@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:garudahub/core/constants/constants.dart';
 
 import 'package:garudahub/core/services/biometric_service.dart';
 import 'package:garudahub/core/models/user_model.dart';
@@ -209,6 +210,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Section Builders
   Widget _buildProfileCard(BuildContext context, ColorScheme cs, UserModel? user) {
+    final base = AppConstants.baseUrl.replaceAll('/api', '');
+    final imageUrl = user?.profilePhoto != null && user!.profilePhoto!.isNotEmpty
+        ? '$base${user.profilePhoto}'
+        : null;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -222,11 +228,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   CircleAvatar(
                     radius: 36,
                     backgroundColor: cs.primaryContainer,
-                    backgroundImage: user?.profilePhoto != null &&
-                            user!.profilePhoto!.isNotEmpty
-                        ? NetworkImage(user.profilePhoto!)
+                    backgroundImage: imageUrl != null
+                        ? NetworkImage(imageUrl)
                         : null,
-                    child: (user?.profilePhoto == null || user!.profilePhoto!.isEmpty)
+                    child: imageUrl == null
                         ? Text(
                             user?.name.isNotEmpty == true
                                 ? user!.name[0].toUpperCase()

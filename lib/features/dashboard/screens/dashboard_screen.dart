@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:garudahub/core/constants/constants.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -9,6 +10,9 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final user = context.watch<AuthProvider>().user;
+    final base = AppConstants.baseUrl.replaceAll('/api', '');
+    final photo = user?.profilePhoto;
+    final imageUrl = (photo != null && photo.isNotEmpty) ? '$base$photo' : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,10 +30,10 @@ class DashboardScreen extends StatelessWidget {
             child: CircleAvatar(
               radius: 18,
               backgroundColor: cs.primaryContainer,
-              backgroundImage: user?.profilePhoto != null && user!.profilePhoto!.isNotEmpty
-                  ? NetworkImage(user.profilePhoto!)
+              backgroundImage: imageUrl != null
+                  ? NetworkImage(imageUrl)
                   : null,
-              child: (user?.profilePhoto == null || user!.profilePhoto!.isEmpty)
+              child: imageUrl == null
                   ? Text(
                       user?.name.isNotEmpty == true
                           ? user!.name[0].toUpperCase()
@@ -40,7 +44,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     )
                   : null,
-            )
+            ),
           ),
         ],
       ),
