@@ -1,0 +1,35 @@
+
+"BOTTOM NAVIGATION BAR DAN WARNA MASIH TANDA TANYA"
+
+
+fitur yang sudah dibuat/berfungsi:
+
+autentikasi
+-login manual dan biometrik
+-register
+-verifikasi email saat register (ada bug dikit saat input kode)
+-lupa kata sandi
+
+profil
+-toggle login biometrik
+-ganti kata sandi
+-reset kata sandi
+-logout
+-beri penilaian
+-saran dan kesan
+-about garudahub
+-edit profil
+-crud poto profil
+
+Sensor Accelerometer – Chant Supporter
+- toggle on off chant
+- shake keluar chant
+
+Merchandise
+- tampilan keseluruhan Merchandise
+- tampilan detail Merchandise
+- button beli menuju ke shopee
+- konversi mata uang menggunakan api https://www.exchangerate-api.com/
+- fitur searching berdasarkan inputan user
+
+Tiket (baru ui doang)

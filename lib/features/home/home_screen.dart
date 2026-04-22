@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/features/dashboard/screens/dashboard_screen.dart';
 import 'package:garudahub/features/profile/screens/profile_screen.dart';
+import 'package:garudahub/features/shop/shop_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _tabs = const [
     DashboardScreen(),
+    ShopScreen(),
     ProfileScreen(),
   ];
 
@@ -29,6 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
             label: 'Beranda',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.shopping_bag),
+            selectedIcon: Icon(Icons.shopping_bag_rounded),
+            label: 'Shop',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
