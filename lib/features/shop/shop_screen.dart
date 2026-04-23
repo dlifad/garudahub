@@ -123,7 +123,7 @@ class _ShopScreenState extends State<ShopScreen> {
           body: TabBarView(
             children: [
               MerchandiseScreen(query: _query),
-              TicketScreen(), // nanti bisa pakai juga
+              TicketScreen(query: _query), // nanti bisa pakai juga
             ],
           ),
         ),

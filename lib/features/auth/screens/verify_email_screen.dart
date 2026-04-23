@@ -144,11 +144,26 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
+
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {
+                              if (i < 5) {
+                                FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
+                              } else {
+                                FocusScope.of(context).unfocus();
+                              }
+                            } else {
+                              if (i > 0) {
+                                FocusScope.of(context).requestFocus(_focusNodes[i - 1]);
+                              }
+                            }
+                          },
+
                           decoration: InputDecoration(
                             counterText: '',
                             filled: true,
                             fillColor: cs.surfaceVariant,
-                            contentPadding: EdgeInsets.symmetric(vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: cs.outline),
