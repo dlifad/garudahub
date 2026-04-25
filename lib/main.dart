@@ -12,6 +12,7 @@ import 'core/theme/app_theme.dart';
 
 import 'package:garudahub/features/chant/providers/chant_provider.dart';
 import 'package:garudahub/features/shop/merchandise/providers/merchandise_provider.dart';
+import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
 import 'package:garudahub/features/shop/providers/currency_provider.dart';
 
 void main() async {
@@ -40,6 +41,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => ChantProvider()..init(),),
         ChangeNotifierProvider(create: (_) => MerchandiseProvider()),
+        ChangeNotifierProvider(create: (_) => TicketProvider()),
         ChangeNotifierProvider(create: (_) => CurrencyProvider()..init(),),
       ],
       child: const GarudaHubApp(),

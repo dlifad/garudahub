@@ -31,5 +31,12 @@ Merchandise
 - button beli menuju ke shopee
 - konversi mata uang menggunakan api https://www.exchangerate-api.com/
 - fitur searching berdasarkan inputan user
+- filter & sorting 
+- button scroll to top
 
-Tiket (baru ui doang)
+Tiket
+- nampilin tiket yg dijual
+- button beli menuju kitagaruda
+- fitur searching
+- filter & sorting 
+- button scroll to top

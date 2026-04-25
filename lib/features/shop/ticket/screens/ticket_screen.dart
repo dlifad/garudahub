@@ -1,76 +1,153 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:garudahub/core/constants/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:garudahub/features/shop/ticket/services/ticket_service.dart';
+import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
 
 class TicketScreen extends StatefulWidget {
   final String query;
-  const TicketScreen({super.key, required this.query});
+  final double? minPrice;
+  final double? maxPrice;
+  final String sortOption;
+
+  const TicketScreen({
+    super.key,
+    required this.query,
+    this.minPrice,
+    this.maxPrice,
+    this.sortOption = 'default',
+  });
 
   @override
   State<TicketScreen> createState() => _TicketScreenState();
 }
 
 class _TicketScreenState extends State<TicketScreen> {
-  late Future<List<dynamic>> tickets;
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTop = false;
 
   @override
   void initState() {
     super.initState();
-    tickets = TicketService.getTickets();
+
+    _scrollController.addListener(() {
+      final shouldShow = _scrollController.offset > 200;
+      if (shouldShow != _showScrollToTop) {
+        setState(() => _showScrollToTop = shouldShow);
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<TicketProvider>().fetch();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final prov = context.watch<TicketProvider>();
     final base = AppConstants.baseUrl.replaceAll('/api', '');
 
-    return FutureBuilder<List<dynamic>>(
-      future: tickets,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    if (prov.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (snapshot.hasError) {
-          return const Center(child: Text("Terjadi kesalahan"));
-        }
+    if (prov.error != null) {
+      return Center(child: Text(prov.error!));
+    }
 
-        final rawData = snapshot.data ?? [];
+    if (prov.items.isEmpty) {
+      return _emptyState();
+    }
 
-        final q = widget.query.toLowerCase().trim();
+    // Filter by query
+    final q = widget.query.toLowerCase().trim();
+    var filtered = q.isEmpty
+        ? List<Map<String, dynamic>>.from(prov.items)
+        : prov.items.where((match) {
+            final home = (match['home_team'] ?? '').toLowerCase();
+            final away = (match['away_team'] ?? '').toLowerCase();
+            final tournament = (match['tournament_name'] ?? '').toLowerCase();
+            final stadium = (match['stadium']?['name'] ?? '').toLowerCase();
+            return home.contains(q) ||
+                away.contains(q) ||
+                tournament.contains(q) ||
+                stadium.contains(q);
+          }).toList();
 
-        final data = q.isEmpty
-            ? rawData
-            : rawData.where((match) {
-                final home = (match['home_team'] ?? '').toLowerCase();
-                final away = (match['away_team'] ?? '').toLowerCase();
-                final tournament = (match['tournament_name'] ?? '').toLowerCase();
-                final stadium = (match['stadium']?['name'] ?? '').toLowerCase();
+    // Filter by min price
+    if (widget.minPrice != null) {
+      filtered = filtered.where((match) {
+        final price = ((match['min_ticket_price'] ?? 0) as num).toDouble();
+        return price >= widget.minPrice!;
+      }).toList();
+    }
 
-                return home.contains(q) ||
-                      away.contains(q) ||
-                      tournament.contains(q) ||
-                      stadium.contains(q);
-              }).toList();
+    // Filter by max price
+    if (widget.maxPrice != null) {
+      filtered = filtered.where((match) {
+        final price = ((match['min_ticket_price'] ?? 0) as num).toDouble();
+        return price <= widget.maxPrice!;
+      }).toList();
+    }
 
-        if (rawData.isEmpty) {
-          return _emptyState();
-        }
+    // Sorting
+    switch (widget.sortOption) {
+      case 'price_asc':
+        filtered.sort((a, b) =>
+            ((a['min_ticket_price'] ?? 0) as num)
+                .compareTo((b['min_ticket_price'] ?? 0) as num));
+        break;
+      case 'price_desc':
+        filtered.sort((a, b) =>
+            ((b['min_ticket_price'] ?? 0) as num)
+                .compareTo((a['min_ticket_price'] ?? 0) as num));
+        break;
+      case 'name_asc':
+        filtered.sort((a, b) =>
+            (a['home_team'] ?? '').toLowerCase()
+                .compareTo((b['home_team'] ?? '').toLowerCase()));
+        break;
+      case 'name_desc':
+        filtered.sort((a, b) =>
+            (b['home_team'] ?? '').toLowerCase()
+                .compareTo((a['home_team'] ?? '').toLowerCase()));
+        break;
+      default:
+        break;
+    }
 
-        if (data.isEmpty) {
-          return const Center(
-            child: Text(
-              'Tiket tidak ditemukan',
-              style: TextStyle(color: Colors.white),
-            ),
-          );
-        }
+    if (filtered.isEmpty) {
+      return const Center(
+        child: Text(
+          'Tiket tidak ditemukan',
+          style: TextStyle(color: Colors.white),
+        ),
+      );
+    }
 
-        return ListView.builder(
+    return Stack(
+      children: [
+        ListView.builder(
+          controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          itemCount: data.length,
+          itemCount: filtered.length,
           itemBuilder: (context, index) {
-            final match = data[index];
+            final match = filtered[index];
             final logo = match['tournament_logo'];
             final stadium = match['stadium']?['name'];
 
@@ -89,7 +166,7 @@ class _TicketScreenState extends State<TicketScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── HEADER: Tournament badge
+                    // Header
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 10),
@@ -119,13 +196,12 @@ class _TicketScreenState extends State<TicketScreen> {
                       ),
                     ),
 
-                    // ── BODY
+                    // Body
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // 🔹 LOGO
                           Container(
                             width: 64,
                             height: 64,
@@ -138,7 +214,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                 ? Image.network(
                                     '$base$logo',
                                     fit: BoxFit.contain,
-                                    errorBuilder: (_, __, ___) => const Icon(
+                                    errorBuilder: (_, _, _) => const Icon(
                                         Icons.image,
                                         color: Colors.black54,
                                         size: 28),
@@ -146,17 +222,13 @@ class _TicketScreenState extends State<TicketScreen> {
                                 : const Icon(Icons.emoji_events,
                                     color: Colors.black54, size: 28),
                           ),
-
                           const SizedBox(width: 14),
-
-                          // 🔹 INFO
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Teams
                                 Text(
-                                  "${match['home_team']} vs ${match['away_team']}",
+                                  '${match['home_team']} vs ${match['away_team']}',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -164,44 +236,35 @@ class _TicketScreenState extends State<TicketScreen> {
                                     height: 1.3,
                                   ),
                                 ),
-
                                 const SizedBox(height: 8),
-
-                                // Date row
                                 Row(
                                   children: [
                                     Icon(Icons.schedule_outlined,
                                         size: 12,
-                                        color:
-                                            Colors.white.withOpacity(0.5)),
+                                        color: Colors.white.withValues(alpha: 0.5)),
                                     const SizedBox(width: 4),
                                     Text(
                                       _formatWIB(match['match_date_local']),
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: Colors.white.withOpacity(0.65),
+                                        color: Colors.white.withValues(alpha: 0.65),
                                       ),
                                     ),
                                   ],
                                 ),
-
                                 const SizedBox(height: 4),
-
-                                // Stadium row
                                 Row(
                                   children: [
                                     Icon(Icons.stadium_outlined,
                                         size: 12,
-                                        color:
-                                            Colors.white.withOpacity(0.5)),
+                                        color: Colors.white.withValues(alpha: 0.5)),
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
-                                        stadium ?? "To be announced",
+                                        stadium ?? 'To be announced',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color:
-                                              Colors.white.withOpacity(0.5),
+                                          color: Colors.white.withValues(alpha: 0.5),
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -215,7 +278,7 @@ class _TicketScreenState extends State<TicketScreen> {
                       ),
                     ),
 
-                    // ── FOOTER: Divider + Price + CTA
+                    // Footer
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
@@ -230,15 +293,14 @@ class _TicketScreenState extends State<TicketScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Price
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Mulai dari",
+                                'Mulai dari',
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: Colors.white.withOpacity(0.45),
+                                  color: Colors.white.withValues(alpha: 0.45),
                                   letterSpacing: 0.2,
                                 ),
                               ),
@@ -253,28 +315,22 @@ class _TicketScreenState extends State<TicketScreen> {
                               ),
                             ],
                           ),
-
-                          // CTA Button
                           GestureDetector(
                             onTap: () async {
-                              final url = Uri.parse("https://kitagaruda.id/id/ticket");
-
-                              await launchUrl(
-                                url,
-                                mode: LaunchMode.externalApplication,
-                              );
+                              final url = Uri.parse(
+                                  'https://kitagaruda.id/id/ticket');
+                              await launchUrl(url,
+                                  mode: LaunchMode.externalApplication);
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
+                                  horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
                                 color: Colors.orange,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Text(
-                                "Beli Tiket",
+                                'Beli Tiket',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -291,26 +347,37 @@ class _TicketScreenState extends State<TicketScreen> {
               ),
             );
           },
-        );
-      },
+        ),
+
+        if (_showScrollToTop)
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton.small(
+              onPressed: _scrollToTop,
+              tooltip: 'Kembali ke atas',
+              child: const Icon(Icons.keyboard_arrow_up),
+            ),
+          ),
+      ],
     );
   }
 
   String _formatPrice(dynamic price) {
-    if (price == null) return "N/A";
-    final number = price.toString();
-    return "Rp ${number.replaceAllMapped(
+    if (price == null) return 'N/A';
+    final number = (price as num).toInt().toString();
+    return 'Rp ${number.replaceAllMapped(
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
       (match) => '.',
-    )}";
+    )}';
   }
 
   String _formatWIB(String? date) {
     if (date == null || date.isEmpty) return '';
     try {
       final dt = DateTime.parse(date).toLocal();
-      return "${_two(dt.day)}/${_two(dt.month)}/${dt.year} "
-          "${_two(dt.hour)}:${_two(dt.minute)} WIB";
+      return '${_two(dt.day)}/${_two(dt.month)}/${dt.year} '
+          '${_two(dt.hour)}:${_two(dt.minute)} WIB';
     } catch (_) {
       return date;
     }
@@ -323,16 +390,13 @@ class _TicketScreenState extends State<TicketScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.confirmation_number_outlined,
-            size: 56,
-            color: Colors.white.withOpacity(0.2),
-          ),
+          Icon(Icons.confirmation_number_outlined,
+              size: 56, color: Colors.white.withValues(alpha: 0.2)),
           const SizedBox(height: 16),
           Text(
             'Tiket Belum Tersedia',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),

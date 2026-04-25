@@ -6,19 +6,6 @@ class AppTheme {
   // M3 akan otomatis generate seluruh color palette dari seed ini
   static const Color _seedColor = Color(0xFFCC0001);
 
-  // Warna statis yang bisa dipakai manual di widget
-  // Diambil dari ColorScheme yang di-generate M3 (dark)
-  static const Color primary       = Color(0xFFFFB3AE); // M3 primary (dark)
-  static const Color onPrimary     = Color(0xFF680003); // M3 onPrimary (dark)
-  static const Color primaryContainer    = Color(0xFF930006); // M3 primaryContainer
-  static const Color onPrimaryContainer  = Color(0xFFFFDAD6); // M3 onPrimaryContainer
-  static const Color secondary     = Color(0xFFFFB59B); // M3 secondary (tertiary warm)
-  static const Color tertiary      = Color(0xFFFFB74D); // aksen kuning-oranye
-  static const Color surface       = Color(0xFF1C1B1F); // M3 surface dark
-  static const Color surfaceVariant= Color(0xFF2B2B2B); // M3 surfaceVariant
-  static const Color background    = Color(0xFF141218); // M3 background dark
-  static const Color outline       = Color(0xFF938F99); // M3 outline
-
   static ThemeData get darkTheme {
     // Biarkan M3 generate ColorScheme lengkap dari seed
     final colorScheme = ColorScheme.fromSeed(
