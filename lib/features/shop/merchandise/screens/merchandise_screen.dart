@@ -139,8 +139,15 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
 
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => MerchandiseDetailScreen(item: item),
+                  PageRouteBuilder(
+                    pageBuilder: (_, _, _) => MerchandiseDetailScreen(item: item),
+                    transitionsBuilder: (_, animation, _, child) {
+                      return FadeTransition(
+                        opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                        child: child,
+                      );
+                    },
+                    transitionDuration: const Duration(milliseconds: 350),
                   ),
                 );
 
@@ -155,19 +162,22 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(12),
+                      child: Hero(
+                        tag: 'merch-image-${item.id}',
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                          child: item.imageUrl.isNotEmpty
+                              ? Image.network(
+                                  '$base${item.imageUrl}',
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => const Center(
+                                      child: Icon(Icons.broken_image)),
+                                )
+                              : const Center(child: Icon(Icons.image)),
                         ),
-                        child: item.imageUrl.isNotEmpty
-                            ? Image.network(
-                                '$base${item.imageUrl}',
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => const Center(
-                                    child: Icon(Icons.broken_image)),
-                              )
-                            : const Center(child: Icon(Icons.image)),
                       ),
                     ),
                     Padding(

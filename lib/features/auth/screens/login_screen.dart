@@ -140,8 +140,11 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 60),
-                  const GarudaLogo(size: 90),
-                  const SizedBox(height: 20),
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 120,
+                    height: 120,
+                  ),  
                   Text(
                     'GARUDAHUB',
                     style: TextStyle(

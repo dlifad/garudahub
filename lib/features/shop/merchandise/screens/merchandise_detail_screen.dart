@@ -46,18 +46,21 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                 color: cs.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: widget.item.imageUrl.isNotEmpty
-                    ? Image.network(
-                        '$base${widget.item.imageUrl}',
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Center(
-                          child: Icon(Icons.broken_image, size: 40),
-                        ),
-                      )
-                    : const Center(child: Icon(Icons.image, size: 40)),
+              child: Hero(
+                tag: 'merch-image-${widget.item.id}',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: widget.item.imageUrl.isNotEmpty
+                      ? Image.network(
+                          '$base${widget.item.imageUrl}',
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const Center(
+                            child: Icon(Icons.broken_image, size: 40),
+                          ),
+                        )
+                      : const Center(child: Icon(Icons.image, size: 40)),
+                ),
               ),
             ),
 
