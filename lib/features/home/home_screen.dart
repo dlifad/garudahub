@@ -15,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _tabs = const [
     DashboardScreen(),
+    _MatchPlaceholderScreen(),
     ShopScreen(),
     ProfileScreen(),
   ];
@@ -33,6 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Beranda',
           ),
           NavigationDestination(
+            icon: Icon(Icons.sports_soccer_outlined),
+            selectedIcon: Icon(Icons.sports_soccer),
+            label: 'Match',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.shopping_bag),
             selectedIcon: Icon(Icons.shopping_bag_rounded),
             label: 'Shop',
@@ -43,6 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profil',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MatchPlaceholderScreen extends StatelessWidget {
+  const _MatchPlaceholderScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Text(
+        'Halaman Match segera hadir',
+        style: TextStyle(color: cs.onSurfaceVariant, fontWeight: FontWeight.w600),
       ),
     );
   }

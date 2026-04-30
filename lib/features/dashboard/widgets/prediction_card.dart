@@ -1,0 +1,191 @@
+import 'package:flutter/material.dart';
+import 'package:garudahub/features/dashboard/models/match_data.dart';
+
+class PredictionCard extends StatelessWidget {
+  const PredictionCard({
+    super.key,
+    required this.match,
+    required this.indScore,
+    required this.oppScore,
+    required this.predictionLocked,
+    required this.submittingPrediction,
+    required this.predictionStatus,
+    required this.onUpInd,
+    required this.onDownInd,
+    required this.onUpOpp,
+    required this.onDownOpp,
+    required this.onSubmit,
+    required this.predictionSummary,
+  });
+
+  final MatchData? match;
+  final int indScore;
+  final int oppScore;
+  final bool predictionLocked;
+  final bool submittingPrediction;
+  final String? predictionStatus;
+  final VoidCallback onUpInd;
+  final VoidCallback onDownInd;
+  final VoidCallback onUpOpp;
+  final VoidCallback onDownOpp;
+  final VoidCallback onSubmit;
+  final String predictionSummary;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final m = match;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [cs.primaryContainer.withOpacity(0.3), cs.surface],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outline.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Siapa yang menang menurutmu?',
+            style: TextStyle(fontWeight: FontWeight.w700, color: cs.onSurface),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            m == null
+                ? 'Belum ada match untuk diprediksi'
+                : '${m.homeFlag} ${m.homeTeam} VS ${m.awayFlag} ${m.awayTeam}',
+            style: TextStyle(color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(height: 12),
+          if (m != null)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _scoreStepper(
+                  canUse: !predictionLocked,
+                  onUp: onUpInd,
+                  onDown: onDownInd,
+                ),
+                const SizedBox(width: 8),
+                _scoreBox(indScore),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    '-',
+                    style: TextStyle(fontSize: 26, color: cs.onSurfaceVariant),
+                  ),
+                ),
+                _scoreBox(oppScore),
+                const SizedBox(width: 8),
+                _scoreStepper(
+                  canUse: !predictionLocked,
+                  onUp: onUpOpp,
+                  onDown: onDownOpp,
+                ),
+              ],
+            ),
+          const SizedBox(height: 12),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.92, end: 1),
+            duration: const Duration(milliseconds: 300),
+            builder: (context, value, child) =>
+                Transform.scale(scale: value, child: child),
+            child: Text(
+              'Hasil prediksimu: $predictionSummary',
+              style: TextStyle(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          if (predictionStatus != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              predictionStatus!,
+              style: TextStyle(color: predictionLocked ? Colors.green : cs.error),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: (m == null || predictionLocked || submittingPrediction)
+                  ? null
+                  : onSubmit,
+              icon: submittingPrediction
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send_rounded),
+              label: Text(predictionLocked ? 'Sudah Diprediksi' : 'Kirim Prediksi'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scoreBox(int score) {
+    return Container(
+      width: 56,
+      height: 56,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient:
+            const LinearGradient(colors: [Color(0xFFDC0000), Color(0xFFB00000)]),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: Text(
+          '$score',
+          key: ValueKey(score),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _scoreStepper({
+    required VoidCallback onUp,
+    required VoidCallback onDown,
+    required bool canUse,
+  }) {
+    return Column(
+      children: [
+        SizedBox(
+          width: 44,
+          height: 44,
+          child: FloatingActionButton(
+            heroTag: null,
+            elevation: 0,
+            onPressed: canUse ? onUp : null,
+            child: const Icon(Icons.arrow_upward),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 44,
+          height: 44,
+          child: FloatingActionButton(
+            heroTag: null,
+            elevation: 0,
+            onPressed: canUse ? onDown : null,
+            child: const Icon(Icons.arrow_downward),
+          ),
+        ),
+      ],
+    );
+  }
+}
