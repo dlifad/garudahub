@@ -6,6 +6,7 @@ import 'package:image/image.dart' as img;
 import 'package:garudahub/core/constants/constants.dart';
 
 import 'package:garudahub/core/services/biometric_service.dart';
+import 'package:garudahub/core/services/notification_service.dart';
 import 'package:garudahub/core/models/user_model.dart';
 
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
@@ -30,6 +31,11 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isNotificationEnabled = false;
+  bool _isMatchNotificationEnabled = false;
+  bool _isResultNotificationEnabled = false;
+  bool _isQuizNotificationEnabled = false;
+  bool _isNotificationLoading = true;
 
   @override
   void initState() {
@@ -38,6 +44,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       final auth = context.read<AuthProvider>();
       context.read<ProfileProvider>().fetchProfile(auth);
+      _loadNotificationSettings();
+    });
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    await NotificationService.instance.init();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isNotificationEnabled = NotificationService.instance.notificationsEnabled;
+      _isMatchNotificationEnabled =
+          NotificationService.instance.matchNotificationsEnabled;
+      _isResultNotificationEnabled =
+          NotificationService.instance.resultNotificationsEnabled;
+      _isQuizNotificationEnabled =
+          NotificationService.instance.quizNotificationsEnabled;
+      _isNotificationLoading = false;
     });
   }
 
@@ -328,30 +352,121 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _MenuTile(
             icon: Icons.notifications_outlined,
             label: 'Notifikasi',
-            trailing: Switch(value: true, onChanged: (_) {}),
+            trailing: _isNotificationLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Switch(
+                    value: _isNotificationEnabled,
+                    onChanged: (val) => _onNotificationToggle(context, val),
+                  ),
             onTap: null,
           ),
           const Divider(height: 1, indent: 56),
           _MenuTile(
             icon: Icons.schedule,
             label: 'Pengingat Pertandingan',
-            trailing: Switch(value: true, onChanged: (_) {}),
+            trailing: _buildSubNotificationSwitch(
+              value: _isMatchNotificationEnabled,
+              enabled: _isNotificationEnabled && !_isNotificationLoading,
+              onChanged: (val) => _onMatchNotificationToggle(context, val),
+            ),
             onTap: null,
           ),
           _MenuTile(
             icon: Icons.emoji_events_outlined,
             label: 'Hasil Pertandingan',
-            trailing: Switch(value: false, onChanged: (_) {}),
+            trailing: _buildSubNotificationSwitch(
+              value: _isResultNotificationEnabled,
+              enabled: _isNotificationEnabled && !_isNotificationLoading,
+              onChanged: (val) => _onResultNotificationToggle(context, val),
+            ),
             onTap: null,
           ),
           _MenuTile(
             icon: Icons.psychology_alt_outlined,
             label: 'Tebak Score',
-            trailing: Switch(value: false, onChanged: (_) {}),
+            trailing: _buildSubNotificationSwitch(
+              value: _isQuizNotificationEnabled,
+              enabled: _isNotificationEnabled && !_isNotificationLoading,
+              onChanged: (val) => _onQuizNotificationToggle(context, val),
+            ),
             onTap: null,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSubNotificationSwitch({
+    required bool value,
+    required bool enabled,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Switch(
+      value: value,
+      onChanged: enabled ? onChanged : null,
+    );
+  }
+
+  Future<void> _onNotificationToggle(BuildContext context, bool val) async {
+    await NotificationService.instance.setNotificationsEnabled(val);
+
+    if (!mounted) return;
+
+    setState(() {
+      _isNotificationEnabled = val;
+      if (!val) {
+        _isMatchNotificationEnabled = false;
+        _isResultNotificationEnabled = false;
+        _isQuizNotificationEnabled = false;
+      }
+    });
+
+    showGarudaSnackbar(
+      context,
+      val ? 'Notifikasi diaktifkan' : 'Notifikasi dinonaktifkan',
+    );
+  }
+
+  Future<void> _onMatchNotificationToggle(BuildContext context, bool val) async {
+    await NotificationService.instance.setMatchNotificationsEnabled(val);
+
+    if (!mounted) return;
+
+    setState(() => _isMatchNotificationEnabled = val);
+
+    showGarudaSnackbar(
+      context,
+      val ? 'Pengingat pertandingan aktif' : 'Pengingat pertandingan nonaktif',
+    );
+  }
+
+  Future<void> _onResultNotificationToggle(BuildContext context, bool val) async {
+    await NotificationService.instance.setResultNotificationsEnabled(val);
+
+    if (!mounted) return;
+
+    setState(() => _isResultNotificationEnabled = val);
+
+    showGarudaSnackbar(
+      context,
+      val ? 'Notifikasi hasil aktif' : 'Notifikasi hasil nonaktif',
+    );
+  }
+
+  Future<void> _onQuizNotificationToggle(BuildContext context, bool val) async {
+    await NotificationService.instance.setQuizNotificationsEnabled(val);
+
+    if (!mounted) return;
+
+    setState(() => _isQuizNotificationEnabled = val);
+
+    showGarudaSnackbar(
+      context,
+      val ? 'Tebak score aktif' : 'Tebak score nonaktif',
     );
   }
 
