@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:garudahub/core/database/db_helper.dart';
 import 'package:provider/provider.dart';
 
 import 'features/splash/splash_screen.dart';
@@ -17,6 +18,7 @@ import 'package:garudahub/features/shop/providers/currency_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await DbHelper.database;
 
   // Status bar transparan
   SystemChrome.setSystemUIOverlayStyle(

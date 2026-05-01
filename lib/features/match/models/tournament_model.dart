@@ -1,4 +1,3 @@
-
 class TournamentModel {
   final int id;
   final String name;
@@ -29,7 +28,8 @@ class TournamentModel {
     // year: bisa dari field 'year', atau parse dari start_date
     int year = parseInt(j['year'], 0);
     if (year == 0 && j['start_date'] != null) {
-      year = DateTime.tryParse(j['start_date'].toString())?.year ??
+      year =
+          DateTime.tryParse(j['start_date'].toString())?.year ??
           DateTime.now().year;
     }
     if (year == 0) year = DateTime.now().year;
