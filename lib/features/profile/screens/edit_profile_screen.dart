@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/features/profile/screens/verify_email_update_screen.dart';
 import 'package:provider/provider.dart';
-
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
-
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
-
 import 'package:garudahub/features/profile/providers/profile_provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -17,6 +15,7 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController nameController;
+  late final TextEditingController emailController;
 
   @override
   void initState() {
@@ -27,11 +26,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     nameController = TextEditingController(
       text: user?.name ?? '',
     );
+
+    emailController = TextEditingController(
+      text: user?.email ?? '',
+    );
   }
 
   @override
   void dispose() {
     nameController.dispose();
+    emailController.dispose();
     super.dispose();
   }
 
@@ -43,6 +47,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final profileProvider = context.read<ProfileProvider>();
     final auth = context.read<AuthProvider>();
 
+    final newEmail = emailController.text.trim();
+    final currentEmail = auth.user?.email;
+
+    // Kalau email berubah
+    if (newEmail != currentEmail) {
+      try {
+        await profileProvider.requestEmailOtp(newEmail);
+
+        if (!mounted) return;
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VerifyEmailScreen(email: newEmail, name: nameController.text.trim(),),
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+
+        final message = e.toString().replaceAll('Exception: ', '');
+
+        showGarudaSnackbar(context, message, isError: true);
+      }
+
+      return;
+    }
+
+    // Kalau email tidak berubah
     try {
       await profileProvider.updateProfile(
         auth,
@@ -82,6 +114,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       val == null || val.trim().isEmpty
                           ? 'Nama wajib diisi'
                           : null,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().isEmpty) {
+                      return 'Email wajib diisi';
+                    }
+                    if (!val.contains('@')) {
+                      return 'Format email tidak valid';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 SizedBox(

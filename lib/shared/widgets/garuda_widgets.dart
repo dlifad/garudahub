@@ -38,6 +38,10 @@ class GarudaTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final IconData? prefixIcon;
+  final Color? fillColor;
+  final Color? textColor;
+  final Color? hintColor;
+  final Color? labelColor;
 
   const GarudaTextField({
     super.key,
@@ -48,6 +52,10 @@ class GarudaTextField extends StatefulWidget {
     this.keyboardType,
     this.validator,
     this.prefixIcon,
+    this.fillColor,
+    this.textColor,
+    this.hintColor,
+    this.labelColor,
   });
 
   @override
@@ -69,6 +77,10 @@ class _GarudaTextFieldState extends State<GarudaTextField> {
       decoration: InputDecoration(
         labelText: widget.label,
         hintText: widget.hint,
+        filled: true,
+        fillColor: widget.fillColor ?? cs.surfaceContainerHighest,
+        labelStyle: TextStyle(color: widget.labelColor ?? cs.onSurfaceVariant,),
+        hintStyle: TextStyle(color: widget.hintColor ?? cs.onSurfaceVariant,),
         prefixIcon: widget.prefixIcon != null
             ? Icon(widget.prefixIcon, color: cs.onSurfaceVariant, size: 20)
             : null,

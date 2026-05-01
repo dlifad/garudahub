@@ -53,6 +53,46 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> requestEmailOtp(String email) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await ProfileService.requestEmailUpdateOtp(email);
+    } catch (e) {
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> verifyEmailOtp(
+    AuthProvider auth, {
+    required String email,
+    required String otp,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final user = await ProfileService.verifyEmailUpdateOtp(
+        email: email,
+        otp: otp,
+      );
+
+      auth.setUser(user);
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

@@ -16,15 +16,7 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: CircleAvatar(
-                radius: 40,
-                backgroundColor: cs.primaryContainer,
-                child: const Text('🦅', style: TextStyle(fontSize: 32)),
-              ),
-            ),
-            const SizedBox(height: 16),
-
+            Center(child: Image.asset('assets/images/logo.png', width: 120, height: 120)),
             Center(
               child: Text(
                 'GarudaHub',
@@ -98,7 +90,7 @@ class AboutScreen extends StatelessWidget {
                 children: const [
                   _FeatureTile('Konversi Zona Waktu Match', Icons.access_time),
                   Divider(height: 1),
-                  _FeatureTile('Konversi Mata Uang Tiket', Icons.attach_money),
+                  _FeatureTile('Konversi Mata Uang Merchandise', Icons.attach_money),
                   Divider(height: 1),
                   _FeatureTile('Notifikasi Pertandingan', Icons.notifications),
                   Divider(height: 1),

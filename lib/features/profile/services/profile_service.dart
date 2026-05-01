@@ -81,4 +81,48 @@ class ProfileService {
       throw Exception(data['message'] ?? 'Gagal update profil');
     }
   }
+
+  // REQUEST OTP EMAIL BARU
+  static Future<void> requestEmailUpdateOtp(String email) async {
+    final token = await AuthService.getToken();
+    if (token == null) throw Exception('Token tidak ditemukan');
+
+    final res = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/profile/request-email-update'),
+      headers: _headers(token),
+      body: jsonEncode({'email': email}),
+    );
+
+    final data = jsonDecode(res.body);
+
+    if (res.statusCode != 200) {
+      throw Exception(data['message'] ?? 'Gagal kirim OTP');
+    }
+  }
+
+  // VERIFY OTP EMAIL BARU
+  static Future<UserModel> verifyEmailUpdateOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final token = await AuthService.getToken();
+    if (token == null) throw Exception('Token tidak ditemukan');
+
+    final res = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/profile/verify-email-update'),
+      headers: _headers(token),
+      body: jsonEncode({
+        'email': email,
+        'code': otp,
+      }),
+    );
+
+    final data = jsonDecode(res.body);
+
+    if (res.statusCode == 200) {
+      return UserModel.fromJson(data);
+    } else {
+      throw Exception(data['message'] ?? 'OTP salah');
+    }
+  }
 }

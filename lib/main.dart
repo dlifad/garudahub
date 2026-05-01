@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:garudahub/core/database/db_helper.dart';
+import 'package:garudahub/features/chant/widgets/chant_animation_overlay.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+
 
 import 'features/splash/splash_screen.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -19,6 +22,8 @@ import 'package:garudahub/features/shop/providers/currency_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DbHelper.database;
+
+  await initializeDateFormatting('id_ID', null);
 
   // Status bar transparan
   SystemChrome.setSystemUIOverlayStyle(
@@ -66,6 +71,30 @@ class GarudaHubApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/register': (_) => const RegisterScreen(),
         '/home': (_) => const HomeScreen(),
+      },
+
+      // Buat menangani accelerometer
+      builder: (context, child) {
+        final auth = context.watch<AuthProvider>();
+        final chant = context.read<ChantProvider>();
+
+        if (auth.isAuthenticated &&
+            chant.isEnabled &&
+            !chant.isListening) {
+          chant.start();
+        }
+
+        if (!auth.isAuthenticated &&
+            chant.isListening) {
+          chant.stop();
+        }
+
+        return Stack(
+          children: [
+            child!,
+            const ChantAnimationOverlay(),
+          ],
+        );
       },
     );
   }
