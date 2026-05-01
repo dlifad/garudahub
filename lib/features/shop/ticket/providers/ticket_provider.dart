@@ -11,8 +11,6 @@ class TicketProvider extends ChangeNotifier {
   String? get error => _error;
 
   Future<void> fetch() async {
-    if (_isLoading || _items.isNotEmpty) return;
-
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -21,6 +19,22 @@ class TicketProvider extends ChangeNotifier {
       _items = await TicketService.getTickets();
     } catch (e) {
       _error = 'Gagal terhubung ke server';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> refresh() async {
+    _isLoading = true;
+    _items = [];
+    notifyListeners();
+
+    try {
+      final data = await TicketService.getTickets();
+      _items = data;
+    } catch (e) {
+      _error = 'Gagal refresh data';
     }
 
     _isLoading = false;

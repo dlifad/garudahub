@@ -63,6 +63,10 @@ class _TicketScreenState extends State<TicketScreen> {
       return Center(child: Text(prov.error!));
     }
 
+    if (prov.isLoading && prov.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (prov.items.isEmpty) {
       return _emptyState();
     }
@@ -124,6 +128,10 @@ class _TicketScreenState extends State<TicketScreen> {
         break;
     }
 
+    if (prov.isLoading && prov.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (filtered.isEmpty) {
       return const Center(
         child: Text(
@@ -135,221 +143,219 @@ class _TicketScreenState extends State<TicketScreen> {
 
     return Stack(
       children: [
-        ListView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final match = filtered[index];
-            final logo = match['tournament_logo'];
-            final stadium = match['stadium']?['name'];
-
-            return GestureDetector(
-              onTap: () {},
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.06),
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16)),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          match['tournament_name'] ?? '-',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            letterSpacing: 0.3,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+        RefreshIndicator(
+          onRefresh: () async {
+            await context.read<TicketProvider>().refresh();
+          },
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: _scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final match = filtered[index];
+              final logo = match['tournament_logo'];
+              final stadium = match['stadium']?['name'];
+          
+              return GestureDetector(
+                onTap: () {},
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1,
                     ),
-
-                    // Body
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.06),
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(16)),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              width: 1,
                             ),
-                            child: logo != null
-                                ? Image.network(
-                                    '$base$logo',
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (_, _, _) => const Icon(
-                                        Icons.image,
-                                        color: Colors.black54,
-                                        size: 28),
-                                  )
-                                : const Icon(Icons.emoji_events,
-                                    color: Colors.black54, size: 28),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
+                        ),
+                        child: Center(
+                          child: Text(
+                            match['tournament_name'] ?? '-',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              letterSpacing: 0.3,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+          
+                      // Body
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: logo != null
+                                  ? Image.network(
+                                      '$base$logo',
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, _, _) => const Icon(
+                                          Icons.image,
+                                          color: Colors.black54,
+                                          size: 28),
+                                    )
+                                  : const Icon(Icons.emoji_events,
+                                      color: Colors.black54, size: 28),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${match['home_team']} vs ${match['away_team']}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.schedule_outlined,
+                                          size: 12,
+                                          color: Colors.white.withValues(alpha: 0.5)),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _formatTime(match['match_date_local'], context),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.white.withValues(alpha: 0.65),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.stadium_outlined,
+                                          size: 12,
+                                          color: Colors.white.withValues(alpha: 0.5)),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          stadium ?? 'To be announced',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.white.withValues(alpha: 0.5),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+          
+                      // Footer
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${match['home_team']} vs ${match['away_team']}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    height: 1.3,
+                                  'Mulai dari',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white.withValues(alpha: 0.45),
+                                    letterSpacing: 0.2,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Icon(Icons.schedule_outlined,
-                                        size: 12,
-                                        color: Colors.white.withValues(alpha: 0.5)),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _formatTime(match['match_date_local'], context),
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.white.withValues(alpha: 0.65),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(Icons.stadium_outlined,
-                                        size: 12,
-                                        color: Colors.white.withValues(alpha: 0.5)),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        stadium ?? 'To be announced',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.white.withValues(alpha: 0.5),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
+                                const SizedBox(height: 2),
+                                Text(
+                                  _formatPrice(match['min_ticket_price']),
+                                  style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Footer
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Mulai dari',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white.withValues(alpha: 0.45),
-                                  letterSpacing: 0.2,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _formatPrice(match['min_ticket_price']),
-                                style: const TextStyle(
+                            GestureDetector(
+                              onTap: () async {
+                                final url = Uri.parse(
+                                    'https://kitagaruda.id/id/ticket');
+                                await launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
                                   color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ),
-                            ],
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              final url = Uri.parse(
-                                  'https://kitagaruda.id/id/ticket');
-                              await launchUrl(url,
-                                  mode: LaunchMode.externalApplication);
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Text(
-                                'Beli Tiket',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                                child: const Text(
+                                  'Beli Tiket',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
-
-        if (prov.isLoading)
-          Container(
-            color: Colors.black.withValues(alpha: 0.3),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+              );
+            },
           ),
-
+        ),
+        
         if (_showScrollToTop)
           Positioned(
             bottom: 16,

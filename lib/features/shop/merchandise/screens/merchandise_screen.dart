@@ -63,6 +63,10 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
       return Center(child: Text(prov.error!));
     }
 
+    if (prov.isLoading && prov.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (prov.items.isEmpty) {
       return const Center(child: Text('Belum ada merchandise'));
     }
@@ -112,98 +116,104 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
 
     return Stack(
       children: [
-        GridView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(12),
-          itemCount: filteredItems.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.7,
-          ),
-          itemBuilder: (context, i) {
-            final item = filteredItems[i];
-            return GestureDetector(
-              onTap: () async {
-                FocusScope.of(context).unfocus();
-
-                await Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (_, _, _) => MerchandiseDetailScreen(item: item),
-                    transitionsBuilder: (_, animation, _, child) {
-                      return FadeTransition(
-                        opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-                        child: child,
-                      );
-                    },
-                    transitionDuration: const Duration(milliseconds: 350),
+        RefreshIndicator(
+          onRefresh: () async {
+            await context.read<MerchandiseProvider>().refresh();
+          },
+          child: GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: _scrollController,
+            padding: const EdgeInsets.all(12),
+            itemCount: filteredItems.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.7,
+            ),
+            itemBuilder: (context, i) {
+              final item = filteredItems[i];
+              return GestureDetector(
+                onTap: () async {
+                  FocusScope.of(context).unfocus();
+          
+                  await Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (_, _, _) => MerchandiseDetailScreen(item: item),
+                      transitionsBuilder: (_, animation, _, child) {
+                        return FadeTransition(
+                          opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                          child: child,
+                        );
+                      },
+                      transitionDuration: const Duration(milliseconds: 350),
+                    ),
+                  );
+          
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-
-                FocusManager.instance.primaryFocus?.unfocus();
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Hero(
-                        tag: 'merch-image-${item.id}',
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Hero(
+                          tag: 'merch-image-${item.id}',
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(12),
+                            ),
+                            child: item.imageUrl.isNotEmpty
+                                ? Image.network(
+                                    '$base${item.imageUrl}',
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => const Center(
+                                        child: Icon(Icons.broken_image)),
+                                  )
+                                : const Center(child: Icon(Icons.image)),
                           ),
-                          child: item.imageUrl.isNotEmpty
-                              ? Image.network(
-                                  '$base${item.imageUrl}',
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => const Center(
-                                      child: Icon(Icons.broken_image)),
-                                )
-                              : const Center(child: Icon(Icons.image)),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            formatCurrency(item.price, 'IDR'),
-                            style: const TextStyle(
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(height: 6),
+                            Text(
+                              formatCurrency(item.price, 'IDR'),
+                              style: const TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
 
-        if (prov.isLoading)
+        if (prov.isLoading && prov.items.isEmpty)
           Container(
             color: Colors.black.withValues(alpha: 0.3),
             child: const Center(
