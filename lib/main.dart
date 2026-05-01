@@ -4,6 +4,7 @@ import 'package:garudahub/core/database/db_helper.dart';
 import 'package:garudahub/features/chant/widgets/chant_animation_overlay.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 
 import 'features/splash/splash_screen.dart';
@@ -18,10 +19,12 @@ import 'package:garudahub/features/chant/providers/chant_provider.dart';
 import 'package:garudahub/features/shop/merchandise/providers/merchandise_provider.dart';
 import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
 import 'package:garudahub/features/shop/providers/currency_provider.dart';
+import 'package:garudahub/core/providers/timezone_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DbHelper.database;
+  tz.initializeTimeZones();
 
   await initializeDateFormatting('id_ID', null);
 
@@ -50,6 +53,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MerchandiseProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
         ChangeNotifierProvider(create: (_) => CurrencyProvider()..init(),),
+        ChangeNotifierProvider(create: (_) => TimezoneProvider()),
       ],
       child: const GarudaHubApp(),
     ),

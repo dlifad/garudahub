@@ -3,7 +3,9 @@ import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:garudahub/features/match/models/tournament_coach.dart';
 import 'package:garudahub/features/match/models/tournament_model.dart';
 import 'package:garudahub/features/match/screens/match_detail_screen.dart';
+import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class TournamentSection extends StatefulWidget {
   const TournamentSection({
@@ -229,7 +231,8 @@ class _MatchRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs    = Theme.of(context).colorScheme;
     final tt    = Theme.of(context).textTheme;
-    final local = match.matchDateUtc.toLocal();
+    final tz = context.watch<TimezoneProvider>();
+    final local = tz.convert(match.matchDateUtc);
     final dateStr = DateFormat('d MMM', 'id_ID').format(local);
     final timeStr = DateFormat('HH:mm').format(local);
 

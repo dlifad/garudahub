@@ -326,21 +326,29 @@ class _ShopScreenState extends State<ShopScreen> {
             ),
         
             Expanded(
-              child: TabBarView(
-                children: [
-                  MerchandiseScreen(
-                    query: _query,
-                    minPrice: _minPrice,
-                    maxPrice: _maxPrice,
-                    sortOption: _sortOption,
-                  ),
-                  TicketScreen(
-                    query: _query,
-                    minPrice: _minPrice,
-                    maxPrice: _maxPrice,
-                    sortOption: _sortOption,
-                  ),
-                ],
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await Future.wait([
+                    context.read<MerchandiseProvider>().fetch(),
+                    context.read<TicketProvider>().fetch(),
+                  ]);
+                },
+                child: TabBarView(
+                  children: [
+                    MerchandiseScreen(
+                      query: _query,
+                      minPrice: _minPrice,
+                      maxPrice: _maxPrice,
+                      sortOption: _sortOption,
+                    ),
+                    TicketScreen(
+                      query: _query,
+                      minPrice: _minPrice,
+                      maxPrice: _maxPrice,
+                      sortOption: _sortOption,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

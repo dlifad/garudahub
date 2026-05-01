@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
@@ -129,10 +130,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   void _updateCountdown() {
-    final target = _nextMatch?.matchDateUtc.toLocal();
+    final tzProvider = context.read<TimezoneProvider>();
+    final target = _nextMatch == null
+      ? null
+      : tzProvider.convert(_nextMatch!.matchDateUtc);
     if (target == null || !mounted) return;
     setState(() {
-      _timeToKickoff = target.difference(DateTime.now());
+      final now = tzProvider.convert(DateTime.now().toUtc());
+    _timeToKickoff = target.difference(now);
     });
   }
 

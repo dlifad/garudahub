@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:garudahub/core/utils/flag_utils.dart';
+import 'package:garudahub/core/providers/timezone_provider.dart';
 
 class NextMatchCard extends StatelessWidget {
   const NextMatchCard({
@@ -52,7 +55,8 @@ class NextMatchCard extends StatelessWidget {
       );
     }
 
-    final localDate = m.matchDateUtc.toLocal();
+    final tzProvider = context.watch<TimezoneProvider>();
+    final localDate = tzProvider.convert(m.matchDateUtc);
     final dateLabel = DateFormat('EEE, d MMM yyyy', 'id_ID').format(localDate);
     final timeLabel = DateFormat('HH:mm').format(localDate);
 
@@ -93,7 +97,34 @@ class NextMatchCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _teamText('${m.homeFlag} ${m.homeTeam}', true)),
+              Expanded(
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.network(
+                        FlagUtils.getFlagUrl(m.homeFlag),
+                        width: 28,
+                        height: 20,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        m.homeTeam,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Column(
                 children: [
                   const Text(
@@ -106,38 +137,89 @@ class NextMatchCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      '$timeLabel WIB',
+                      '$timeLabel ${tzProvider.label}',
                       style: const TextStyle(color: Colors.white, fontSize: 11),
                     ),
                   ),
                 ],
               ),
-              Expanded(child: _teamText('${m.awayFlag} ${m.awayTeam}', false)),
+
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        m.awayTeam,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.network(
+                        FlagUtils.getFlagUrl(m.awayFlag),
+                        width: 28,
+                        height: 20,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
-                child: Text(
-                  '📅 $dateLabel',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_today, size: 14, color: Colors.white),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(dateLabel,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        softWrap: true,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Container(width: 1, height: 16, color: Colors.white24),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  '📍 ${m.venueName}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                  textAlign: TextAlign.right,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Icon(Icons.stadium, size: 14, color: Colors.white),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(m.venueName,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

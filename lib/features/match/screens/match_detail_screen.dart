@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:garudahub/features/match/models/lineup_player.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:garudahub/features/match/models/tournament_coach.dart';
 import 'package:garudahub/features/match/services/match_service.dart';
 import 'package:garudahub/features/match/widgets/lineup_field_widget.dart';
+import 'package:garudahub/core/utils/flag_utils.dart';
+import 'package:garudahub/features/match/widgets/stadium_map_widget.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:garudahub/core/services/directions_service.dart';
 
 class MatchDetailScreen extends StatefulWidget {
   const MatchDetailScreen({super.key, required this.match});
@@ -21,10 +27,16 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
   bool _lineupLoading = true;
   bool _coachLoading  = true;
 
+  // LBS
+  double? _distanceKm;
+  double? _durationMin;
+  bool _locationLoading = true;
+  String? _locationError;
+
   @override
   void initState() {
     super.initState();
-    Future.wait([_loadLineup(), _loadCoach()]);
+    Future.wait([_loadLineup(), _loadCoach(), _loadUserLocation()]);
   }
 
   Future<void> _loadLineup() async {
@@ -38,6 +50,137 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     final resolved =
         _service.resolveCoach(coaches, widget.match.matchDateUtc);
     if (mounted) setState(() { _coach = resolved; _coachLoading = false; });
+  }
+
+  Future<void> _loadUserLocation() async {
+    final lat = widget.match.stadium.latitude;
+    final lng = widget.match.stadium.longitude;
+
+    if (lat == 0 || lng == 0) {
+      if (mounted) setState(() { _locationLoading = false; _locationError = 'Koordinat stadion tidak tersedia'; });
+      return;
+    }
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) setState(() { _locationLoading = false; _locationError = 'Layanan lokasi nonaktif'; });
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) setState(() { _locationLoading = false; _locationError = 'Izin lokasi ditolak'; });
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) setState(() { _locationLoading = false; _locationError = 'Izin lokasi diblokir permanen'; });
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 10),
+      );
+
+      final result = await DirectionsService.getRoute(
+        startLat: position.latitude,
+        startLng: position.longitude,
+        endLat: lat,
+        endLng: lng,
+      );
+
+      if (result != null) {
+        setState(() {
+          _distanceKm = result.distanceMeters / 1000;
+          _durationMin = result.durationSeconds / 60;
+          _locationLoading = false;
+        });
+      }   
+    } catch (e) {
+      if (mounted) setState(() { _locationLoading = false; _locationError = 'Gagal mendapatkan lokasi'; });
+    }
+  }
+
+  void _openMapSheet(BuildContext context) {
+    final m = widget.match;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.92,
+        builder: (ctx, ctrl) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            children: [
+              // ── Drag handle ──────────────────────────────────
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // ── Header ───────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.stadium_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        m.venue ?? 'Stadion',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(ctx),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        padding: const EdgeInsets.all(6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ── StadiumMap mengisi sisa ruang + tombol di dalamnya ──
+              Expanded(
+                child: StadiumMap(
+                  stadiumLat: m.stadium.latitude,
+                  stadiumLng: m.stadium.longitude,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -58,17 +201,6 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
 
-                // ── Goal Scorers ───────────────────────────────────
-                if (m.isFinished &&
-                    m.goals != null && m.goals!.isNotEmpty) ...[
-                  const _SectionTitle(
-                      icon: Icons.sports_soccer_rounded,
-                      label: 'PENCETAK GOL'),
-                  const SizedBox(height: 8),
-                  _GoalScorersCard(goals: m.goals!),
-                  const SizedBox(height: 20),
-                ],
-
                 // ── Match Info ─────────────────────────────────────
                 _MatchInfoCard(match: m),
                 const SizedBox(height: 20),
@@ -76,6 +208,21 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                 // ── Lineup ─────────────────────────────────────────
                 _buildLineupSection(context, cs),
                 const SizedBox(height: 24),
+
+                // ── Stadium & LBS ─────────────────────────────────────────
+                _StadiumLBSCard(
+                  match: m,
+                  distanceKm: _distanceKm,
+                  durationMin: _durationMin,
+                  locationLoading: _locationLoading,
+                  locationError: _locationError,
+                  onOpenMap: () => _openMapSheet(context),
+                  onRetryLocation: () {
+                    setState(() { _locationLoading = true; _locationError = null; });
+                    _loadUserLocation();
+                  },
+                ),
+                const SizedBox(height: 20),
 
                 // ── Discussion CTA ─────────────────────────────────
                 FilledButton.icon(
@@ -187,6 +334,240 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
   }
 }
 
+// Stadium LBS Card
+class _StadiumLBSCard extends StatelessWidget {
+  const _StadiumLBSCard({
+    required this.match,
+    required this.distanceKm,
+    required this.durationMin,
+    required this.locationLoading,
+    required this.locationError,
+    required this.onOpenMap,
+    required this.onRetryLocation,
+  });
+
+  final MatchItem match;
+  final double? distanceKm;
+  final double? durationMin;
+  final bool locationLoading;
+  final String? locationError;
+  final VoidCallback onOpenMap;
+  final VoidCallback onRetryLocation;
+
+  String _formatDistance(double km) {
+    if (km < 1.0) return '${(km * 1000).round()} m';
+    return '${km.toStringAsFixed(1)} km';
+  }
+
+  String _formatDuration(double min) {
+    if (min < 60) return '${min.round()} menit';
+    final h = min ~/ 60;
+    final m = (min % 60).round();
+    return m == 0 ? '$h jam' : '$h jam $m menit';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final hasVenue = match.venue?.isNotEmpty == true;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle(
+            icon: Icons.stadium_rounded, label: 'LOKASI STADION'),
+        const SizedBox(height: 8),
+
+        Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.15)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              // ── Stadium header row ──────────────────────────────
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            hasVenue ? match.venue! : 'Stadion',
+                            style: tt.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                          if (match.stadium.city.isNotEmpty)
+                            Text(
+                              match.stadium.city,
+                              style: tt.labelSmall?.copyWith(
+                                  color: cs.onSurfaceVariant),
+                            ),
+                        ],
+                      ),
+                    ),
+                    // Lihat Peta button
+                    FilledButton.icon(
+                      onPressed: onOpenMap,
+                      icon: const Icon(Icons.map_rounded, size: 15),
+                      label: const Text('Peta'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        foregroundColor: cs.onPrimary,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Divider(height: 1, color: cs.outline.withValues(alpha: 0.12)),
+
+              // ── LBS section ────────────────────────────────────
+              if (locationLoading)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 14, height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2, color: cs.primary),
+                      ),
+                      const SizedBox(width: 10),
+                      Text('Mendeteksi lokasi Anda...',
+                          style: tt.labelSmall?.copyWith(
+                              color: cs.onSurfaceVariant)),
+                    ],
+                  ),
+                )
+              else if (locationError != null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(Icons.location_off_rounded,
+                          size: 18, color: cs.error),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(locationError!,
+                            style: tt.labelSmall?.copyWith(
+                                color: cs.onSurfaceVariant)),
+                      ),
+                      TextButton(
+                        onPressed: onRetryLocation,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text('Coba lagi', style: TextStyle(fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                )
+              else if (distanceKm != null) ...[
+                // Distance + time strip
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                  child: Row(
+                    children: [
+                      _LBSStat(
+                        icon: Icons.place,
+                        iconColor: cs.primary,
+                        label: 'Jarak',
+                        value: _formatDistance(distanceKm!),
+                        cs: cs, tt: tt,
+                      ),
+                      Container(width: 1, height: 40,
+                          color: cs.outline.withValues(alpha: 0.15),
+                          margin: const EdgeInsets.symmetric(horizontal: 16)),
+                      _LBSStat(
+                        icon: Icons.schedule_rounded,
+                        iconColor: cs.primary,
+                        label: 'Estimasi Perjalanan',
+                        value: durationMin != null
+                            ? _formatDuration(durationMin!)
+                            : '-',
+                        cs: cs, tt: tt,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// LBS stat widget (jarak / estimasi)
+class _LBSStat extends StatelessWidget {
+  const _LBSStat({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.cs,
+    required this.tt,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+  final ColorScheme cs;
+  final TextTheme tt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, color: iconColor, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(label,
+                    style: tt.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant, fontSize: 10)),
+                Text(value,
+                    style: tt.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800, color: cs.onSurface),
+                    overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // Hero Header — red gradient, big flags, score
 // ══════════════════════════════════════════════════════════════════════════
@@ -202,7 +583,8 @@ class _HeroHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final local   = match.matchDateUtc.toLocal();
+    final tzProvider = context.watch<TimezoneProvider>();
+    final local   = tzProvider.convert(match.matchDateUtc);
     final dateStr = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(local);
     final timeStr = DateFormat('HH:mm').format(local);
 
@@ -249,25 +631,18 @@ class _HeroHeader extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Indonesia side
                     Expanded(child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _FlagImage(url: match.isHome
-                            ? match.homeFlag : match.awayFlag, size: 60),
+                        _FlagImage(
+                            code: match.isHome ? match.homeFlag : match.awayFlag,
+                            size: 60),
                         const SizedBox(height: 8),
                         const Text('Indonesia',
                             style: TextStyle(color: Colors.white,
                                 fontWeight: FontWeight.w700, fontSize: 14)),
-                        if (match.isFinished && match.result != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: _ResultBadge(result: match.result!),
-                          ),
                       ],
                     )),
-
-                    // Score centre
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Column(
@@ -290,6 +665,11 @@ class _HeroHeader extends StatelessWidget {
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: -1),
                             ),
+                            if (match.isFinished && match.result != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5),
+                                child: _ResultBadge(result: match.result!),
+                              ),
                             if (match.halfTimeScore?.isNotEmpty == true)
                               Text('(${match.halfTimeScore})',
                                   style: const TextStyle(
@@ -298,23 +678,27 @@ class _HeroHeader extends StatelessWidget {
                         ],
                       ),
                     ),
-
-                    // Opponent side
                     Expanded(child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _FlagImage(url: match.opponentFlag, size: 60),
+                        _FlagImage(code: match.opponentFlag, size: 60),
                         const SizedBox(height: 8),
                         Text(match.opponentName,
                             style: const TextStyle(color: Colors.white70,
                                 fontWeight: FontWeight.w500, fontSize: 14),
-                            textAlign: TextAlign.center, maxLines: 2,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis),
                       ],
                     )),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 8),
+
+              if (match.goals != null && match.goals!.isNotEmpty)
+                  _InlineGoalScorers(goals: match.goals!, match: match),
 
               const SizedBox(height: 18),
 
@@ -330,7 +714,7 @@ class _HeroHeader extends StatelessWidget {
                   children: [
                     _InfoRow(
                         icon: Icons.calendar_today_rounded,
-                        text: '$dateStr  •  $timeStr WIB'),
+                        text: '$dateStr  •  $timeStr ${tzProvider.label}'),
                     if (match.venue?.isNotEmpty == true) ...[
                       const SizedBox(height: 4),
                       _InfoRow(
@@ -378,23 +762,22 @@ class _HeroHeader extends StatelessWidget {
 }
 
 class _FlagImage extends StatelessWidget {
-  const _FlagImage({required this.url, required this.size});
-  final String url;
+  const _FlagImage({required this.code, required this.size});
+  final String code;
   final double size;
+
   @override
   Widget build(BuildContext context) {
-    if (url.startsWith('http')) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Image.network(url, width: size, height: size * 0.67,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) =>
-                Icon(Icons.flag_rounded, size: size, color: Colors.white54)),
-      );
-    }
-    return SizedBox(width: size, height: size * 0.67,
-        child: Center(child: Text(url,
-            style: TextStyle(fontSize: size * 0.75))));
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image.network(
+        FlagUtils.getFlagUrl(code.toLowerCase()),
+        width: size, height: size * 0.67,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            Icon(Icons.flag_rounded, size: size, color: Colors.white54),
+      ),
+    );
   }
 }
 
@@ -465,88 +848,6 @@ class _InfoRow extends StatelessWidget {
           overflow: TextOverflow.ellipsis)),
     ],
   );
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-class _GoalScorersCard extends StatelessWidget {
-  const _GoalScorersCard({required this.goals});
-  final List<MatchGoal> goals;
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outline.withOpacity(0.15)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: goals.asMap().entries.map((e) {
-          final g = e.value;
-          final isLast = e.key == goals.length - 1;
-          final isIndo = g.isIndonesiaGoal;
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 11),
-                child: Row(children: [
-                  Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isIndo
-                          ? cs.primaryContainer
-                          : cs.surfaceContainer,
-                    ),
-                    child: const Center(
-                        child: Text('\u26BD',
-                            style: TextStyle(fontSize: 16))),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(g.scorerName,
-                          style: tt.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface)),
-                      if (g.assistName?.isNotEmpty == true)
-                        Text('Assist: ${g.assistName}',
-                            style: tt.labelSmall?.copyWith(
-                                color: cs.onSurfaceVariant)),
-                    ],
-                  )),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: isIndo
-                          ? cs.primaryContainer
-                          : cs.surfaceContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text("${g.minute}'",
-                        style: tt.labelMedium?.copyWith(
-                          color: isIndo
-                              ? cs.onPrimaryContainer
-                              : cs.onSurfaceVariant,
-                          fontWeight: FontWeight.bold,
-                        )),
-                  ),
-                ]),
-              ),
-              if (!isLast)
-                Divider(height: 1, indent: 16, endIndent: 16,
-                    color: cs.outline.withOpacity(0.1)),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -721,5 +1022,64 @@ class _SectionTitle extends StatelessWidget {
           color: cs.onSurface,
           fontWeight: FontWeight.w800, letterSpacing: 0.8)),
     ]);
+  }
+}
+
+class _InlineGoalScorers extends StatelessWidget {
+  const _InlineGoalScorers({
+    required this.goals,
+    required this.match,
+  });
+
+  final List<MatchGoal> goals;
+  final MatchItem match;
+
+  @override
+  Widget build(BuildContext context) {
+    final indoGoals =
+        goals.where((g) => g.isIndonesiaGoal).toList();
+    final oppGoals =
+        goals.where((g) => !g.isIndonesiaGoal).toList();
+
+    TextStyle style = const TextStyle(
+      color: Colors.white70,
+      fontSize: 11,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: indoGoals.map((g) {
+                return Text(
+                  "${g.scorerName} ${g.minute}' ",
+                  style: style,
+                  textAlign: TextAlign.right,
+                );
+              }).toList(),
+            ),
+          ),
+      
+          const SizedBox(width: 72),
+      
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: oppGoals.map((g) {
+                return Text(
+                  "${g.scorerName} ${g.minute}'",
+                  style: style,
+                  textAlign: TextAlign.left,
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

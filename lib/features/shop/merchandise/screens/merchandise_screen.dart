@@ -38,11 +38,6 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
         setState(() => _showScrollToTop = shouldShow);
       }
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<MerchandiseProvider>().fetch();
-    });
   }
 
   @override
@@ -63,10 +58,6 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
   Widget build(BuildContext context) {
     final prov = context.watch<MerchandiseProvider>();
     final base = AppConstants.baseUrl.replaceAll('/api', '');
-
-    if (prov.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     if (prov.error != null) {
       return Center(child: Text(prov.error!));
@@ -211,6 +202,14 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
             );
           },
         ),
+
+        if (prov.isLoading)
+          Container(
+            color: Colors.black.withValues(alpha: 0.3),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
 
         if (_showScrollToTop)
           Positioned(

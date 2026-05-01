@@ -23,6 +23,8 @@ import 'package:garudahub/features/profile/screens/edit_profile_screen.dart';
 
 import 'package:garudahub/features/chant/providers/chant_provider.dart';
 
+import 'package:garudahub/core/providers/timezone_provider.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -217,10 +219,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildNotificationSection(context, cs),
                   const SizedBox(height: 16),
 
+                  const SizedBox(height: 16),
+
                   _SectionLabel('Lainnya'),
                   const SizedBox(height: 8),
                   _buildOtherSection(context, cs),
-                  const SizedBox(height: 24),
 
                   _buildLogoutButton(context, cs, auth),
                 ],
@@ -307,6 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAccountSection(BuildContext context, ColorScheme cs, AuthProvider auth) {
+    final tz = context.watch<TimezoneProvider>();
     return Card(
       child: Column(
         children: [
@@ -329,11 +333,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const Divider(height: 1, indent: 56),
           _MenuTile(
+            icon: Icons.schedule,
+            label: 'Zona Waktu',
+            trailing: Text(
+              tz.label,
+              style: TextStyle(color: cs.primary, fontSize: 12),
+            ),
+            onTap: () => _showTimezonePicker(context),
+          ),
+          const Divider(height: 1, indent: 56),
+          _MenuTile(
             icon: Icons.fingerprint,
             label: 'Login Biometrik',
             trailing: _buildBiometricSwitch(context, auth),
             onTap: null,
           ),
+          const Divider(height: 1, indent: 56),
           _MenuTile(
             icon: Icons.campaign,
             label: 'Chant Supporter',
@@ -375,6 +390,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             onTap: null,
           ),
+          const Divider(height: 1, indent: 56),
           _MenuTile(
             icon: Icons.emoji_events_outlined,
             label: 'Hasil Pertandingan',
@@ -385,6 +401,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             onTap: null,
           ),
+          const Divider(height: 1, indent: 56),
           _MenuTile(
             icon: Icons.psychology_alt_outlined,
             label: 'Tebak Score',
@@ -582,6 +599,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             }
           : null,
+    );
+  }
+
+  void _showTimezonePicker(BuildContext context) {
+    final tzProvider = context.read<TimezoneProvider>();
+
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (_) {
+        return ListView(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          children: TimezoneProvider.options.entries.map((e) {
+            final isSelected = e.key == tzProvider.selected;
+
+            return ListTile(
+              title: Text(e.value),
+              trailing: isSelected
+                  ? const Icon(Icons.check, color: Colors.green)
+                  : null,
+              onTap: () {
+                tzProvider.setTimezone(e.key);
+                Navigator.pop(context);
+
+                showGarudaSnackbar(
+                  context,
+                  'Zona waktu diubah ke ${e.value}',
+                );
+              },
+            );
+          }).toList(),
+        );
+      },
     );
   }
 

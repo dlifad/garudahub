@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/features/dashboard/screens/dashboard_screen.dart';
+import 'package:garudahub/features/match/screens/match_screen.dart';
 import 'package:garudahub/features/profile/screens/profile_screen.dart';
 import 'package:garudahub/features/shop/shop_screen.dart';
 
@@ -15,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _tabs = const [
     DashboardScreen(),
-    _MatchPlaceholderScreen(),
+    MatchScreen(),
     ShopScreen(),
     ProfileScreen(),
   ];

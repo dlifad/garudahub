@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:garudahub/core/constants/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
+import 'package:garudahub/core/providers/timezone_provider.dart';
 
 class TicketScreen extends StatefulWidget {
   final String query;
@@ -36,11 +37,6 @@ class _TicketScreenState extends State<TicketScreen> {
         setState(() => _showScrollToTop = shouldShow);
       }
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<TicketProvider>().fetch();
-    });
   }
 
   @override
@@ -62,9 +58,6 @@ class _TicketScreenState extends State<TicketScreen> {
     final prov = context.watch<TicketProvider>();
     final base = AppConstants.baseUrl.replaceAll('/api', '');
 
-    if (prov.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
 
     if (prov.error != null) {
       return Center(child: Text(prov.error!));
@@ -244,7 +237,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                         color: Colors.white.withValues(alpha: 0.5)),
                                     const SizedBox(width: 4),
                                     Text(
-                                      _formatWIB(match['match_date_local']),
+                                      _formatTime(match['match_date_local'], context),
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: Colors.white.withValues(alpha: 0.65),
@@ -349,6 +342,14 @@ class _TicketScreenState extends State<TicketScreen> {
           },
         ),
 
+        if (prov.isLoading)
+          Container(
+            color: Colors.black.withValues(alpha: 0.3),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+
         if (_showScrollToTop)
           Positioned(
             bottom: 16,
@@ -372,12 +373,16 @@ class _TicketScreenState extends State<TicketScreen> {
     )}';
   }
 
-  String _formatWIB(String? date) {
+  String _formatTime(String? date, BuildContext context) {
     if (date == null || date.isEmpty) return '';
+
     try {
-      final dt = DateTime.parse(date).toLocal();
-      return '${_two(dt.day)}/${_two(dt.month)}/${dt.year} '
-          '${_two(dt.hour)}:${_two(dt.minute)} WIB';
+      final tz = context.read<TimezoneProvider>();
+      final utc = DateTime.parse(date).toUtc();
+      final local = tz.convert(utc);
+
+      return '${_two(local.day)}/${_two(local.month)}/${local.year} '
+          '${_two(local.hour)}:${_two(local.minute)} ${tz.label}';
     } catch (_) {
       return date;
     }

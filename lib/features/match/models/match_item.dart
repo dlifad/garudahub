@@ -21,6 +21,38 @@ class MatchGoal {
       );
 }
 
+class Stadium {
+  final String name;
+  final String city;
+  final double latitude;
+  final double longitude;
+
+  const Stadium({
+    required this.name,
+    required this.city,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  factory Stadium.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return const Stadium(
+        name: '-',
+        city: '-',
+        latitude: 0,
+        longitude: 0,
+      );
+    }
+
+    return Stadium(
+      name: json['name']?.toString() ?? '-',
+      city: json['city']?.toString() ?? '-',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
+
 class MatchItem {
   final int id;
   final int tournamentId;
@@ -35,6 +67,7 @@ class MatchItem {
   final String awayFlag;
   final DateTime matchDateUtc;
   final String? venue;
+  final Stadium stadium;
   final String status;
   final int? homeScore;
   final int? awayScore;
@@ -60,6 +93,7 @@ class MatchItem {
     required this.awayFlag,
     required this.matchDateUtc,
     this.venue,
+    required this.stadium,
     required this.status,
     this.homeScore,
     this.awayScore,
@@ -81,6 +115,7 @@ class MatchItem {
   factory MatchItem.fromJson(Map<String, dynamic> j) {
     int? parseInt(dynamic v) => v == null ? null : int.tryParse('$v');
     final isHome = j['is_home'] == true || j['is_home'] == 1;
+    final stadiumJson = j['stadium'] as Map<String, dynamic>?;
     List<MatchGoal>? goals;
     if (j['goals'] is List) {
       goals = (j['goals'] as List)
@@ -106,9 +141,8 @@ class MatchItem {
           : (isHome ? '??' : 'ID'),
       matchDateUtc:
           DateTime.tryParse(j['match_date_utc']?.toString() ?? '') ?? DateTime.now(),
-      venue: (j['stadium'] is Map<String, dynamic>)
-          ? j['stadium']['name']?.toString()
-          : j['venue']?.toString(),
+      venue: stadiumJson?['name']?.toString() ?? j['venue']?.toString(),
+      stadium: Stadium.fromJson(stadiumJson),
       status: j['status']?.toString() ?? 'scheduled',
       homeScore: parseInt(j['home_score']),
       awayScore: parseInt(j['away_score']),
