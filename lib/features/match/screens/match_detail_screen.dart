@@ -1,0 +1,725 @@
+import 'package:flutter/material.dart';
+import 'package:garudahub/features/match/models/lineup_player.dart';
+import 'package:garudahub/features/match/models/match_item.dart';
+import 'package:garudahub/features/match/models/tournament_coach.dart';
+import 'package:garudahub/features/match/services/match_service.dart';
+import 'package:garudahub/features/match/widgets/lineup_field_widget.dart';
+import 'package:intl/intl.dart';
+
+class MatchDetailScreen extends StatefulWidget {
+  const MatchDetailScreen({super.key, required this.match});
+  final MatchItem match;
+
+  @override
+  State<MatchDetailScreen> createState() => _MatchDetailScreenState();
+}
+
+class _MatchDetailScreenState extends State<MatchDetailScreen> {
+  final _service = MatchService();
+  MatchLineupData? _lineup;
+  TournamentCoach? _coach;
+  bool _lineupLoading = true;
+  bool _coachLoading  = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.wait([_loadLineup(), _loadCoach()]);
+  }
+
+  Future<void> _loadLineup() async {
+    final data = await _service.getMatchLineup(widget.match.id);
+    if (mounted) setState(() { _lineup = data; _lineupLoading = false; });
+  }
+
+  Future<void> _loadCoach() async {
+    final coaches =
+        await _service.getTournamentCoaches(widget.match.tournamentId);
+    final resolved =
+        _service.resolveCoach(coaches, widget.match.matchDateUtc);
+    if (mounted) setState(() { _coach = resolved; _coachLoading = false; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final m  = widget.match;
+
+    return Scaffold(
+      backgroundColor: cs.surface,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: _HeroHeader(
+              match: m, coach: _coach, coachLoading: _coachLoading),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+
+                // ── Goal Scorers ───────────────────────────────────
+                if (m.isFinished &&
+                    m.goals != null && m.goals!.isNotEmpty) ...[
+                  const _SectionTitle(
+                      icon: Icons.sports_soccer_rounded,
+                      label: 'PENCETAK GOL'),
+                  const SizedBox(height: 8),
+                  _GoalScorersCard(goals: m.goals!),
+                  const SizedBox(height: 20),
+                ],
+
+                // ── Match Info ─────────────────────────────────────
+                _MatchInfoCard(match: m),
+                const SizedBox(height: 20),
+
+                // ── Lineup ─────────────────────────────────────────
+                _buildLineupSection(context, cs),
+                const SizedBox(height: 24),
+
+                // ── Discussion CTA ─────────────────────────────────
+                FilledButton.icon(
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Fitur diskusi segera hadir! \u{1F525}'),
+                        behavior: SnackBarBehavior.floating),
+                  ),
+                  icon: const Icon(Icons.forum_rounded, size: 18),
+                  label: const Text('Gabung Diskusi Laga'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 52),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLineupSection(BuildContext context, ColorScheme cs) {
+    final tt = Theme.of(context).textTheme;
+
+    if (_lineupLoading) {
+      return Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: cs.primary, strokeWidth: 2),
+            const SizedBox(height: 10),
+            Text('Memuat susunan pemain...',
+                style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
+          ],
+        )),
+      );
+    }
+
+    if (_lineup == null || _lineup!.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(36),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(child: Column(
+          children: [
+            Icon(Icons.groups_2_rounded, size: 42,
+                color: cs.onSurfaceVariant.withOpacity(0.3)),
+            const SizedBox(height: 8),
+            Text('Susunan pemain belum tersedia',
+                style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+          ],
+        )),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const _SectionTitle(
+                icon: Icons.sports_outlined, label: 'SUSUNAN PEMAIN'),
+            const Spacer(),
+            if (widget.match.formation?.isNotEmpty == true)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(widget.match.formation!,
+                    style: TextStyle(
+                        color: cs.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13, letterSpacing: 0.5)),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Field
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: LineupFieldWidget(
+            players:   _lineup!.startingXi,
+            formation: widget.match.formation,
+          ),
+        ),
+        // Subs
+        if (_lineup!.substitutes.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          const _SectionTitle(
+              icon: Icons.swap_horiz_rounded, label: 'PEMAIN PENGGANTI'),
+          const SizedBox(height: 8),
+          _SubsCard(substitutes: _lineup!.substitutes),
+        ],
+      ],
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// Hero Header — red gradient, big flags, score
+// ══════════════════════════════════════════════════════════════════════════
+class _HeroHeader extends StatelessWidget {
+  const _HeroHeader({
+    required this.match,
+    required this.coach,
+    required this.coachLoading,
+  });
+  final MatchItem match;
+  final TournamentCoach? coach;
+  final bool coachLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    final local   = match.matchDateUtc.toLocal();
+    final dateStr = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(local);
+    final timeStr = DateFormat('HH:mm').format(local);
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFCC0001), Color(0xFF7B0000)],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Top bar ──────────────────────────────────────────
+              Row(children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white, size: 18),
+                  onPressed: () => Navigator.pop(context),
+                  style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      padding: const EdgeInsets.all(8)),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(match.tournamentName.toUpperCase(),
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 11,
+                          fontWeight: FontWeight.w700, letterSpacing: 1.2),
+                      overflow: TextOverflow.ellipsis),
+                ),
+                _StatusChip(match: match),
+              ]),
+
+              const SizedBox(height: 24),
+
+              // ── Teams + Score ─────────────────────────────────────
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Indonesia side
+                    Expanded(child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _FlagImage(url: match.isHome
+                            ? match.homeFlag : match.awayFlag, size: 60),
+                        const SizedBox(height: 8),
+                        const Text('Indonesia',
+                            style: TextStyle(color: Colors.white,
+                                fontWeight: FontWeight.w700, fontSize: 14)),
+                        if (match.isFinished && match.result != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: _ResultBadge(result: match.result!),
+                          ),
+                      ],
+                    )),
+
+                    // Score centre
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (match.isScheduled) ...[
+                            const Text('VS',
+                                style: TextStyle(color: Colors.white,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w900)),
+                            const SizedBox(height: 4),
+                            Text(timeStr,
+                                style: const TextStyle(
+                                    color: Colors.white60, fontSize: 13)),
+                          ] else ...[
+                            Text(
+                              '${match.indonesiaScore ?? 0}  :  ${match.opponentScore ?? 0}',
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 44,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -1),
+                            ),
+                            if (match.halfTimeScore?.isNotEmpty == true)
+                              Text('(${match.halfTimeScore})',
+                                  style: const TextStyle(
+                                      color: Colors.white54, fontSize: 12)),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                    // Opponent side
+                    Expanded(child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _FlagImage(url: match.opponentFlag, size: 60),
+                        const SizedBox(height: 8),
+                        Text(match.opponentName,
+                            style: const TextStyle(color: Colors.white70,
+                                fontWeight: FontWeight.w500, fontSize: 14),
+                            textAlign: TextAlign.center, maxLines: 2,
+                            overflow: TextOverflow.ellipsis),
+                      ],
+                    )),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              // ── Info strip ────────────────────────────────────────
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.20),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    _InfoRow(
+                        icon: Icons.calendar_today_rounded,
+                        text: '$dateStr  •  $timeStr WIB'),
+                    if (match.venue?.isNotEmpty == true) ...[
+                      const SizedBox(height: 4),
+                      _InfoRow(
+                          icon: Icons.stadium_rounded, text: match.venue!),
+                    ],
+                  ],
+                ),
+              ),
+
+              // ── Coach strip ───────────────────────────────────────
+              if (!coachLoading && coach != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.11),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.sports_rounded,
+                          color: Colors.white70, size: 14),
+                      const SizedBox(width: 8),
+                      const Text('Pelatih Kepala: ',
+                          style: TextStyle(
+                              color: Colors.white60, fontSize: 12)),
+                      Flexible(child: Text(coach!.name,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12),
+                          overflow: TextOverflow.ellipsis)),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FlagImage extends StatelessWidget {
+  const _FlagImage({required this.url, required this.size});
+  final String url;
+  final double size;
+  @override
+  Widget build(BuildContext context) {
+    if (url.startsWith('http')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Image.network(url, width: size, height: size * 0.67,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) =>
+                Icon(Icons.flag_rounded, size: size, color: Colors.white54)),
+      );
+    }
+    return SizedBox(width: size, height: size * 0.67,
+        child: Center(child: Text(url,
+            style: TextStyle(fontSize: size * 0.75))));
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.match});
+  final MatchItem match;
+  @override
+  Widget build(BuildContext context) {
+    if (match.isOngoing) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.orange, borderRadius: BorderRadius.circular(6)),
+        child: const Text('LIVE',
+            style: TextStyle(color: Colors.white,
+                fontSize: 10, fontWeight: FontWeight.bold)));
+    }
+    if (match.isFinished) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(6)),
+        child: const Text('SELESAI',
+            style: TextStyle(color: Colors.white70,
+                fontSize: 10, fontWeight: FontWeight.bold)));
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+class _ResultBadge extends StatelessWidget {
+  const _ResultBadge({required this.result});
+  final String result;
+  @override
+  Widget build(BuildContext context) {
+    Color c; String label;
+    if (result == 'WIN')  { c = const Color(0xFF4CAF50); label = 'MENANG'; }
+    else if (result == 'LOSS') { c = const Color(0xFFEF5350); label = 'KALAH'; }
+    else { c = Colors.orange; label = 'SERI'; }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: c.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: c.withOpacity(0.7)),
+      ),
+      child: Text(label,
+          style: TextStyle(color: c,
+              fontWeight: FontWeight.bold, fontSize: 10)),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.text});
+  final IconData icon;
+  final String   text;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Icon(icon, color: Colors.white54, size: 12),
+      const SizedBox(width: 6),
+      Flexible(child: Text(text,
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis)),
+    ],
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+class _GoalScorersCard extends StatelessWidget {
+  const _GoalScorersCard({required this.goals});
+  final List<MatchGoal> goals;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outline.withOpacity(0.15)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: goals.asMap().entries.map((e) {
+          final g = e.value;
+          final isLast = e.key == goals.length - 1;
+          final isIndo = g.isIndonesiaGoal;
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 11),
+                child: Row(children: [
+                  Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isIndo
+                          ? cs.primaryContainer
+                          : cs.surfaceContainer,
+                    ),
+                    child: const Center(
+                        child: Text('\u26BD',
+                            style: TextStyle(fontSize: 16))),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(g.scorerName,
+                          style: tt.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurface)),
+                      if (g.assistName?.isNotEmpty == true)
+                        Text('Assist: ${g.assistName}',
+                            style: tt.labelSmall?.copyWith(
+                                color: cs.onSurfaceVariant)),
+                    ],
+                  )),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isIndo
+                          ? cs.primaryContainer
+                          : cs.surfaceContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text("${g.minute}'",
+                        style: tt.labelMedium?.copyWith(
+                          color: isIndo
+                              ? cs.onPrimaryContainer
+                              : cs.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        )),
+                  ),
+                ]),
+              ),
+              if (!isLast)
+                Divider(height: 1, indent: 16, endIndent: 16,
+                    color: cs.outline.withOpacity(0.1)),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+class _MatchInfoCard extends StatelessWidget {
+  const _MatchInfoCard({required this.match});
+  final MatchItem match;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final rows = <({IconData icon, String label, String value})>[];
+    if (match.round?.isNotEmpty == true)
+      rows.add((icon: Icons.flag_rounded, label: 'Ronde', value: match.round!));
+    rows.add((
+      icon: Icons.swap_horiz_rounded,
+      label: 'Kandang/Tandang',
+      value: match.isHome ? 'Kandang (Home)' : 'Tandang (Away)',
+    ));
+    if (match.matchday?.isNotEmpty == true)
+      rows.add((
+        icon: Icons.calendar_month_rounded,
+        label: 'Matchday',
+        value: match.matchday!,
+      ));
+    if (match.formation?.isNotEmpty == true)
+      rows.add((
+        icon: Icons.grid_view_rounded,
+        label: 'Formasi',
+        value: match.formation!,
+      ));
+    if (rows.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle(
+            icon: Icons.info_outline_rounded, label: 'INFO PERTANDINGAN'),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outline.withOpacity(0.15)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: rows.asMap().entries.map((e) {
+              final r = e.value;
+              final isLast = e.key == rows.length - 1;
+              return Column(children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  child: Row(children: [
+                    Icon(r.icon, size: 18, color: cs.primary),
+                    const SizedBox(width: 12),
+                    SizedBox(width: 110,
+                        child: Text(r.label,
+                            style: tt.labelSmall?.copyWith(
+                                color: cs.onSurfaceVariant))),
+                    Expanded(child: Text(r.value,
+                        style: tt.bodySmall?.copyWith(
+                            color: cs.onSurface,
+                            fontWeight: FontWeight.w600))),
+                  ]),
+                ),
+                if (!isLast)
+                  Divider(height: 1, indent: 46, endIndent: 16,
+                      color: cs.outline.withOpacity(0.1)),
+              ]);
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+class _SubsCard extends StatelessWidget {
+  const _SubsCard({required this.substitutes});
+  final List<LineupPlayer> substitutes;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outline.withOpacity(0.15)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: substitutes.asMap().entries.map((e) {
+          final p = e.value;
+          final isLast = e.key == substitutes.length - 1;
+          return Column(children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 10),
+              child: Row(children: [
+                Container(
+                  width: 34, height: 34,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: cs.surfaceContainer,
+                    border: Border.all(
+                        color: cs.outline.withOpacity(0.2)),
+                  ),
+                  child: Center(child: Text('${p.jerseyNumber ?? ''}',
+                      style: tt.labelMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: cs.onSurface))),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p.name,
+                        style: tt.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface)),
+                    if (p.currentClub?.isNotEmpty == true)
+                      Text(p.currentClub!,
+                          style: tt.labelSmall?.copyWith(
+                              color: cs.onSurfaceVariant)),
+                  ],
+                )),
+                if (p.position?.isNotEmpty == true)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: cs.secondaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(p.position!,
+                        style: tt.labelSmall?.copyWith(
+                            color: cs.onSecondaryContainer,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10)),
+                  ),
+              ]),
+            ),
+            if (!isLast)
+              Divider(height: 1, indent: 62, endIndent: 16,
+                  color: cs.outline.withOpacity(0.1)),
+          ]);
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ── Shared Section Title ──────────────────────────────────────────────────
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.icon, required this.label});
+  final IconData icon;
+  final String   label;
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Row(children: [
+      Container(width: 3, height: 16,
+          decoration: BoxDecoration(
+              color: cs.primary, borderRadius: BorderRadius.circular(2))),
+      const SizedBox(width: 8),
+      Icon(icon, size: 15, color: cs.primary),
+      const SizedBox(width: 6),
+      Text(label, style: tt.labelMedium?.copyWith(
+          color: cs.onSurface,
+          fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+    ]);
+  }
+}
