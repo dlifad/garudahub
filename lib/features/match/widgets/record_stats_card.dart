@@ -34,9 +34,9 @@ class RecordStatsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCC0001).withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: const Color(0xFFCC0001).withOpacity(0.10),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),

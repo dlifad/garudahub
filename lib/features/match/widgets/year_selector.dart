@@ -1,5 +1,7 @@
-
 import 'package:flutter/material.dart';
+
+/// Nilai sentinel untuk "All Time"
+const int kAllTimeYear = -1;
 
 class YearSelector extends StatelessWidget {
   const YearSelector({
@@ -9,70 +11,124 @@ class YearSelector extends StatelessWidget {
     required this.onChanged,
   });
 
-  final List<int>       years;
-  final int             selected;
+  final List<int>         years;    // angka tahun, sudah DESC; -1 = all-time
+  final int               selected;
   final ValueChanged<int> onChanged;
+
+  String _label(int y) => y == kAllTimeYear ? 'All Time' : '$y';
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
-    return SizedBox(
+    // Pastikan list diakhiri kAllTimeYear
+    final items = [
+      ...years.where((y) => y != kAllTimeYear),
+      kAllTimeYear,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: [
+          Text(
+            'Pilih Tahun',
+            style: tt.labelMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _DropdownYear(
+              items:    items,
+              selected: selected,
+              onChanged: onChanged,
+              labelFn:  _label,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DropdownYear extends StatelessWidget {
+  const _DropdownYear({
+    required this.items,
+    required this.selected,
+    required this.onChanged,
+    required this.labelFn,
+  });
+
+  final List<int>         items;
+  final int               selected;
+  final ValueChanged<int> onChanged;
+  final String Function(int) labelFn;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
       height: 38,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: years.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (ctx, i) {
-          final year    = years[i];
-          final isSelected = year == selected;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            child: InkWell(
-              onTap: () => onChanged(year),
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? cs.primary
-                      : cs.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? cs.primary
-                        : cs.outline.withOpacity(0.2),
-                    width: 1.2,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: cs.primary.withOpacity(0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          )
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  '$year',
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color:        cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: cs.outline.withOpacity(0.18),
+          width: 1,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value:        selected,
+          isExpanded:   true,
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: cs.onSurfaceVariant, size: 20),
+          style: tt.bodyMedium?.copyWith(
+            color:      cs.onSurface,
+            fontWeight: FontWeight.w700,
+            fontSize:   13,
+          ),
+          dropdownColor: cs.surfaceContainerHighest,
+          borderRadius:  BorderRadius.circular(14),
+          items: items.map((y) {
+            final isSelected = y == selected;
+            return DropdownMenuItem<int>(
+              value: y,
+              child: Row(children: [
+                if (isSelected)
+                  Container(
+                    width: 6, height: 6,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color:        const Color(0xFFCC0001),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  )
+                else
+                  const SizedBox(width: 14),
+                Text(
+                  labelFn(y),
                   style: TextStyle(
-                    color: isSelected
-                        ? cs.onPrimary
-                        : cs.onSurfaceVariant,
                     fontWeight: isSelected
-                        ? FontWeight.w700
+                        ? FontWeight.w800
                         : FontWeight.w500,
+                    color: isSelected
+                        ? const Color(0xFFCC0001)
+                        : null,
                     fontSize: 13,
                   ),
                 ),
-              ),
-            ),
-          );
-        },
+              ]),
+            );
+          }).toList(),
+          onChanged: (v) { if (v != null) onChanged(v); },
+        ),
       ),
     );
   }

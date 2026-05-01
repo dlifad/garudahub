@@ -7,6 +7,7 @@ import 'package:garudahub/features/match/services/match_service.dart';
 import 'package:garudahub/features/match/widgets/record_stats_card.dart';
 import 'package:garudahub/features/match/widgets/tournament_section.dart';
 import 'package:garudahub/features/match/widgets/year_selector.dart';
+// kAllTimeYear = -1 (all time sentinel)
 
 class MatchScreen extends StatefulWidget {
   const MatchScreen({super.key});
@@ -33,8 +34,9 @@ class _MatchScreenState extends State<MatchScreen>
   @override
   void initState() { super.initState(); _init(); }
 
-  List<TournamentModel> get _tournamentsForYear =>
-      _allTournaments.where((t) => t.year == _selectedYear).toList();
+  List<TournamentModel> get _tournamentsForYear => _selectedYear == kAllTimeYear
+      ? _allTournaments
+      : _allTournaments.where((t) => t.year == _selectedYear).toList();
 
   bool get _yearIsLoading =>
       _tournamentsForYear.any((t) => _loadingSet.contains(t.id));
@@ -55,6 +57,8 @@ class _MatchScreenState extends State<MatchScreen>
     final years = list.map((t) => t.year).toSet().toList()
       ..sort((a, b) => b.compareTo(a));
     if (years.isEmpty) years.add(DateTime.now().year);
+    // All Time ditambah di YearSelector, tapi kita simpan di _years juga
+    if (!years.contains(kAllTimeYear)) years.add(kAllTimeYear);
     final defaultYear = years.contains(DateTime.now().year)
         ? DateTime.now().year : years.first;
     if (mounted) {
@@ -148,7 +152,7 @@ class _MatchScreenState extends State<MatchScreen>
               SliverFillRemaining(
                   child: _ErrorState(message: _error!, onRetry: _init))
             else ...[
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
               SliverToBoxAdapter(
                 child: RecordStatsCard(
                   year: _selectedYear,
@@ -156,10 +160,10 @@ class _MatchScreenState extends State<MatchScreen>
                   isLoading: _yearIsLoading,
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+              const SliverToBoxAdapter(child: SizedBox(height: 8)),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: Row(children: [
                     Container(width: 3, height: 14,
                         decoration: BoxDecoration(color: cs.primary,

@@ -595,6 +595,10 @@ class _HeroHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [Color(0xFFCC0001), Color(0xFF7B0000)],
         ),
+        borderRadius: BorderRadius.only(
+          bottomLeft:  Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
       ),
       child: SafeArea(
         bottom: false,

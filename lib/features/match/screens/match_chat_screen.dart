@@ -1,73 +1,49 @@
-
-import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:garudahub/features/match/models/chat_message.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
-import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-// ─── Dummy "me" user ──────────────────────────────────────────────────────
-const _myUserId   = 'me_001';
-const _myUsername = 'GarudaFan';
+// ────────────────────────────────────────────────
+// Model pesan (dari Supabase)
+// ────────────────────────────────────────────────
+class MatchChatMessage {
+  final String  id;
+  final String  matchId;
+  final String  userId;
+  final String  username;
+  final String  avatarEmoji;
+  final String  body;
+  final String? type; // null=normal, 'predict','chant'
+  final DateTime createdAt;
 
-// ─── Yel-yel shortcuts ───────────────────────────────────────────────────
-const _cheers = [
-  'Ayo Garuda! \u{1F1EE}\u{1F1E9}',
-  'Indonesia Juara! \u{1F3C6}',
-  'Garuda di dadaku! \u2764\uFE0F',
-  'Hajar lawan! \u26BD',
-  'Majulah Indonesiaku! \u{1F525}',
-];
+  const MatchChatMessage({
+    required this.id,
+    required this.matchId,
+    required this.userId,
+    required this.username,
+    required this.avatarEmoji,
+    required this.body,
+    this.type,
+    required this.createdAt,
+  });
 
-// ─── Dummy messages for demo ──────────────────────────────────────────────
-List<ChatMessage> _dummyMessages(MatchItem match) {
-  final rng = Random(match.id);
-  final users = [
-    ('usr_a', 'BungKarno12'),
-    ('usr_b', 'GarudaMuda'),
-    ('usr_c', 'SurabayaFC'),
-    ('usr_d', 'JakartaKickOff'),
-    ('usr_e', 'MerahPutih99'),
-  ];
-  final msgs = <ChatMessage>[];
-  final now  = DateTime.now();
-  final texts = [
-    'Semangat Indonesia! \u{1F1EE}\u{1F1E9}',
-    'Prediksi gue 3-0 buat Garuda',
-    'Pemain kita lagi on fire banget',
-    'Siapa yang nonton bareng?',
-    'Formasi ${match.formation ?? '4-3-3'} udah pas banget',
-    'Pelatihnya strategi keren sih',
-    'Gas gas gas Garuda!!!',
-    'Ayo kita menang!',
-  ];
-  for (int i = 0; i < 6; i++) {
-    final u = users[rng.nextInt(users.length)];
-    msgs.add(ChatMessage(
-      id: 'dummy_$i',
-      userId: u.$1,
-      username: u.$2,
-      text: texts[rng.nextInt(texts.length)],
-      createdAt: now.subtract(Duration(minutes: 30 - i * 5)),
-      type: ChatMessageType.text,
-    ));
-  }
-  if (match.isFinished && match.goals != null && match.goals!.isNotEmpty) {
-    final g = match.goals!.first;
-    msgs.add(ChatMessage(
-      id: 'goal_0',
-      userId: 'sys',
-      username: 'System',
-      text: '\u26BD GOL! ${g.scorerName} menit ${g.minute}\'',
-      createdAt: now.subtract(const Duration(minutes: 10)),
-      type: ChatMessageType.goal,
-    ));
-  }
-  msgs.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-  return msgs;
+  factory MatchChatMessage.fromMap(Map<String, dynamic> m) =>
+      MatchChatMessage(
+        id:          m['id']           as String,
+        matchId:     m['match_id']     as String,
+        userId:      m['user_id']      as String,
+        username:    m['username']     as String,
+        avatarEmoji: m['avatar_emoji'] as String? ?? '🦅',
+        body:        m['body']         as String,
+        type:        m['type']         as String?,
+        createdAt:   DateTime.parse(m['created_at'] as String),
+      );
 }
 
-// ═════════════════════════════════════════════════════════════════════════
+// ────────────────────────────────────────────────
+// Screen
+// ────────────────────────────────────────────────
 class MatchChatScreen extends StatefulWidget {
   const MatchChatScreen({super.key, required this.match});
   final MatchItem match;
@@ -77,569 +53,715 @@ class MatchChatScreen extends StatefulWidget {
 }
 
 class _MatchChatScreenState extends State<MatchChatScreen>
-    with SingleTickerProviderStateMixin {
-  final _scrollCtrl = ScrollController();
-  final _inputCtrl  = TextEditingController();
-  final _focusNode  = FocusNode();
-  late List<ChatMessage> _messages;
-  bool _showScrollFab = false;
-  bool _showCheers    = false;
-  late AnimationController _sendAnim;
+    with TickerProviderStateMixin {
+
+  static final _sb       = Supabase.instance.client;
+  static const _table    = 'match_chats';
+  static const _emojis   = ['🦅','🇮🇩','⚽','🔥','💪','🎯','🏆','😎'];
+  static const _chants   = [
+    'Ayo Garuda! 🦅🔥',
+    'Indonesia Bisa! 💪',
+    'Merah Putih Juara! 🇮🇩',
+    'Garuda di Dadaku! ❤️',
+  ];
+
+  final _ctrl    = TextEditingController();
+  final _scroll  = ScrollController();
+  final _focusNode = FocusNode();
+
+  List<MatchChatMessage> _messages = [];
+  bool   _loading     = true;
+  bool   _sending     = false;
+  String _msgType     = 'normal'; // normal | predict | chant
+  bool   _showChants  = false;
+  bool   _showScrollBtn = false;
+
+  RealtimeChannel? _channel;
+
+  late final AnimationController _fabAnim;
+
+  String get _matchId => '${widget.match.id}';
+  String get _me      => _sb.auth.currentUser?.id ?? 'anon';
+  String get _myName  {
+    final u = _sb.auth.currentUser;
+    return u?.userMetadata?['full_name'] as String?
+        ?? u?.email?.split('@').first
+        ?? 'Garuda Fan';
+  }
+  String get _myEmoji {
+    final code = _me.codeUnitAt(0) % _emojis.length;
+    return _emojis[code];
+  }
 
   @override
   void initState() {
     super.initState();
-    _messages = _dummyMessages(widget.match);
-    _sendAnim = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
-    _scrollCtrl.addListener(() {
-      final atBottom = _scrollCtrl.position.pixels >=
-          _scrollCtrl.position.maxScrollExtent - 80;
-      if (atBottom == _showScrollFab) {
-        setState(() => _showScrollFab = !atBottom);
-      }
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    _fabAnim = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 250));
+    _scroll.addListener(_onScroll);
+    _load();
+    _subscribe();
   }
 
   @override
   void dispose() {
-    _scrollCtrl.dispose();
-    _inputCtrl.dispose();
+    _channel?.unsubscribe();
+    _ctrl.dispose();
+    _scroll.dispose();
     _focusNode.dispose();
-    _sendAnim.dispose();
+    _fabAnim.dispose();
     super.dispose();
   }
 
-  void _scrollToBottom({bool animated = true}) {
-    if (!_scrollCtrl.hasClients) return;
-    if (animated) {
-      _scrollCtrl.animateTo(
-        _scrollCtrl.position.maxScrollExtent,
+  void _onScroll() {
+    final atBottom = _scroll.offset >=
+        (_scroll.position.maxScrollExtent - 80);
+    if (!atBottom && !_showScrollBtn) {
+      setState(() => _showScrollBtn = true);
+      _fabAnim.forward();
+    } else if (atBottom && _showScrollBtn) {
+      _fabAnim.reverse().then((_) {
+        if (mounted) setState(() => _showScrollBtn = false);
+      });
+    }
+  }
+
+  // ── Fetch history ──────────────────────────────
+  Future<void> _load() async {
+    try {
+      final rows = await _sb
+          .from(_table)
+          .select()
+          .eq('match_id', _matchId)
+          .order('created_at')
+          .limit(200);
+      if (mounted) {
+        setState(() {
+          _messages = (rows as List)
+              .map((r) => MatchChatMessage.fromMap(r as Map<String, dynamic>))
+              .toList();
+          _loading  = false;
+        });
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _scrollToBottom(animate: false));
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  // ── Realtime subscription ──────────────────────
+  void _subscribe() {
+    _channel = _sb
+        .channel('match_chat_$_matchId')
+        .onPostgresChanges(
+          event:  PostgresChangeEvent.insert,
+          schema: 'public',
+          table:  _table,
+          filter: PostgresChangeFilter(
+            type:  FilterType.eq,
+            column: 'match_id',
+            value:  _matchId,
+          ),
+          callback: (payload) {
+            final msg = MatchChatMessage.fromMap(
+                payload.newRecord as Map<String, dynamic>);
+            if (mounted) {
+              setState(() => _messages.add(msg));
+              final atBottom = _scroll.hasClients &&
+                  _scroll.offset >=
+                      (_scroll.position.maxScrollExtent - 120);
+              if (atBottom) _scrollToBottom();
+            }
+          },
+        )
+        .subscribe();
+  }
+
+  // ── Send ───────────────────────────────────────
+  Future<void> _send({String? overrideText, String? overrideType}) async {
+    final text = (overrideText ?? _ctrl.text).trim();
+    if (text.isEmpty || _sending) return;
+    setState(() => _sending = true);
+    _ctrl.clear();
+    try {
+      await _sb.from(_table).insert({
+        'match_id':    _matchId,
+        'user_id':     _me,
+        'username':    _myName,
+        'avatar_emoji':_myEmoji,
+        'body':        text,
+        'type':        overrideType ?? (_msgType == 'normal' ? null : _msgType),
+      });
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal kirim pesan, coba lagi.')));
+      }
+    } finally {
+      if (mounted) setState(() { _sending = false; _msgType = 'normal'; });
+    }
+  }
+
+  void _scrollToBottom({bool animate = true}) {
+    if (!_scroll.hasClients) return;
+    if (animate) {
+      _scroll.animateTo(
+        _scroll.position.maxScrollExtent + 200,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     } else {
-      _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
+      _scroll.jumpTo(_scroll.position.maxScrollExtent + 200);
     }
   }
 
-  void _sendMessage(String text, {ChatMessageType type = ChatMessageType.text}) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return;
-    HapticFeedback.lightImpact();
-    setState(() {
-      _messages.add(ChatMessage(
-        id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-        userId: _myUserId,
-        username: _myUsername,
-        text: trimmed,
-        createdAt: DateTime.now(),
-        type: type,
-        isMe: true,
-      ));
-      _showCheers = false;
-    });
-    _inputCtrl.clear();
-    _sendAnim.forward(from: 0);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final m  = widget.match;
-
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: Column(
-        children: [
-          // ── Header ─────────────────────────────────────────────
-          _ChatHeader(match: m),
-
-          // ── Messages ───────────────────────────────────────────
-          Expanded(
-            child: Stack(
-              children: [
-                ListView.builder(
-                  controller: _scrollCtrl,
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  itemCount: _messages.length,
-                  itemBuilder: (ctx, i) {
-                    final msg  = _messages[i];
-                    final prev = i > 0 ? _messages[i - 1] : null;
-                    final showDate = prev == null ||
-                        !_isSameDay(prev.createdAt, msg.createdAt);
-                    final showName = !msg.isMe &&
-                        (prev == null || prev.userId != msg.userId ||
-                            showDate);
-                    return Column(
-                      children: [
-                        if (showDate)
-                          _DateSeparator(date: msg.createdAt),
-                        _ChatBubble(
-                            message: msg, showName: showName),
-                      ],
-                    );
-                  },
-                ),
-
-                // Scroll-to-bottom FAB
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
-                  bottom: _showScrollFab ? 12 : -60,
-                  right: 12,
-                  child: FloatingActionButton.small(
-                    onPressed: () => _scrollToBottom(),
-                    backgroundColor: cs.primaryContainer,
-                    child: Icon(Icons.keyboard_arrow_down_rounded,
-                        color: cs.onPrimaryContainer),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Cheer shortcuts ────────────────────────────────────
-          AnimatedSize(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeInOut,
-            child: _showCheers
-                ? Container(
-                    color: cs.surfaceContainerHighest,
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-                    child: Wrap(
-                      spacing: 8, runSpacing: 6,
-                      children: _cheers.map((c) => ActionChip(
-                        label: Text(c,
-                            style: TextStyle(
-                                fontSize: 12, color: cs.onSurface)),
-                        backgroundColor: cs.surfaceContainer,
-                        side: BorderSide(
-                            color: cs.outline.withOpacity(0.2)),
-                        onPressed: () => _sendMessage(c,
-                            type: ChatMessageType.cheer),
-                      )).toList(),
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-
-          // ── Input bar ──────────────────────────────────────────
-          _InputBar(
-            controller: _inputCtrl,
-            focusNode: _focusNode,
-            showCheers: _showCheers,
-            onToggleCheers: () =>
-                setState(() => _showCheers = !_showCheers),
-            onSend: _sendMessage,
-          ),
-        ],
-      ),
-    );
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
-}
-
-// ── Chat Header ───────────────────────────────────────────────────────────
-class _ChatHeader extends StatelessWidget {
-  const _ChatHeader({required this.match});
-  final MatchItem match;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [Color(0xFFCC0001), Color(0xFF7B0000)],
-        ),
-        boxShadow: [BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(4, 6, 16, 12),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 18),
-                onPressed: () => Navigator.pop(context),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      Text('Indonesia',
-                          style: tt.titleSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: match.isFinished
-                            ? Text(
-                                '${match.indonesiaScore} : ${match.opponentScore}',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 16))
-                            : const Text('VS',
-                                style: TextStyle(
-                                    color: Colors.white70,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14)),
-                      ),
-                      Flexible(child: Text(match.opponentName,
-                          style: tt.titleSmall?.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w500),
-                          overflow: TextOverflow.ellipsis)),
-                    ]),
-                    const SizedBox(height: 2),
-                    Row(children: [
-                      const Icon(Icons.circle,
-                          size: 7, color: Color(0xFF4CAF50)),
-                      const SizedBox(width: 5),
-                      Text('1.2k online',
-                          style: tt.labelSmall?.copyWith(
-                              color: Colors.white60, fontSize: 11)),
-                      const SizedBox(width: 12),
-                      Icon(Icons.emoji_events_rounded,
-                          size: 11, color: Colors.white54),
-                      const SizedBox(width: 4),
-                      Flexible(child: Text(match.tournamentName,
-                          style: tt.labelSmall?.copyWith(
-                              color: Colors.white54, fontSize: 11),
-                          overflow: TextOverflow.ellipsis)),
-                    ]),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.more_vert_rounded,
-                    color: Colors.white70, size: 20),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Chat Bubble ───────────────────────────────────────────────────────────
-class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.message, required this.showName});
-  final ChatMessage message;
-  final bool        showName;
-
+  // ────────────────────────────────────────────────
+  // Build
+  // ────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final cs  = Theme.of(context).colorScheme;
     final tt  = Theme.of(context).textTheme;
-    final msg = message;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // ── System / goal event ──────────────────────────────────────
-    if (msg.type == ChatMessageType.goal ||
-        msg.type == ChatMessageType.system) {
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: msg.type == ChatMessageType.goal
-                    ? const Color(0xFF4CAF50).withOpacity(0.15)
-                    : cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: msg.type == ChatMessageType.goal
-                      ? const Color(0xFF4CAF50).withOpacity(0.4)
-                      : cs.outline.withOpacity(0.2),
-                ),
-              ),
-              child: Text(msg.text,
-                  style: tt.labelSmall?.copyWith(
-                      color: msg.type == ChatMessageType.goal
-                          ? const Color(0xFF4CAF50)
-                          : cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center),
-            ),
-          ),
-        ]),
-      );
-    }
+    final isUpcoming = widget.match.result == null;
+    final vs = widget.match.opponent;
 
-    final isMe = msg.isMe;
-    final isCheer = msg.type == ChatMessageType.cheer;
-
-    // ── Bubble alignment ─────────────────────────────────────────
-    return Padding(
-      padding: EdgeInsets.only(
-        top: showName ? 10 : 2,
-        bottom: 0,
-        left: isMe ? 48 : 0,
-        right: isMe ? 0 : 48,
-      ),
-      child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          // Avatar (only for others, last in group)
-          if (!isMe)
-            Container(
-              width: 28, height: 28,
-              margin: const EdgeInsets.only(right: 6, bottom: 2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: msg.userColor.withOpacity(0.18),
-                border: Border.all(
-                    color: msg.userColor.withOpacity(0.5), width: 1.2),
-              ),
-              child: Center(
-                child: Text(
-                  msg.username.isNotEmpty
-                      ? msg.username[0].toUpperCase()
-                      : '?',
-                  style: TextStyle(
-                      color: msg.userColor,
-                      fontWeight: FontWeight.bold, fontSize: 11),
-                ),
-              ),
-            ),
-
-          // Bubble
-          Flexible(
-            child: Column(
-              crossAxisAlignment: isMe
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
-              children: [
-                if (showName && !isMe)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4, bottom: 3),
-                    child: Text(msg.username,
-                        style: TextStyle(
-                            color: msg.userColor,
-                            fontWeight: FontWeight.w700, fontSize: 11)),
-                  ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isMe
-                        ? (isCheer
-                            ? const Color(0xFFFF9800).withOpacity(0.9)
-                            : const Color(0xFFCC0001))
-                        : (isCheer
-                            ? const Color(0xFFFF9800).withOpacity(0.12)
-                            : cs.surfaceContainerHighest),
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isMe ? 16 : 4),
-                      bottomRight: Radius.circular(isMe ? 4 : 16),
-                    ),
-                    border: !isMe
-                        ? Border.all(
-                            color: isCheer
-                                ? Colors.orange.withOpacity(0.3)
-                                : cs.outline.withOpacity(0.12))
-                        : null,
-                    boxShadow: [BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 4, offset: const Offset(0, 1))],
-                  ),
-                  child: Text(
-                    msg.text,
-                    style: tt.bodySmall?.copyWith(
-                      color: isMe ? Colors.white : cs.onSurface,
-                      fontSize: 13, height: 1.35,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
-                  child: Text(
-                    DateFormat('HH:mm').format(msg.createdAt),
-                    style: tt.labelSmall?.copyWith(
-                        color: cs.onSurfaceVariant.withOpacity(0.5),
-                        fontSize: 10),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          if (isMe)
-            const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Date Separator ────────────────────────────────────────────────────────
-class _DateSeparator extends StatelessWidget {
-  const _DateSeparator({required this.date});
-  final DateTime date;
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final now = DateTime.now();
-    String label;
-    final d = DateTime(date.year, date.month, date.day);
-    final today = DateTime(now.year, now.month, now.day);
-    if (d == today) label = 'Hari ini';
-    else if (d == today.subtract(const Duration(days: 1))) label = 'Kemarin';
-    else label = DateFormat('d MMMM yyyy', 'id_ID').format(date);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(children: [
-        Expanded(child: Divider(
-            color: cs.outline.withOpacity(0.2), height: 1)),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(label,
-              style: TextStyle(
-                  color: cs.onSurfaceVariant,
-                  fontSize: 11, fontWeight: FontWeight.w500)),
+    return Scaffold(
+      backgroundColor: cs.surface,
+      // ── AppBar ──
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFCC0001),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+          onPressed: () => Navigator.pop(context),
         ),
-        Expanded(child: Divider(
-            color: cs.outline.withOpacity(0.2), height: 1)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Diskusi Laga',
+              style: tt.titleSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14),
+            ),
+            Text(
+              'Indonesia vs $vs',
+              style: const TextStyle(
+                  color: Colors.white70, fontSize: 11),
+            ),
+          ],
+        ),
+        actions: [
+          // mini scoreboard / status
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(children: [
+              const Text('🇮🇩', style: TextStyle(fontSize: 13)),
+              const SizedBox(width: 4),
+              Text(
+                isUpcoming
+                    ? 'vs'
+                    : '${widget.match.scoreIndo ?? 0} - ${widget.match.scoreOpp ?? 0}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13),
+              ),
+              const SizedBox(width: 4),
+              Text(widget.match.opponentFlag ?? '🏳️',
+                  style: const TextStyle(fontSize: 13)),
+            ]),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(colors: [
+                Color(0xFFCC0001), Color(0xFF8B0000)
+              ]),
+            ),
+          ),
+        ),
+      ),
+
+      body: Column(children: [
+        // ── Messages list ──
+        Expanded(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _messages.isEmpty
+                  ? _EmptyChat(vs: vs)
+                  : Stack(children: [
+                      ListView.builder(
+                        controller:   _scroll,
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                        itemCount:    _messages.length,
+                        itemBuilder:  (ctx, i) {
+                          final msg    = _messages[i];
+                          final isMine = msg.userId == _me;
+                          final prev   = i > 0 ? _messages[i - 1] : null;
+                          final showName = !isMine &&
+                              (prev == null || prev.userId != msg.userId);
+                          return _ChatBubble(
+                            msg:       msg,
+                            isMine:    isMine,
+                            showName:  showName,
+                            isDark:    isDark,
+                          );
+                        },
+                      ),
+                      // FAB scroll-to-bottom
+                      if (_showScrollBtn)
+                        Positioned(
+                          right: 12, bottom: 8,
+                          child: ScaleTransition(
+                            scale: CurvedAnimation(
+                                parent: _fabAnim,
+                                curve: Curves.elasticOut),
+                            child: FloatingActionButton.small(
+                              onPressed: _scrollToBottom,
+                              backgroundColor: const Color(0xFFCC0001),
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              child: const Icon(
+                                  Icons.keyboard_arrow_down_rounded),
+                            ),
+                          ),
+                        ),
+                    ]),
+        ),
+
+        // ── Chant shortcut row ──
+        if (_showChants) _ChantRow(
+          chants: _chants,
+          onTap: (c) {
+            setState(() => _showChants = false);
+            _send(overrideText: c, overrideType: 'chant');
+          },
+        ),
+
+        // ── Input bar ──
+        _InputBar(
+          ctrl:         _ctrl,
+          focusNode:    _focusNode,
+          msgType:      _msgType,
+          sending:      _sending,
+          showChants:   _showChants,
+          onTypeChanged: (t) => setState(() => _msgType = t),
+          onToggleChants: () => setState(() => _showChants = !_showChants),
+          onSend:       _send,
+        ),
       ]),
     );
   }
 }
 
-// ── Input Bar ─────────────────────────────────────────────────────────────
-class _InputBar extends StatefulWidget {
-  const _InputBar({
-    required this.controller,
-    required this.focusNode,
-    required this.showCheers,
-    required this.onToggleCheers,
-    required this.onSend,
+// ────────────────────────────────────────────────
+// Bubble
+// ────────────────────────────────────────────────
+class _ChatBubble extends StatelessWidget {
+  const _ChatBubble({
+    required this.msg,
+    required this.isMine,
+    required this.showName,
+    required this.isDark,
   });
-  final TextEditingController controller;
-  final FocusNode             focusNode;
-  final bool                  showCheers;
-  final VoidCallback          onToggleCheers;
-  final void Function(String, {ChatMessageType type}) onSend;
+  final MatchChatMessage msg;
+  final bool isMine, showName, isDark;
+
+  Color _userColor(String uid) {
+    const colors = [
+      Color(0xFFE53935), Color(0xFF1E88E5), Color(0xFF43A047),
+      Color(0xFFFB8C00), Color(0xFF8E24AA), Color(0xFF00897B),
+    ];
+    return colors[uid.codeUnitAt(0) % colors.length];
+  }
 
   @override
-  State<_InputBar> createState() => _InputBarState();
+  Widget build(BuildContext context) {
+    final cs      = Theme.of(context).colorScheme;
+    final isPredict = msg.type == 'predict';
+    final isChant   = msg.type == 'chant';
+
+    Color bubbleBg;
+    if (isMine) {
+      bubbleBg = const Color(0xFFCC0001);
+    } else if (isPredict) {
+      bubbleBg = isDark
+          ? const Color(0xFF1B3A2A)
+          : const Color(0xFFE8F5E9);
+    } else if (isChant) {
+      bubbleBg = isDark
+          ? const Color(0xFF3E2A00)
+          : const Color(0xFFFFF3E0);
+    } else {
+      bubbleBg = isDark
+          ? const Color(0xFF2A2A2A)
+          : Colors.white;
+    }
+
+    final radius = BorderRadius.only(
+      topLeft:     const Radius.circular(18),
+      topRight:    const Radius.circular(18),
+      bottomLeft:  Radius.circular(isMine ? 18 : 4),
+      bottomRight: Radius.circular(isMine ? 4 : 18),
+    );
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top:    showName ? 12 : 3,
+        bottom: 2,
+        left:   isMine ? 48 : 0,
+        right:  isMine ? 0  : 48,
+      ),
+      child: Column(
+        crossAxisAlignment:
+            isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (showName && !isMine)
+            Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 3),
+              child: Row(children: [
+                Text(msg.avatarEmoji,
+                    style: const TextStyle(fontSize: 13)),
+                const SizedBox(width: 5),
+                Text(
+                  msg.username,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: _userColor(msg.userId),
+                  ),
+                ),
+              ]),
+            ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 13, vertical: 9),
+            decoration: BoxDecoration(
+              color:       bubbleBg,
+              borderRadius: radius,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.25 : 0.07),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isPredict)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(children: [
+                      const Text('🔮', style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 4),
+                      Text('Prediksi Skor',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.green[700],
+                          )),
+                    ]),
+                  ),
+                if (isChant)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(children: [
+                      const Text('📣', style: TextStyle(fontSize: 11)),
+                      const SizedBox(width: 4),
+                      Text('Yel-Yel',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.orange[700],
+                          )),
+                    ]),
+                  ),
+                Text(
+                  msg.body,
+                  style: TextStyle(
+                    color: isMine ? Colors.white : cs.onSurface,
+                    fontSize: 13.5,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  _time(msg.createdAt),
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    color: isMine
+                        ? Colors.white54
+                        : cs.onSurfaceVariant.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _time(DateTime dt) {
+    final local = dt.toLocal();
+    final h = local.hour.toString().padLeft(2, '0');
+    final m = local.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
 }
 
-class _InputBarState extends State<_InputBar> {
-  bool _hasText = false;
+// ────────────────────────────────────────────────
+// Input Bar
+// ────────────────────────────────────────────────
+class _InputBar extends StatelessWidget {
+  const _InputBar({
+    required this.ctrl,
+    required this.focusNode,
+    required this.msgType,
+    required this.sending,
+    required this.showChants,
+    required this.onTypeChanged,
+    required this.onToggleChants,
+    required this.onSend,
+  });
+  final TextEditingController ctrl;
+  final FocusNode focusNode;
+  final String  msgType;
+  final bool    sending, showChants;
+  final ValueChanged<String> onTypeChanged;
+  final VoidCallback onToggleChants;
+  final Future<void> Function({String? overrideText, String? overrideType}) onSend;
 
   @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(
-        () => setState(() => _hasText = widget.controller.text.trim().isNotEmpty));
+  Widget build(BuildContext context) {
+    final cs    = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: EdgeInsets.only(
+        left: 8, right: 8, top: 8,
+        bottom: MediaQuery.of(context).viewInsets.bottom > 0
+            ? 8
+            : MediaQuery.of(context).padding.bottom + 8,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        border: Border(
+          top: BorderSide(
+              color: cs.outline.withOpacity(0.12), width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(children: [
+        // Predict button
+        _TypeBtn(
+          icon: '🔮',
+          active:  msgType == 'predict',
+          tooltip: 'Prediksi Skor',
+          onTap:   () => onTypeChanged(
+              msgType == 'predict' ? 'normal' : 'predict'),
+        ),
+        const SizedBox(width: 4),
+        // Chant button
+        _TypeBtn(
+          icon:    '📣',
+          active:  showChants,
+          tooltip: 'Yel-Yel',
+          onTap:   onToggleChants,
+        ),
+        const SizedBox(width: 8),
+        // Text field
+        Expanded(
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 120),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF2A2A2A)
+                  : const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: TextField(
+              controller:  ctrl,
+              focusNode:   focusNode,
+              maxLines:    null,
+              textCapitalization: TextCapitalization.sentences,
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: msgType == 'predict'
+                    ? 'Prediksi skor... mis: 2-1'
+                    : 'Tulis komentar...',
+                hintStyle: TextStyle(
+                    color: cs.onSurfaceVariant.withOpacity(0.5),
+                    fontSize: 13),
+                border:      InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 10),
+              ),
+              onSubmitted: (_) => onSend(),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Send button
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 42, height: 42,
+          decoration: BoxDecoration(
+            color: sending
+                ? cs.surfaceContainerHighest
+                : const Color(0xFFCC0001),
+            shape: BoxShape.circle,
+          ),
+          child: sending
+              ? const Padding(
+                  padding: EdgeInsets.all(10),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 1.5, color: Colors.white))
+              : IconButton(
+                  onPressed: onSend,
+                  icon: const Icon(Icons.send_rounded,
+                      color: Colors.white, size: 18),
+                  padding: EdgeInsets.zero,
+                ),
+        ),
+      ]),
+    );
   }
+}
+
+class _TypeBtn extends StatelessWidget {
+  const _TypeBtn({
+    required this.icon,
+    required this.active,
+    required this.tooltip,
+    required this.onTap,
+  });
+  final String icon;
+  final bool   active;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 36, height: 36,
+          decoration: BoxDecoration(
+            color: active
+                ? const Color(0xFFCC0001).withOpacity(0.12)
+                : Colors.transparent,
+            shape: BoxShape.circle,
+            border: active
+                ? Border.all(
+                    color: const Color(0xFFCC0001).withOpacity(0.4))
+                : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(icon, style: const TextStyle(fontSize: 18)),
+        ),
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────
+// Chant Row
+// ────────────────────────────────────────────────
+class _ChantRow extends StatelessWidget {
+  const _ChantRow({required this.chants, required this.onTap});
+  final List<String> chants;
+  final ValueChanged<String> onTap;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: EdgeInsets.only(
-          left: 8, right: 8, top: 8,
-          bottom: MediaQuery.of(context).padding.bottom + 8),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        border: Border(top: BorderSide(
-            color: cs.outline.withOpacity(0.12))),
-      ),
-      child: Row(
-        children: [
-          // Yel-yel toggle
-          IconButton(
-            onPressed: widget.onToggleCheers,
-            icon: Icon(
-              widget.showCheers
-                  ? Icons.keyboard_arrow_down_rounded
-                  : Icons.campaign_rounded,
-              color: widget.showCheers ? cs.primary : cs.onSurfaceVariant,
-              size: 22,
-            ),
-            tooltip: 'Yel-yel',
-            padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(),
-          ),
-          const SizedBox(width: 4),
-
-          // Text field
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(maxHeight: 120),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: cs.outline.withOpacity(0.2)),
-              ),
-              child: TextField(
-                controller: widget.controller,
-                focusNode: widget.focusNode,
-                maxLines: null,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (v) =>
-                    widget.onSend(v),
-                style: TextStyle(color: cs.onSurface, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Tulis pesan...',
-                  hintStyle: TextStyle(
-                      color: cs.onSurfaceVariant.withOpacity(0.5),
-                      fontSize: 14),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
-                  isDense: true,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Send button
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 42, height: 42,
+      height: 44,
+      color: cs.surfaceContainerLow,
+      child: ListView.separated(
+        scrollDirection:   Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        itemCount:         chants.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (_, i) => InkWell(
+          onTap: () => onTap(chants[i]),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _hasText ? const Color(0xFFCC0001) : cs.surfaceContainer,
+              color: const Color(0xFFFF8F00).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                  color: const Color(0xFFFF8F00).withOpacity(0.35)),
             ),
-            child: IconButton(
-              onPressed: _hasText
-                  ? () => widget.onSend(widget.controller.text)
-                  : null,
-              icon: Icon(Icons.send_rounded,
-                  size: 18,
-                  color: _hasText ? Colors.white : cs.onSurfaceVariant),
-              padding: EdgeInsets.zero,
+            child: Text(chants[i],
+                style: const TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────
+// Empty State
+// ────────────────────────────────────────────────
+class _EmptyChat extends StatelessWidget {
+  const _EmptyChat({required this.vs});
+  final String vs;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('🦅', style: TextStyle(fontSize: 52)),
+          const SizedBox(height: 12),
+          Text(
+            'Jadilah yang pertama\nberdiskusi tentang laga ini!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
             ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Indonesia vs $vs',
+            style: TextStyle(
+                fontSize: 12, color: cs.onSurfaceVariant.withOpacity(0.6)),
           ),
         ],
       ),
