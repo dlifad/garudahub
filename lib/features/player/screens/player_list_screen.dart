@@ -17,10 +17,11 @@ class _PlayerListScreenState extends State<PlayerListScreen>
   final _playerService = PlayerService();
   final _matchService  = MatchService();
 
-  List<TournamentModel> _tournaments = [];
+  List<TournamentModel> _tournaments     = [];
+  List<TournamentModel> _filledTournaments = []; // hanya yang punya pemain
   TournamentModel?      _selectedTournament;
   SquadResponse?        _squad;
-  bool   _isLoading = true;
+  bool    _isLoading = true;
   String? _error;
   String? _filterPos;
 
@@ -43,27 +44,58 @@ class _PlayerListScreenState extends State<PlayerListScreen>
 
   Future<void> _init() async {
     setState(() { _isLoading = true; _error = null; });
+
     final tours = await _matchService.getTournaments();
     if (tours.isEmpty) {
       if (mounted) setState(() { _isLoading = false; _error = 'Gagal memuat data turnamen.'; });
       return;
     }
-    // Ambil turnamen terbaru berdasarkan tahun
-    final latest = tours.reduce((a, b) =>
-        (a.endDate?.millisecondsSinceEpoch ?? a.year * 10000) >=
-        (b.endDate?.millisecondsSinceEpoch ?? b.year * 10000) ? a : b);
-    if (mounted) setState(() { _tournaments = tours; _selectedTournament = latest; });
-    await _loadSquad(latest.id);
+
+    // Urutkan dari terbaru ke terlama
+    final sorted = List<TournamentModel>.from(tours)
+      ..sort((a, b) {
+        final aMs = a.endDate?.millisecondsSinceEpoch ?? (a.year * 10000);
+        final bMs = b.endDate?.millisecondsSinceEpoch ?? (b.year * 10000);
+        return bMs.compareTo(aMs);
+      });
+
+    // Cari tournament terbaru yang punya pemain
+    TournamentModel? selectedTour;
+    SquadResponse?   firstSquad;
+    final filled = <TournamentModel>[];
+
+    for (final t in sorted) {
+      final squad = await _playerService.getSquadByTournament(t.id);
+      if (squad != null && squad.totalPlayers > 0) {
+        filled.add(t);
+        selectedTour ??= t;
+        firstSquad   ??= squad;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _tournaments          = sorted;
+        _filledTournaments    = filled;
+        _selectedTournament   = selectedTour;
+        _squad                = firstSquad;
+        _isLoading            = false;
+        if (selectedTour == null) _error = 'Belum ada skuad yang tersedia.';
+      });
+    }
   }
 
-  Future<void> _loadSquad(int id) async {
-    setState(() { _isLoading = true; _error = null; });
-    final result = await _playerService.getSquadByTournament(id);
-    if (mounted) setState(() {
-      _squad = result;
-      _isLoading = false;
-      if (result == null) _error = 'Gagal memuat skuad.';
-    });
+  Future<void> _loadSquad(TournamentModel tour) async {
+    setState(() { _isLoading = true; _error = null; _filterPos = null; });
+    final result = await _playerService.getSquadByTournament(tour.id);
+    if (mounted) {
+      setState(() {
+        _selectedTournament = tour;
+        _squad      = result;
+        _isLoading  = false;
+        if (result == null) _error = 'Gagal memuat skuad.';
+      });
+    }
   }
 
   List<PlayerModel> get _filtered {
@@ -79,261 +111,205 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
-      body: RefreshIndicator(
-        onRefresh: _init,
-        color: cs.primary,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // ── AppBar ──────────────────────────────────────────
-            SliverAppBar(
-              pinned: true,
-              backgroundColor: cs.surface,
-              surfaceTintColor: cs.surfaceTint,
-              title: Row(children: [
-                Icon(Icons.groups_rounded, color: cs.primary, size: 22),
-                const SizedBox(width: 8),
-                RichText(
-                  text: TextSpan(
-                    style: tt.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900, letterSpacing: 0.3),
-                    children: [
-                      TextSpan(
-                          text: 'GARUDA ',
-                          style: TextStyle(color: cs.onSurface)),
-                      TextSpan(
-                          text: 'SQUAD',
-                          style: TextStyle(color: cs.primary)),
-                    ],
-                  ),
+      appBar: AppBar(
+        title: const Text('GARUDA SQUAD'),
+        titleTextStyle: tt.titleLarge?.copyWith(
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.2,
+        ),
+        actions: [
+          if (_squad != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Chip(
+                label: Text('${_squad!.totalPlayers} Pemain'),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // ── Tournament Picker ──────────────────────────────────────
+          if (_filledTournaments.length > 1)
+            _TournamentPicker(
+              tournaments: _filledTournaments,
+              selected: _selectedTournament,
+              onSelect: _loadSquad,
+            ),
+
+          // ── Position Filter Chips ──────────────────────────────────
+          SizedBox(
+            height: 48,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              children: [
+                _FilterChip(
+                  label: 'Semua',
+                  selected: _filterPos == null,
+                  onTap: () => setState(() => _filterPos = null),
                 ),
-                if (_squad != null) ...[
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: cs.outlineVariant),
-                    ),
-                    child: Text(
-                      '${_squad!.totalPlayers} Pemain',
-                      style: tt.labelSmall?.copyWith(
-                          color: cs.onSurfaceVariant),
-                    ),
-                  ),
-                ],
-              ]),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(42),
-                child: SizedBox(
-                  height: 42,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    children: [
-                      _Chip(
-                        label: 'Semua',
-                        active: _filterPos == null,
-                        onTap: () => setState(() => _filterPos = null),
-                        cs: cs,
-                      ),
-                      ..._posOrder.map((p) => _Chip(
-                            label: _posLabel[p]!,
-                            active: _filterPos == p,
-                            onTap: () => setState(() => _filterPos = p),
-                            cs: cs,
-                          )),
-                    ],
-                  ),
+                ..._posOrder.map((pos) => _FilterChip(
+                  label: _posLabel[pos]!,
+                  selected: _filterPos == pos,
+                  onTap: () => setState(() => _filterPos = pos),
+                )),
+              ],
+            ),
+          ),
+
+          // ── Body ───────────────────────────────────────────────────
+          Expanded(child: _buildBody(cs, tt)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(ColorScheme cs, TextTheme tt) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: cs.error),
+            const SizedBox(height: 8),
+            Text(_error!, style: tt.bodyMedium),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: _init, child: const Text('Coba Lagi')),
+          ],
+        ),
+      );
+    }
+
+    final players = _filtered;
+    if (players.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.groups_outlined, size: 64, color: Colors.grey),
+            SizedBox(height: 12),
+            Text('Belum ada pemain', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+
+    // Kalau filter posisi aktif → flat list
+    if (_filterPos != null) {
+      return ListView.builder(
+        padding: const EdgeInsets.only(bottom: 16),
+        itemCount: players.length,
+        itemBuilder: (_, i) => PlayerCard(
+          player: players[i],
+          onTap: () => _goDetail(players[i]),
+        ),
+      );
+    }
+
+    // Grouped by position
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 16),
+      children: _posOrder.map((pos) {
+        final list = _squad!.squad[pos] ?? [];
+        if (list.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(
+                _posLabel[pos]!,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 13,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),
-
-            // ── States ──────────────────────────────────────────
-            if (_isLoading)
-              const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()))
-            else if (_error != null)
-              SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.error_outline_rounded,
-                          size: 48, color: cs.error),
-                      const SizedBox(height: 12),
-                      Text(_error!,
-                          style: TextStyle(color: cs.onSurfaceVariant)),
-                      const SizedBox(height: 16),
-                      FilledButton.tonal(
-                          onPressed: _init,
-                          child: const Text('Coba Lagi')),
-                    ],
-                  ),
-                ),
-              )
-            else if (_filtered.isEmpty)
-              SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.groups_outlined,
-                          size: 52,
-                          color: cs.onSurfaceVariant.withOpacity(0.3)),
-                      const SizedBox(height: 12),
-                      Text('Belum ada pemain',
-                          style: TextStyle(
-                              color: cs.onSurfaceVariant, fontSize: 14)),
-                    ],
-                  ),
-                ),
-              )
-            else ...[
-              if (_filterPos == null)
-                ..._posOrder.map((pos) {
-                  final list = _squad!.squad[pos] ?? [];
-                  if (list.isEmpty) {
-                    return const SliverToBoxAdapter(child: SizedBox.shrink());
-                  }
-                  return _PositionSection(
-                    pos: pos,
-                    label: _posLabel[pos]!,
-                    players: list,
-                    onTap: _openDetail,
-                  );
-                })
-              else
-                _PositionSection(
-                  pos: _filterPos!,
-                  label: _posLabel[_filterPos]!,
-                  players: _filtered,
-                  onTap: _openDetail,
-                  showHeader: false,
-                ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
-            ],
+            ...list.map((p) => PlayerCard(
+              player: p,
+              onTap: () => _goDetail(p),
+            )),
           ],
+        );
+      }).toList(),
+    );
+  }
+
+  void _goDetail(PlayerModel player) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PlayerDetailScreen(
+          player: player,
+          tournamentId: _selectedTournament?.id,
         ),
       ),
     );
   }
-
-  void _openDetail(PlayerModel p) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: p)),
-    );
-  }
 }
 
-// ── Position Section ───────────────────────────────────────────────────
+// ── Widget Helpers ─────────────────────────────────────────────────────────────
 
-class _PositionSection extends StatelessWidget {
-  final String pos, label;
-  final List<PlayerModel> players;
-  final ValueChanged<PlayerModel> onTap;
-  final bool showHeader;
+class _TournamentPicker extends StatelessWidget {
+  final List<TournamentModel> tournaments;
+  final TournamentModel?      selected;
+  final void Function(TournamentModel) onSelect;
 
-  const _PositionSection({
-    required this.pos,
-    required this.label,
-    required this.players,
-    required this.onTap,
-    this.showHeader = true,
+  const _TournamentPicker({
+    required this.tournaments,
+    required this.selected,
+    required this.onSelect,
   });
-
-  static const _posColor = {
-    'GK':  Color(0xFFFFB300),
-    'DEF': Color(0xFF42A5F5),
-    'MID': Color(0xFF66BB6A),
-    'FWD': Color(0xFFEF5350),
-  };
 
   @override
   Widget build(BuildContext context) {
-    final cs  = Theme.of(context).colorScheme;
-    final tt  = Theme.of(context).textTheme;
-    final col = _posColor[pos] ?? cs.primary;
-
-    return SliverMainAxisGroup(slivers: [
-      if (showHeader)
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
-            child: Row(children: [
-              Container(
-                  width: 3, height: 14,
-                  decoration: BoxDecoration(
-                      color: col,
-                      borderRadius: BorderRadius.circular(2))),
-              const SizedBox(width: 8),
-              Text(label.toUpperCase(),
-                  style: tt.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
-                      color: cs.onSurface)),
-              const SizedBox(width: 6),
-              Text('(${players.length})',
-                  style: tt.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant)),
-            ]),
-          ),
-        ),
-      SliverPadding(
-        padding: EdgeInsets.fromLTRB(12, showHeader ? 0 : 12, 12, 4),
-        sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 0.72,
-          ),
-          delegate: SliverChildBuilderDelegate(
-            (ctx, i) => PlayerCard(
-              player: players[i],
-              onTap: () => onTap(players[i]),
+    return SizedBox(
+      height: 40,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: tournaments.length,
+        itemBuilder: (_, i) {
+          final t = tournaments[i];
+          final isSelected = selected?.id == t.id;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(t.name, style: const TextStyle(fontSize: 12)),
+              selected: isSelected,
+              onSelected: (_) => onSelect(t),
+              visualDensity: VisualDensity.compact,
             ),
-            childCount: players.length,
-          ),
-        ),
+          );
+        },
       ),
-    ]);
+    );
   }
 }
 
-// ── Chip Filter ────────────────────────────────────────────────────────
-
-class _Chip extends StatelessWidget {
+class _FilterChip extends StatelessWidget {
   final String label;
-  final bool active;
+  final bool   selected;
   final VoidCallback onTap;
-  final ColorScheme cs;
-  const _Chip({required this.label, required this.active,
-      required this.onTap, required this.cs});
+
+  const _FilterChip({required this.label, required this.selected, required this.onTap});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-          decoration: BoxDecoration(
-            color: active ? cs.primary : cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(label,
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-                  color: active ? cs.onPrimary : cs.onSurfaceVariant)),
-        ),
+      child: FilterChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        visualDensity: VisualDensity.compact,
       ),
     );
   }
