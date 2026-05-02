@@ -24,21 +24,25 @@ class MatchGoal {
 class Stadium {
   final String name;
   final String city;
+  final String country;
   final double latitude;
   final double longitude;
 
   const Stadium({
     required this.name,
     required this.city,
+    required this.country,
     required this.latitude,
     required this.longitude,
   });
 
   factory Stadium.fromJson(Map<String, dynamic>? json) {
+    print('STADIUM JSON: $json'); // 👈 TAMBAH INI
     if (json == null) {
       return const Stadium(
         name: '-',
         city: '-',
+        country: '-',
         latitude: 0,
         longitude: 0,
       );
@@ -47,6 +51,7 @@ class Stadium {
     return Stadium(
       name: json['name']?.toString() ?? '-',
       city: json['city']?.toString() ?? '-',
+      country: json['country']?.toString() ?? '-',
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0,
     );

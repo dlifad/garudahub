@@ -395,7 +395,7 @@ class _TicketScreenState extends State<TicketScreen> {
 
         if (_showScrollToTop)
           Positioned(
-            bottom: 16,
+            bottom: 90,
             right: 16,
             child: FloatingActionButton.small(
               onPressed: _scrollToTop,

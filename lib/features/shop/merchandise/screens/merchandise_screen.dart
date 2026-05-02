@@ -231,7 +231,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
 
         if (_showScrollToTop)
           Positioned(
-            bottom: 16,
+            bottom: 90,
             right: 16,
             child: FloatingActionButton.small(
               onPressed: _scrollToTop,

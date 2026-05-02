@@ -57,7 +57,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     final lng = widget.match.stadium.longitude;
 
     if (lat == 0 || lng == 0) {
-      if (mounted) setState(() { _locationLoading = false; _locationError = 'Koordinat stadion tidak tersedia'; });
+      if (mounted) setState(() { _locationLoading = false; _locationError = 'Lokasi stadion belum diumumkan'; });
       return;
     }
 
@@ -371,6 +371,9 @@ class _StadiumLBSCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final hasVenue = match.venue?.isNotEmpty == true;
+    final hasCoordinate = match.stadium.latitude != 0 && match.stadium.longitude != 0;
+    final city = match.stadium.city;
+    final country = match.stadium.country; 
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,24 +401,27 @@ class _StadiumLBSCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            hasVenue ? match.venue! : 'Stadion',
+                            hasVenue ? match.venue! : 'To be announced',
                             style: tt.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: cs.onSurface,
                             ),
                           ),
-                          if (match.stadium.city.isNotEmpty)
+                          if (city != '-' || country != '-')
                             Text(
-                              match.stadium.city,
+                              [city, country]
+                                  .where((e) => e.isNotEmpty && e != '-')
+                                  .join(', '),
                               style: tt.labelSmall?.copyWith(
-                                  color: cs.onSurfaceVariant),
+                                color: cs.onSurfaceVariant,
+                              ),
                             ),
                         ],
                       ),
                     ),
                     // Lihat Peta button
                     FilledButton.icon(
-                      onPressed: onOpenMap,
+                      onPressed: hasCoordinate ? onOpenMap : null,
                       icon: const Icon(Icons.map_rounded, size: 15),
                       label: const Text('Peta'),
                       style: FilledButton.styleFrom(
@@ -587,6 +593,7 @@ class _HeroHeader extends StatelessWidget {
     final local   = tzProvider.convert(match.matchDateUtc);
     final dateStr = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(local);
     final timeStr = DateFormat('HH:mm').format(local);
+    final hasCoordinate = match.stadium.latitude != 0 && match.stadium.longitude != 0;
 
     return Container(
       decoration: const BoxDecoration(
@@ -719,11 +726,13 @@ class _HeroHeader extends StatelessWidget {
                     _InfoRow(
                         icon: Icons.calendar_today_rounded,
                         text: '$dateStr  •  $timeStr ${tzProvider.label}'),
-                    if (match.venue?.isNotEmpty == true) ...[
-                      const SizedBox(height: 4),
-                      _InfoRow(
-                          icon: Icons.stadium_rounded, text: match.venue!),
-                    ],
+                    const SizedBox(height: 4),
+                    _InfoRow(
+                      icon: Icons.stadium_rounded,
+                      text: hasCoordinate
+                          ? (match.venue ?? 'Stadion')
+                          : 'Stadion belum diumumkan',
+                    ),
                   ],
                 ),
               ),
