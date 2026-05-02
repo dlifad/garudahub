@@ -8,6 +8,7 @@ import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
+import 'package:garudahub/features/dashboard/widgets/ai_chat_widget.dart';
 import 'package:garudahub/features/dashboard/widgets/hero_section.dart';
 import 'package:garudahub/features/dashboard/widgets/news_list.dart';
 import 'package:garudahub/features/dashboard/widgets/next_match_card.dart';
@@ -296,6 +297,11 @@ class _DashboardScreenState extends State<DashboardScreen>
                     recentMatches: _recentMatches,
                     countdownLabel: _countdownLabel(),
                   ),
+                ),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0),
+                  child: AiChatWidget(),
                 ),
                 const SizedBox(height: 20),
                 const SectionTitle('Pertandingan Berikutnya'),

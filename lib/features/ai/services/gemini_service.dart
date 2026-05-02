@@ -1,12 +1,8 @@
-
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GeminiService {
-  static const _model    = 'gemini-2.0-flash';
-  static const _endpoint =
-      'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent';
+  static const _modelName = 'gemini-2.0-flash';
 
   static const _systemPrompt = """
 Kamu adalah GarudaBot 🦅, asisten resmi aplikasi GarudaHub yang merupakan
@@ -42,57 +38,43 @@ ATURAN PENTING:
 - Jawab selalu dalam Bahasa Indonesia.
 """;
 
-  static final List<Map<String, dynamic>> _history = [];
+  static GenerativeModel? _model;
+  static ChatSession? _chat;
+
+  static GenerativeModel _getModel() {
+    return _model ??= GenerativeModel(
+      model: _modelName,
+      apiKey: AppConstants.geminiApiKey,
+      systemInstruction: Content.system(_systemPrompt),
+      generationConfig: GenerationConfig(
+        temperature: 0.8,
+        topP: 0.9,
+        maxOutputTokens: 512,
+      ),
+    );
+  }
 
   static Future<String> sendMessage(String message) async {
-    if (AppConstants.geminiApiKey.isEmpty ||
-        AppConstants.geminiApiKey == 'ISI_API_KEY_GEMINI_DI_SINI') {
+    final apiKey = AppConstants.geminiApiKey.trim();
+    if (apiKey.isEmpty || apiKey == 'ISI_API_KEY_GEMINI_DI_SINI') {
       return '⚠️ API key Gemini belum diisi Sobat Garuda!\nIsikan dulu di lib/core/constants/constants.dart ya 🙏';
     }
-
-    _history.add({
-      'role': 'user',
-      'parts': [{'text': message}],
-    });
-
-    final payload = {
-      'system_instruction': {
-        'parts': [{'text': _systemPrompt}],
-      },
-      'contents': _history,
-      'generationConfig': {
-        'temperature': 0.8,
-        'topP': 0.9,
-        'maxOutputTokens': 512,
-      },
-    };
-
     try {
-      final res = await http.post(
-        Uri.parse('$_endpoint?key=${AppConstants.geminiApiKey}'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(payload),
-      );
-
-      if (res.statusCode != 200) {
-        final err = jsonDecode(res.body);
-        return '⚠️ Error: ${err['error']?['message'] ?? 'Unknown error'}';
+      final chat = _chat ??= _getModel().startChat();
+      final response = await chat.sendMessage(Content.text(message));
+      final reply = response.text?.trim();
+      if (reply == null || reply.isEmpty) {
+        return 'Maaf Sobat Garuda, aku belum bisa jawab itu sekarang.';
       }
-
-      final data  = jsonDecode(res.body);
-      final reply = data['candidates']?[0]?['content']?['parts']?[0]?['text'] as String? ??
-          'Maaf Sobat Garuda, aku belum bisa jawab itu sekarang.';
-
-      _history.add({
-        'role': 'model',
-        'parts': [{'text': reply}],
-      });
-
-      return reply.trim();
+      return reply;
+    } on GenerativeAIException catch (e) {
+      return '⚠️ Error Gemini: \${e.message}';
     } catch (_) {
       return '⚠️ Koneksi gagal. Cek internet kamu ya, Sobat Garuda!';
     }
   }
 
-  static void clearHistory() => _history.clear();
+  static void clearHistory() {
+    _chat = null;
+  }
 }
