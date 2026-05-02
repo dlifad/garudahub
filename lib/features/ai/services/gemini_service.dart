@@ -3,8 +3,6 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GeminiService {
   static const _modelName = 'gemini-2.0-flash';
-  static const _maxRetries = 3;
-  static const _retryDelay = Duration(seconds: 15);
 
   static const _systemPrompt = """
 Kamu adalah GarudaBot 🦅, asisten resmi aplikasi GarudaHub yang merupakan
@@ -70,31 +68,22 @@ ATURAN PENTING:
       return '⚠️ API key Gemini belum diisi Sobat Garuda!\nIsikan dulu di lib/core/constants/constants.dart ya 🙏';
     }
 
-    int attempt = 0;
-    while (attempt < _maxRetries) {
-      try {
-        final chat = _chat ??= _getModel().startChat();
-        final response = await chat.sendMessage(Content.text(message));
-        final reply = response.text?.trim();
-        if (reply == null || reply.isEmpty) {
-          return 'Maaf Sobat Garuda, aku belum bisa jawab itu sekarang.';
-        }
-        return reply;
-      } on GenerativeAIException catch (e) {
-        if (_isRateLimitError(e) && attempt < _maxRetries - 1) {
-          attempt++;
-          await Future.delayed(_retryDelay * attempt);
-          continue;
-        }
-        if (_isRateLimitError(e)) {
-          return '⏳ Sobat Garuda, GarudaBot lagi kebanjiran pertanyaan nih!\nCoba lagi dalam beberapa detik ya 🙏';
-        }
-        return '⚠️ Error Gemini: ${e.message}';
-      } catch (_) {
-        return '⚠️ Koneksi gagal. Cek internet kamu ya, Sobat Garuda!';
+    try {
+      final chat = _chat ??= _getModel().startChat();
+      final response = await chat.sendMessage(Content.text(message));
+      final reply = response.text?.trim();
+      if (reply == null || reply.isEmpty) {
+        return 'Maaf Sobat Garuda, aku belum bisa jawab itu sekarang.';
       }
+      return reply;
+    } on GenerativeAIException catch (e) {
+      if (_isRateLimitError(e)) {
+        return '⏳ GarudaBot lagi istirahat sebentar nih Sobat Garuda!\nCoba lagi dalam 1 menit ya 🙏⚽';
+      }
+      return '⚠️ Error Gemini: ${e.message}';
+    } catch (_) {
+      return '⚠️ Koneksi gagal. Cek internet kamu ya, Sobat Garuda!';
     }
-    return '⏳ Server Gemini sedang sibuk. Coba lagi sebentar ya Sobat Garuda!';
   }
 
   static void clearHistory() {
