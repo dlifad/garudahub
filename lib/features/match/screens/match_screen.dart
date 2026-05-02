@@ -9,6 +9,8 @@ import 'package:garudahub/features/match/widgets/tournament_section.dart';
 import 'package:garudahub/features/match/widgets/year_selector.dart';
 // kAllTimeYear = -1 (all time sentinel)
 
+const int kAllTimeYear = -1;
+
 class MatchScreen extends StatefulWidget {
   const MatchScreen({super.key});
   @override
@@ -34,16 +36,27 @@ class _MatchScreenState extends State<MatchScreen>
   @override
   void initState() { super.initState(); _init(); }
 
+  /// Tournament yang mencakup tahun terpilih (berdasarkan range start-end, bukan year tunggal).
   List<TournamentModel> get _tournamentsForYear => _selectedYear == kAllTimeYear
       ? _allTournaments
-      : _allTournaments.where((t) => t.year == _selectedYear).toList();
+      : _allTournaments.where((t) => t.coversYear(_selectedYear)).toList();
 
   bool get _yearIsLoading =>
       _tournamentsForYear.any((t) => _loadingSet.contains(t.id));
 
   MatchRecord get _recordForYear {
-    final all = _tournamentsForYear
-        .expand((t) => _matchCache[t.id] ?? const <MatchItem>[]).toList();
+    final tours = _tournamentsForYear;
+    if (_selectedYear == kAllTimeYear) {
+      final all = tours
+          .expand((t) => _matchCache[t.id] ?? const <MatchItem>[])
+          .toList();
+      return _service.computeRecord(all);
+    }
+    // Hanya hitung match yang tanggalnya benar-benar di tahun terpilih
+    final all = tours.expand((t) {
+      return (_matchCache[t.id] ?? const <MatchItem>[])
+          .where((m) => m.matchDateUtc.year == _selectedYear);
+    }).toList();
     return _service.computeRecord(all);
   }
 
@@ -54,11 +67,16 @@ class _MatchScreenState extends State<MatchScreen>
       setState(() { _isLoading = false; _error = 'Gagal memuat data. Coba lagi.'; });
       return;
     }
-    final years = list.map((t) => t.year).toSet().toList()
-      ..sort((a, b) => b.compareTo(a));
+
+    // Kumpulkan semua tahun dari range start-end tiap tournament
+    final yearSet = <int>{};
+    for (final t in list) {
+      yearSet.addAll(t.years);
+    }
+    final years = yearSet.toList()..sort((a, b) => b.compareTo(a));
     if (years.isEmpty) years.add(DateTime.now().year);
-    // All Time ditambah di YearSelector, tapi kita simpan di _years juga
     if (!years.contains(kAllTimeYear)) years.add(kAllTimeYear);
+
     final defaultYear = years.contains(DateTime.now().year)
         ? DateTime.now().year : years.first;
     if (mounted) {
@@ -73,7 +91,9 @@ class _MatchScreenState extends State<MatchScreen>
   }
 
   Future<void> _loadDataForYear(int year) async {
-    final tours  = _allTournaments.where((t) => t.year == year).toList();
+    final tours  = year == kAllTimeYear
+        ? _allTournaments
+        : _allTournaments.where((t) => t.coversYear(year)).toList();
     final toLoad = tours.where((t) => !_matchCache.containsKey(t.id)).toList();
     if (toLoad.isEmpty) return;
     if (mounted) setState(() => _loadingSet.addAll(toLoad.map((t) => t.id)));
@@ -100,6 +120,13 @@ class _MatchScreenState extends State<MatchScreen>
     _matchCache.clear(); _coachCache.clear(); _loadingSet.clear();
     setState(() { _allTournaments = []; _years = []; });
     await _init();
+  }
+
+  /// Filter match dalam satu tournament yang tahunnya = _selectedYear.
+  List<MatchItem> _matchesForTournamentInYear(TournamentModel t) {
+    final all = _matchCache[t.id] ?? const <MatchItem>[];
+    if (_selectedYear == kAllTimeYear) return all;
+    return all.where((m) => m.matchDateUtc.year == _selectedYear).toList();
   }
 
   @override
@@ -169,12 +196,15 @@ class _MatchScreenState extends State<MatchScreen>
                         decoration: BoxDecoration(color: cs.primary,
                             borderRadius: BorderRadius.circular(2))),
                     const SizedBox(width: 8),
-                    Text('TURNAMEN $_selectedYear',
-                        style: tt.labelMedium?.copyWith(
-                          color: cs.onSurface,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1,
-                        )),
+                    Text(
+                      _selectedYear == kAllTimeYear
+                          ? 'SEMUA TURNAMEN'
+                          : 'TURNAMEN $_selectedYear',
+                      style: tt.labelMedium?.copyWith(
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1,
+                      )),
                     const SizedBox(width: 8),
                     if (_yearIsLoading)
                       SizedBox(width: 12, height: 12,
@@ -192,9 +222,10 @@ class _MatchScreenState extends State<MatchScreen>
                       final t = _tournamentsForYear[i];
                       return TournamentSection(
                         tournament: t,
-                        matches:   _matchCache[t.id] ?? [],
+                        matches:   _matchesForTournamentInYear(t),
                         coaches:   _coachCache[t.id] ?? [],
                         isLoading: _loadingSet.contains(t.id),
+                        selectedYear: _selectedYear,
                         initiallyExpanded: i == 0,
                       );
                     },
@@ -222,8 +253,11 @@ class _EmptyYear extends StatelessWidget {
         Icon(Icons.sports_soccer_outlined, size: 52,
             color: cs.onSurfaceVariant.withOpacity(0.35)),
         const SizedBox(height: 12),
-        Text('Belum ada turnamen di $year',
-            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14)),
+        Text(
+          year == kAllTimeYear
+              ? 'Belum ada data turnamen'
+              : 'Belum ada turnamen di $year',
+          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14)),
       ]),
     );
   }
