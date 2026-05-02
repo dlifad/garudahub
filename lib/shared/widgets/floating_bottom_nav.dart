@@ -166,23 +166,30 @@ class _DockBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       height: 62,
       decoration: BoxDecoration(
-        color: const Color(0xFF181818),
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(32),
         border: Border.all(
-          color: Colors.white.withOpacity(0.08),
+          color: cs.outlineVariant.withOpacity(isDark ? 0.3 : 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.45),
+            color: isDark
+                ? Colors.black.withOpacity(0.45)
+                : cs.shadow.withOpacity(0.12),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: isDark
+                ? Colors.black.withOpacity(0.15)
+                : cs.shadow.withOpacity(0.06),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -208,7 +215,7 @@ class _DockBar extends StatelessWidget {
                       width: 56,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFCC0000).withOpacity(0.15),
+                        color: cs.primary.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
@@ -220,7 +227,6 @@ class _DockBar extends StatelessWidget {
               Row(
                 children: List.generate(items.length, (i) {
                   if (i == 2) {
-                    // Slot tengah dikosongkan — diisi floating button
                     return const Expanded(child: SizedBox.shrink());
                   }
                   return Expanded(
@@ -259,6 +265,8 @@ class _FloatingCenterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return AnimatedBuilder(
       animation: entryController,
       builder: (context, child) {
@@ -280,31 +288,30 @@ class _FloatingCenterButton extends StatelessWidget {
           width: isActive ? 58 : 52,
           height: isActive ? 58 : 52,
           decoration: BoxDecoration(
-            color:
-                isActive ? const Color(0xFFCC0000) : const Color(0xFF2A2A2A),
+            color: isActive ? cs.primary : cs.surfaceContainerHigh,
             shape: BoxShape.circle,
             border: Border.all(
               color: isActive
-                  ? const Color(0xFFFF3333).withOpacity(0.4)
-                  : Colors.white.withOpacity(0.08),
+                  ? cs.primary.withOpacity(0.4)
+                  : cs.outlineVariant.withOpacity(0.3),
               width: isActive ? 2 : 1,
             ),
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: const Color(0xFFCC0000).withOpacity(0.5),
+                      color: cs.primary.withOpacity(0.5),
                       blurRadius: 18,
                       offset: const Offset(0, 4),
                     ),
                     BoxShadow(
-                      color: const Color(0xFFCC0000).withOpacity(0.25),
+                      color: cs.primary.withOpacity(0.25),
                       blurRadius: 32,
                       spreadRadius: 2,
                     ),
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withOpacity(0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -317,7 +324,7 @@ class _FloatingCenterButton extends StatelessWidget {
             child: Icon(
               isActive ? item.activeIcon : item.icon,
               key: ValueKey(isActive),
-              color: Colors.white,
+              color: isActive ? cs.onPrimary : cs.onSurfaceVariant,
               size: isActive ? 28 : 24,
             ),
           ),
@@ -390,6 +397,8 @@ class _NavItemWidgetState extends State<_NavItemWidget>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
@@ -416,11 +425,13 @@ class _NavItemWidgetState extends State<_NavItemWidget>
                   child: FadeTransition(opacity: anim, child: child),
                 ),
                 child: Icon(
-                  widget.isActive ? widget.item.activeIcon : widget.item.icon,
+                  widget.isActive
+                      ? widget.item.activeIcon
+                      : widget.item.icon,
                   key: ValueKey(widget.isActive),
                   color: widget.isActive
-                      ? const Color(0xFFCC0000)
-                      : const Color(0xFF777777),
+                      ? cs.primary
+                      : cs.onSurfaceVariant,
                   size: widget.isActive ? 24 : 22,
                 ),
               ),
@@ -429,11 +440,12 @@ class _NavItemWidgetState extends State<_NavItemWidget>
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(
                   fontSize: 10,
-                  fontWeight:
-                      widget.isActive ? FontWeight.w700 : FontWeight.w400,
+                  fontWeight: widget.isActive
+                      ? FontWeight.w700
+                      : FontWeight.w400,
                   color: widget.isActive
-                      ? const Color(0xFFCC0000)
-                      : const Color(0xFF555555),
+                      ? cs.primary
+                      : cs.onSurfaceVariant,
                   letterSpacing: 0.3,
                 ),
                 child: Text(widget.item.label),
