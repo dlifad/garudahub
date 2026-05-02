@@ -282,11 +282,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Halo, ${user?.name.split(' ').first ?? 'Garuda'}',
-                  style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700),
-                ),
                 const SizedBox(height: 16),
                 _animated(
                   ctrl: _heroAnim,

@@ -2,40 +2,28 @@ import 'package:garudahub/core/constants/constants.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GeminiService {
-  static const _modelName = 'gemini-2.0-flash';
+  static const _modelName = 'gemini-2.5-flash';
 
   static const _systemPrompt = """
-Kamu adalah GarudaBot 🦅, asisten resmi aplikasi GarudaHub yang merupakan
-ahli terdepan seputar Timnas Indonesia sepak bola dan futsal pria maupun wanita.
+Kamu adalah GarudaBot 🦅, asisten resmi GarudaHub — khusus Timnas Indonesia SENIOR.
+Panggil user "Sobat Garuda". Bahasa santai. JANGAN gunakan markdown **bold**, *italic*, atau ### heading. Gunakan bullet • biasa.
 
-KEPRIBADIAN:
-- Antusias, semangat, dan bangga dengan Timnas Indonesia
-- Panggil pengguna dengan "Sobat Garuda" atau "Garuda Fans"
-- Gunakan emoji sepak bola yang relevan agar lebih hidup
-- Bahasa santai tapi informatif, seperti teman yang nonton bareng
+LANGSUNG ke inti jawaban. JANGAN kalimat pembuka seperti "Waduh!", "Siap banget!", "Sebagai GarudaBot...".
 
-KEAHLIAN KAMU:
-1. 📅 Jadwal & hasil pertandingan Timnas (sepak bola & futsal)
-2. 👤 Profil pemain & pelatih (statistik, karir, fun facts)
-3. 🏆 Turnamen: AFF Cup, AFC, FIFA World Cup Qualifier, Piala Asia, SEA Games, Pro Futsal League
-4. 🔮 Prediksi skor pertandingan mendatang (berdasarkan form & head-to-head)
-5. 📋 Prediksi starting lineup next match (berdasarkan kondisi & tren pemain)
-6. 📊 Analisis taktik & formasi Timnas
-7. ⚽ Statistik & rekor pemain (top scorer, assist, caps)
-8. 🏟️ Info venue & stadion pertandingan
-9. 🎽 Info merchandise & tiket pertandingan resmi
-10. 📰 Berita & gosip transfer pemain Timnas
-11. 🥅 Sejarah & prestasi Timnas Indonesia sejak zaman PSSI
-12. 🤔 Kuis & trivia seputar Timnas Indonesia
-13. 📈 Prediksi peluang Timnas di turnamen yang sedang berjalan
+TOPIK BOLEH (jawab lengkap pakai pengetahuanmu):
+- Sepak bola & futsal apapun (profil pemain, sejarah, taktik, analisis, trivia)
+- Timnas Indonesia semua aspek
+- Jika di tanya prediksi jawaban singkat pilih mana antara 2 opsi dengan alasan singkat 1 kalimat
 
-ATURAN PENTING:
-- Kalau ada pertanyaan DI LUAR topik Timnas Indonesia, tolak dengan sopan:
-  Contoh: "Wah menarik, tapi aku cuma bisa bantu soal Timnas Indonesia nih Sobat Garuda 😅"
-- Untuk prediksi, selalu tambahkan disclaimer singkat bahwa ini prediksi berdasarkan analisis, bukan kepastian.
-- Maksimal 220 kata per jawaban, padat, berenergi, dan mudah dipahami.
-- Jika tidak yakin info terbaru, sarankan cek PSSI, AFC, atau akun resmi Timnas.
-- Jawab selalu dalam Bahasa Indonesia.
+TOPIK DILARANG: di luar olahraga → tolak sopan saja.
+
+INFO TIMNAS SENIOR (Mei 2026):
+- Pelatih: John Herdman | Formasi: 3-4-2-1 / 4-4-2 | Kapten: Jay Idzes
+- Pemain inti: Maarten Paes, Jay Idzes, Justin Hubner, Rizky Ridho, Kevin Diks, Calvin Verdonk, Ivar Jenner, Thom Haye, Ragnar Oratmangoen, Eliano Reijnders, Ole Romeny, Rafael Struick
+- Next match: Indonesia vs Oman | FIFA Matchday | 6 Juni 2026 | GBK Jakarta
+- Agenda: Piala AFF/ASEAN Cup Juli-Agustus 2026
+- Kualifikasi Piala Dunia 2026: SUDAH SELESAI
+- Untuk prediksi: tambahkan disclaimer singkat
 """;
 
   static GenerativeModel? _model;
@@ -47,9 +35,9 @@ ATURAN PENTING:
       apiKey: AppConstants.geminiApiKey,
       systemInstruction: Content.system(_systemPrompt),
       generationConfig: GenerationConfig(
-        temperature: 0.8,
+        temperature: 0.7,
         topP: 0.9,
-        maxOutputTokens: 512,
+        maxOutputTokens: 700,
       ),
     );
   }
@@ -62,27 +50,30 @@ ATURAN PENTING:
         msg.contains('resource_exhausted');
   }
 
-  static Future<String> sendMessage(String message) async {
-    final apiKey = AppConstants.geminiApiKey.trim();
-    if (apiKey.isEmpty || apiKey == 'ISI_API_KEY_GEMINI_DI_SINI') {
-      return '⚠️ API key Gemini belum diisi Sobat Garuda!\nIsikan dulu di lib/core/constants/constants.dart ya 🙏';
-    }
+  static String _stripMarkdown(String text) {
+    return text
+        .replaceAllMapped(RegExp(r'\*\*(.*?)\*\*'), (m) => m[1] ?? '')
+        .replaceAllMapped(RegExp(r'\*(.*?)\*'), (m) => m[1] ?? '')
+        .replaceAll(RegExp(r'#{1,6}\s'), '')
+        .replaceAll('`', '')
+        .trim();
+  }
 
+  static Future<String> sendMessage(String text) async {
+    final model = _getModel();
+    _chat ??= model.startChat();
     try {
-      final chat = _chat ??= _getModel().startChat();
-      final response = await chat.sendMessage(Content.text(message));
+      final response = await _chat!.sendMessage(Content.text(text));
       final reply = response.text?.trim();
       if (reply == null || reply.isEmpty) {
-        return 'Maaf Sobat Garuda, aku belum bisa jawab itu sekarang.';
+        return 'Maaf Sobat Garuda, aku belum bisa menjawab itu sekarang.';
       }
-      return reply;
-    } on GenerativeAIException catch (e) {
+      return _stripMarkdown(reply);
+    } catch (e) {
       if (_isRateLimitError(e)) {
-        return '⏳ GarudaBot lagi istirahat sebentar nih Sobat Garuda!\nCoba lagi dalam 1 menit ya 🙏⚽';
+        return 'Server lagi penuh, coba beberapa saat lagi ya Sobat Garuda.';
       }
-      return '⚠️ Error Gemini: ${e.message}';
-    } catch (_) {
-      return '⚠️ Koneksi gagal. Cek internet kamu ya, Sobat Garuda!';
+      return 'Maaf Sobat Garuda, terjadi kesalahan. Coba lagi sebentar ya.';
     }
   }
 

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:garudahub/core/constants/constants.dart';
 import 'package:garudahub/core/database/db_helper.dart';
 import 'package:garudahub/features/chant/widgets/chant_animation_overlay.dart';
 import 'package:garudahub/features/news/providers/news_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
-
 
 import 'features/splash/splash_screen.dart';
 import 'features/auth/screens/login_screen.dart';
@@ -29,6 +30,11 @@ void main() async {
 
   await initializeDateFormatting('id_ID', null);
 
+  await Supabase.initialize(
+    url: AppConstants.supabaseUrl,
+    anonKey: AppConstants.supabaseAnonKey,
+  );
+
   // Status bar transparan
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -50,10 +56,10 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
-        ChangeNotifierProvider(create: (_) => ChantProvider()..init(),),
+        ChangeNotifierProvider(create: (_) => ChantProvider()..init()),
         ChangeNotifierProvider(create: (_) => MerchandiseProvider()),
         ChangeNotifierProvider(create: (_) => TicketProvider()),
-        ChangeNotifierProvider(create: (_) => CurrencyProvider()..init(),),
+        ChangeNotifierProvider(create: (_) => CurrencyProvider()..init()),
         ChangeNotifierProvider(create: (_) => TimezoneProvider()),
         ChangeNotifierProvider(create: (_) => NewsProvider()),
       ],
@@ -84,23 +90,15 @@ class GarudaHubApp extends StatelessWidget {
         final auth = context.watch<AuthProvider>();
         final chant = context.read<ChantProvider>();
 
-        if (auth.isAuthenticated &&
-            chant.isEnabled &&
-            !chant.isListening) {
+        if (auth.isAuthenticated && chant.isEnabled && !chant.isListening) {
           chant.start();
         }
 
-        if (!auth.isAuthenticated &&
-            chant.isListening) {
+        if (!auth.isAuthenticated && chant.isListening) {
           chant.stop();
         }
 
-        return Stack(
-          children: [
-            child!,
-            const ChantAnimationOverlay(),
-          ],
-        );
+        return Stack(children: [child!, const ChantAnimationOverlay()]);
       },
     );
   }
