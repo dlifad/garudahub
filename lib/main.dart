@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:garudahub/core/database/db_helper.dart';
 import 'package:garudahub/features/chant/widgets/chant_animation_overlay.dart';
+import 'package:garudahub/features/news/providers/news_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -54,6 +55,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TicketProvider()),
         ChangeNotifierProvider(create: (_) => CurrencyProvider()..init(),),
         ChangeNotifierProvider(create: (_) => TimezoneProvider()),
+        ChangeNotifierProvider(create: (_) => NewsProvider()),
       ],
       child: const GarudaHubApp(),
     ),

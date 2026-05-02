@@ -1,5 +1,5 @@
 import 'package:garudahub/features/dashboard/models/match_data.dart';
-import 'package:garudahub/features/dashboard/models/news_data.dart';
+import 'package:garudahub/features/news/models/news_data.dart';
 
 class DashboardData {
   const DashboardData({

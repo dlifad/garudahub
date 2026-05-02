@@ -7,7 +7,6 @@ import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
-import 'package:garudahub/features/dashboard/models/news_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
 import 'package:garudahub/features/dashboard/widgets/hero_section.dart';
 import 'package:garudahub/features/dashboard/widgets/news_list.dart';
@@ -16,6 +15,10 @@ import 'package:garudahub/features/dashboard/widgets/prediction_card.dart';
 import 'package:garudahub/features/dashboard/widgets/section_title.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+
+import 'package:garudahub/features/news/models/news_data.dart';
+import 'package:garudahub/features/news/screen/news_screen.dart';
+import 'package:garudahub/features/news/screen/news_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -341,7 +344,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const SectionTitle('Berita Terbaru'),
-                    TextButton(onPressed: () {}, child: const Text('Lihat semua')),
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NewsScreen()),
+                      ),
+                      child: const Text('Lihat semua'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -350,6 +359,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                   news: _news,
                   newsAnim: _newsAnim,
                   categoryFromTitle: _categoryFromTitle,
+                  onTap: (item) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NewsDetailScreen(news: item),
+                    ),
+                  ),
                 ),
                 if (_errorText != null) ...[
                   const SizedBox(height: 8),

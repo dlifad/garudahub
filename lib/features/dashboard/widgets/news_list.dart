@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:garudahub/features/dashboard/models/news_data.dart';
+import 'package:garudahub/features/news/models/news_data.dart';
 
 class NewsList extends StatelessWidget {
   const NewsList({
@@ -8,12 +8,14 @@ class NewsList extends StatelessWidget {
     required this.news,
     required this.newsAnim,
     required this.categoryFromTitle,
+    this.onTap,
   });
 
   final bool isLoading;
   final List<NewsData> news;
   final AnimationController newsAnim;
   final String Function(String title) categoryFromTitle;
+  final void Function(NewsData)? onTap; 
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +76,7 @@ class NewsList extends StatelessWidget {
               ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () {},
+                onTap: () => onTap?.call(item),
                 child: Row(
                   children: [
                     ClipRRect(
@@ -84,13 +86,9 @@ class NewsList extends StatelessWidget {
                       child: SizedBox(
                         width: 100,
                         height: 90,
-                        child: item.imageUrl.isEmpty
-                            ? Icon(
-                                Icons.image_not_supported,
-                                color: cs.onSurfaceVariant,
-                              )
-                            : Image.network(
-                                item.imageUrl,
+                        child: (item.imageUrl == null || item.imageUrl!.isEmpty)
+                            ? Icon(Icons.image_not_supported, color: cs.onSurfaceVariant)
+                            : Image.network(item.imageUrl!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => Icon(
                                   Icons.image_not_supported,
@@ -132,12 +130,18 @@ class NewsList extends StatelessWidget {
                                   const TextStyle(fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              '🕐 ${item.relativeTime}',
-                              style: TextStyle(
-                                color: cs.onSurfaceVariant,
-                                fontSize: 12,
-                              ),
+                            Row(
+                              children: [
+                                Icon(Icons.access_time, size: 12, color: cs.onSurfaceVariant),
+                                const SizedBox(width: 4),
+                                Text(
+                                  item.relativeTime,
+                                  style: TextStyle(
+                                    color: cs.onSurfaceVariant,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

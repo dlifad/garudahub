@@ -219,11 +219,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildNotificationSection(context, cs),
                   const SizedBox(height: 16),
 
-                  const SizedBox(height: 16),
-
                   _SectionLabel('Lainnya'),
                   const SizedBox(height: 8),
                   _buildOtherSection(context, cs),
+                  const SizedBox(height: 16),
 
                   _buildLogoutButton(context, cs, auth),
                 ],

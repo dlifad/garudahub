@@ -159,9 +159,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           schema: 'public',
           table:  _table,
           filter: PostgresChangeFilter(
-            type:  FilterType.eq,
+            type: PostgresChangeFilterType.eq,
             column: 'match_id',
-            value:  _matchId,
+            value: _matchId,
           ),
           callback: (payload) {
             final msg = MatchChatMessage.fromMap(
@@ -226,7 +226,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final isUpcoming = widget.match.result == null;
-    final vs = widget.match.opponent;
+    final vs = widget.match.opponentName;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -272,7 +272,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
               Text(
                 isUpcoming
                     ? 'vs'
-                    : '${widget.match.scoreIndo ?? 0} - ${widget.match.scoreOpp ?? 0}',
+                    : '${widget.match.indonesiaScore ?? 0} - ${widget.match.opponentScore ?? 0}',
                 style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,

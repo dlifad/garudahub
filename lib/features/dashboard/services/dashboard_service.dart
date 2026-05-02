@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:garudahub/core/constants/constants.dart';
 import 'package:garudahub/features/dashboard/models/dashboard_data.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
-import 'package:garudahub/features/dashboard/models/news_data.dart';
+import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:http/http.dart' as http;
 
 class DashboardService {
@@ -44,10 +44,11 @@ class DashboardService {
   }
 
   Future<List<NewsData>> getNews() async {
-    final uri = Uri.parse('${AppConstants.baseUrl}/news');
+    final uri = Uri.parse('${AppConstants.baseUrl}/news?limit=2');
     final res = await http.get(uri);
     if (res.statusCode != 200) return [];
-    final data = jsonDecode(res.body) as List<dynamic>;
+    final decoded = jsonDecode(res.body) as Map<String, dynamic>;
+    final data = decoded['data'] as List<dynamic>? ?? [];
     return data.whereType<Map<String, dynamic>>().map(NewsData.fromJson).toList();
   }
 }

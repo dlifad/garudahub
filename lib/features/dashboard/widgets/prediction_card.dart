@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
+import 'package:garudahub/core/utils/flag_utils.dart';
 
 class PredictionCard extends StatelessWidget {
   const PredictionCard({
@@ -55,12 +56,36 @@ class PredictionCard extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.w700, color: cs.onSurface),
           ),
           const SizedBox(height: 12),
-          Text(
-            m == null
-                ? 'Belum ada match untuk diprediksi'
-                : '${m.homeFlag} ${m.homeTeam} VS ${m.awayFlag} ${m.awayTeam}',
-            style: TextStyle(color: cs.onSurfaceVariant),
-          ),
+          m == null
+            ? Text(
+                'Belum ada match untuk diprediksi',
+                style: TextStyle(color: cs.onSurfaceVariant),
+              )
+            : Row(
+                children: [
+                  Text(m.homeTeam),
+                  const SizedBox(width: 6),
+                  Image.network(
+                    FlagUtils.getFlagUrl(m.homeFlag),
+                    width: 20,
+                    height: 14,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 16),
+                  ),    
+                  const SizedBox(width: 8),
+                  const Text('VS'),
+                  const SizedBox(width: 8),
+                  Image.network(
+                    FlagUtils.getFlagUrl(m.awayFlag),
+                    width: 20,
+                    height: 14,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 16),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(m.awayTeam),
+                ],
+              ),
           const SizedBox(height: 12),
           if (m != null)
             Row(
