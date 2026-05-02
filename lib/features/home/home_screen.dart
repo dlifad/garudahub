@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/features/dashboard/screens/dashboard_screen.dart';
 import 'package:garudahub/features/match/screens/match_screen.dart';
+import 'package:garudahub/features/player/screens/player_list_screen.dart';
 import 'package:garudahub/features/profile/screens/profile_screen.dart';
 import 'package:garudahub/features/shop/shop_screen.dart';
 
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _tabs = const [
     DashboardScreen(),
     MatchScreen(),
+    PlayerListScreen(),
     ShopScreen(),
     ProfileScreen(),
   ];
@@ -40,7 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Match',
           ),
           NavigationDestination(
-            icon: Icon(Icons.shopping_bag),
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups_rounded),
+            label: 'Skuad',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.shopping_bag_outlined),
             selectedIcon: Icon(Icons.shopping_bag_rounded),
             label: 'Shop',
           ),
@@ -50,21 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Profil',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _MatchPlaceholderScreen extends StatelessWidget {
-  const _MatchPlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Text(
-        'Halaman Match segera hadir',
-        style: TextStyle(color: cs.onSurfaceVariant, fontWeight: FontWeight.w600),
       ),
     );
   }
