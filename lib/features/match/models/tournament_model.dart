@@ -21,6 +21,18 @@ class TournamentModel {
     this.endDate,
   });
 
+  /// Semua tahun yang dicakup tournament ini (startDate.year .. endDate.year).
+  /// Jika tidak ada startDate/endDate, kembalikan [year].
+  List<int> get years {
+    final start = startDate?.year ?? year;
+    final end   = endDate?.year   ?? year;
+    if (start > end) return [year];
+    return List.generate(end - start + 1, (i) => start + i);
+  }
+
+  /// Apakah tournament ini aktif pada tahun [y].
+  bool coversYear(int y) => years.contains(y);
+
   factory TournamentModel.fromJson(Map<String, dynamic> j) {
     int parseInt(dynamic v, int fallback) =>
         v == null ? fallback : int.tryParse('$v') ?? fallback;
