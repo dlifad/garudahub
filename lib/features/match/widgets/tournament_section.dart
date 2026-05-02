@@ -7,6 +7,8 @@ import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+const int kAllTimeYear = -1;
+
 class TournamentSection extends StatefulWidget {
   const TournamentSection({
     super.key,
@@ -15,6 +17,7 @@ class TournamentSection extends StatefulWidget {
     this.coaches = const [],
     this.isLoading = false,
     this.initiallyExpanded = false,
+    this.selectedYear,
   });
 
   final TournamentModel tournament;
@@ -22,6 +25,8 @@ class TournamentSection extends StatefulWidget {
   final List<TournamentCoach> coaches;
   final bool isLoading;
   final bool initiallyExpanded;
+  /// Tahun yang sedang dipilih di parent, untuk konteks nama header.
+  final int? selectedYear;
 
   @override
   State<TournamentSection> createState() => _TournamentSectionState();
@@ -34,11 +39,23 @@ class _TournamentSectionState extends State<TournamentSection>
   late final Animation<double> _heightFactor;
   late final Animation<double> _rotate;
 
-  TournamentCoach? get _headCoach {
-    final heads =
-        widget.coaches.where((c) => c.role == 'head_coach').toList();
+  /// Resolve head coach berdasarkan tanggal match pertama yang tersedia,
+  /// atau fallback ke isActive / entry pertama.
+  TournamentCoach? get _representativeCoach {
+    if (widget.coaches.isEmpty) return null;
+    final heads = widget.coaches.where((c) => c.role == 'head_coach').toList();
+    if (heads.isEmpty) return null;
+
+    // Cari coach berdasarkan tanggal match pertama (finished/scheduled)
+    if (widget.matches.isNotEmpty) {
+      final refDate = widget.matches.first.matchDateUtc;
+      final byDate = heads.where((c) => c.isActiveOn(refDate)).toList();
+      if (byDate.isNotEmpty) return byDate.first;
+    }
+
+    // Fallback: isActive, lalu entry pertama
     final active = heads.where((c) => c.isActive).toList();
-    return active.isNotEmpty ? active.first : (heads.isNotEmpty ? heads.first : null);
+    return active.isNotEmpty ? active.first : heads.first;
   }
 
   @override
@@ -69,7 +86,7 @@ class _TournamentSectionState extends State<TournamentSection>
     final tt = Theme.of(context).textTheme;
     final finished = widget.matches.where((m) => m.isFinished).length;
     final total    = widget.matches.length;
-    final coach    = _headCoach;
+    final coach    = _representativeCoach;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -209,8 +226,10 @@ class _TournamentSectionState extends State<TournamentSection>
                       separatorBuilder: (_, __) => Divider(
                           height: 1, indent: 16, endIndent: 16,
                           color: cs.outline.withOpacity(0.1)),
-                      itemBuilder: (ctx, i) =>
-                          _MatchRow(match: widget.matches[i]),
+                      itemBuilder: (ctx, i) => _MatchRow(
+                        match: widget.matches[i],
+                        coaches: widget.coaches,
+                      ),
                     ),
                 ],
               ),
@@ -224,8 +243,19 @@ class _TournamentSectionState extends State<TournamentSection>
 
 // ─────────────────────────────────────────────────────────────────────────
 class _MatchRow extends StatelessWidget {
-  const _MatchRow({required this.match});
+  const _MatchRow({required this.match, this.coaches = const []});
   final MatchItem match;
+  final List<TournamentCoach> coaches;
+
+  /// Resolve coach spesifik per match berdasarkan tanggal.
+  TournamentCoach? get _coachForMatch {
+    final heads = coaches.where((c) => c.role == 'head_coach').toList();
+    if (heads.isEmpty) return null;
+    final byDate = heads.where((c) => c.isActiveOn(match.matchDateUtc)).toList();
+    if (byDate.isNotEmpty) return byDate.first;
+    final active = heads.where((c) => c.isActive).toList();
+    return active.isNotEmpty ? active.first : heads.first;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +269,10 @@ class _MatchRow extends StatelessWidget {
     return InkWell(
       onTap: () => Navigator.push(context,
           MaterialPageRoute(
-              builder: (_) => MatchDetailScreen(match: match))),
+              builder: (_) => MatchDetailScreen(
+                    match: match,
+                    coaches: coaches,
+                  ))),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 11, 12, 11),
         child: Row(
