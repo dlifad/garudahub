@@ -108,7 +108,7 @@ class PlayerCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    player.displayName.toUpperCase(),
+                    _twoWordName(player.name).toUpperCase(),
                     style: tt.labelMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.2,
@@ -116,43 +116,14 @@ class PlayerCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 8),
                   Text(
                     player.currentClub ?? '-',
                     style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Icon(Icons.shield_rounded, size: 11, color: cs.primary),
-                      const SizedBox(width: 3),
-                      Text(
-                        '${player.caps} caps',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.sports_soccer_rounded,
-                        size: 11,
-                        color: cs.primary,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        '${player.goals} gol',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -187,6 +158,13 @@ class PlayerCard extends StatelessWidget {
     final base = AppConstants.baseUrl.replaceAll('/api', '');
     if (raw.startsWith('/')) return '$base$raw';
     return '$base/$raw';
+  }
+
+  String _twoWordName(String raw) {
+    final parts = raw.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return raw;
+    if (parts.length == 1) return parts[0];
+    return '${parts[0]} ${parts[1]}';
   }
 }
 

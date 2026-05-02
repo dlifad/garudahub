@@ -14,6 +14,8 @@ import 'package:garudahub/features/dashboard/widgets/news_list.dart';
 import 'package:garudahub/features/dashboard/widgets/next_match_card.dart';
 import 'package:garudahub/features/dashboard/widgets/prediction_card.dart';
 import 'package:garudahub/features/dashboard/widgets/section_title.dart';
+import 'package:garudahub/features/notification/screens/notification_screen.dart';
+import 'package:garudahub/features/notification/services/notification_inbox_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -55,6 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   bool _submittingPrediction = false;
   bool _predictionLocked = false;
   String? _predictionStatus;
+  int _notifCount = 0;
 
   @override
   void initState() {
@@ -77,6 +80,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
     _playEntrance();
     _fetchData();
+    _loadNotifCount();
   }
 
   @override
@@ -133,15 +137,21 @@ class _DashboardScreenState extends State<DashboardScreen>
     });
   }
 
+  Future<void> _loadNotifCount() async {
+    final count = await NotificationInboxService.instance.getUnreadCount();
+    if (!mounted) return;
+    setState(() => _notifCount = count);
+  }
+
   void _updateCountdown() {
     final tzProvider = context.read<TimezoneProvider>();
     final target = _nextMatch == null
-      ? null
-      : tzProvider.convert(_nextMatch!.matchDateUtc);
+        ? null
+        : tzProvider.convert(_nextMatch!.matchDateUtc);
     if (target == null || !mounted) return;
     setState(() {
       final now = tzProvider.convert(DateTime.now().toUtc());
-    _timeToKickoff = target.difference(now);
+      _timeToKickoff = target.difference(now);
     });
   }
 
@@ -222,9 +232,10 @@ class _DashboardScreenState extends State<DashboardScreen>
     return FadeTransition(
       opacity: CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic),
       child: SlideTransition(
-        position: Tween<Offset>(begin: begin, end: Offset.zero).animate(
-          CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic),
-        ),
+        position: Tween<Offset>(
+          begin: begin,
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic)),
         child: child,
       ),
     );
@@ -237,134 +248,154 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _fetchData,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.sports_soccer,
-                        size: 20,
-                        color: cs.onPrimary,
-                      ),
+      body: RefreshIndicator(
+        onRefresh: _fetchData,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: MediaQuery.of(context).padding.top + 12,
+            bottom: 100,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: cs.primary,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'GarudaHub',
-                      style: TextStyle(
-                        color: cs.primary,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const Spacer(),
-                    Badge(
-                      label: const Text('3'),
-                      child: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.notifications_outlined),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _animated(
-                  ctrl: _heroAnim,
-                  begin: const Offset(0, -0.3),
-                  child: HeroSection(
-                    fifaRank: _fifaRank,
-                    heroImageUrl: _heroImageUrl,
-                    recentMatches: _recentMatches,
-                    countdownLabel: _countdownLabel(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0),
-                  child: AiChatWidget(),
-                ),
-                const SizedBox(height: 20),
-                const SectionTitle('Pertandingan Berikutnya'),
-                const SizedBox(height: 12),
-                _animated(
-                  ctrl: _matchAnim,
-                  begin: const Offset(0.3, 0),
-                  child: NextMatchCard(
-                    isLoading: _isLoading,
-                    match: _nextMatch,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const SectionTitle('Prediksi Skor'),
-                const SizedBox(height: 12),
-                _animated(
-                  ctrl: _predAnim,
-                  begin: const Offset(0, 0.3),
-                  child: PredictionCard(
-                    match: _nextMatch,
-                    indScore: _indScore,
-                    oppScore: _oppScore,
-                    predictionLocked: _predictionLocked,
-                    submittingPrediction: _submittingPrediction,
-                    predictionStatus: _predictionStatus,
-                    onUpInd: () => setState(() => _indScore++),
-                    onDownInd: () =>
-                        setState(() => _indScore = (_indScore - 1).clamp(0, 20)),
-                    onUpOpp: () => setState(() => _oppScore++),
-                    onDownOpp: () =>
-                        setState(() => _oppScore = (_oppScore - 1).clamp(0, 20)),
-                    onSubmit: _submitPrediction,
-                    predictionSummary: _predictionSummary(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SectionTitle('Berita Terbaru'),
-                    TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const NewsScreen()),
-                      ),
-                      child: const Text('Lihat semua'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                NewsList(
-                  isLoading: _isLoading,
-                  news: _news,
-                  newsAnim: _newsAnim,
-                  onTap: (item) => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => NewsDetailScreen(news: item),
+                    child: Icon(
+                      Icons.sports_soccer,
+                      size: 20,
+                      color: cs.onPrimary,
                     ),
                   ),
-                ),
-                if (_errorText != null) ...[
-                  const SizedBox(height: 8),
-                  Text(_errorText!, style: TextStyle(color: cs.error)),
+                  const SizedBox(width: 10),
+                  Text(
+                    'GarudaHub',
+                    style: TextStyle(
+                      color: cs.primary,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const Spacer(),
+                  _notifCount > 0
+                      ? Badge(
+                          label: Text('$_notifCount'),
+                          child: IconButton(
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const NotificationScreen(),
+                                ),
+                              );
+                              await _loadNotifCount();
+                            },
+                            icon: const Icon(Icons.notifications_outlined),
+                          ),
+                        )
+                      : IconButton(
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NotificationScreen(),
+                              ),
+                            );
+                            await _loadNotifCount();
+                          },
+                          icon: const Icon(Icons.notifications_outlined),
+                        ),
                 ],
-                const SizedBox(height: 24),
+              ),
+              const SizedBox(height: 16),
+              _animated(
+                ctrl: _heroAnim,
+                begin: const Offset(0, -0.3),
+                child: HeroSection(
+                  fifaRank: _fifaRank,
+                  heroImageUrl: _heroImageUrl,
+                  recentMatches: _recentMatches,
+                  countdownLabel: _countdownLabel(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0),
+                child: AiChatWidget(),
+              ),
+              const SizedBox(height: 20),
+              const SectionTitle('Pertandingan Berikutnya'),
+              const SizedBox(height: 12),
+              _animated(
+                ctrl: _matchAnim,
+                begin: const Offset(0.3, 0),
+                child: NextMatchCard(isLoading: _isLoading, match: _nextMatch),
+              ),
+              const SizedBox(height: 20),
+              const SectionTitle('Prediksi Skor'),
+              const SizedBox(height: 12),
+              _animated(
+                ctrl: _predAnim,
+                begin: const Offset(0, 0.3),
+                child: PredictionCard(
+                  match: _nextMatch,
+                  indScore: _indScore,
+                  oppScore: _oppScore,
+                  predictionLocked: _predictionLocked,
+                  submittingPrediction: _submittingPrediction,
+                  predictionStatus: _predictionStatus,
+                  onUpInd: () => setState(() => _indScore++),
+                  onDownInd: () =>
+                      setState(() => _indScore = (_indScore - 1).clamp(0, 20)),
+                  onUpOpp: () => setState(() => _oppScore++),
+                  onDownOpp: () =>
+                      setState(() => _oppScore = (_oppScore - 1).clamp(0, 20)),
+                  onSubmit: _submitPrediction,
+                  predictionSummary: _predictionSummary(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SectionTitle('Berita Terbaru'),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NewsScreen()),
+                    ),
+                    child: const Text('Lihat semua'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              NewsList(
+                isLoading: _isLoading,
+                news: _news,
+                newsAnim: _newsAnim,
+                onTap: (item) => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NewsDetailScreen(news: item),
+                  ),
+                ),
+              ),
+              if (_errorText != null) ...[
+                const SizedBox(height: 8),
+                Text(_errorText!, style: TextStyle(color: cs.error)),
               ],
-            ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),

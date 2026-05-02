@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:garudahub/features/notification/models/notification_item.dart';
+import 'package:garudahub/features/notification/services/notification_inbox_service.dart';
 
 class NotificationService {
   NotificationService._();
@@ -29,13 +31,17 @@ class NotificationService {
   Future<void> init() async {
     if (_initialized) return;
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const initSettings = InitializationSettings(android: androidSettings);
 
     await _plugin.initialize(initSettings);
 
-    final androidImpl = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final androidImpl = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await androidImpl?.requestNotificationsPermission();
 
     await _loadState();
@@ -74,6 +80,7 @@ class NotificationService {
       id: 100,
       title: 'Notifikasi aktif',
       body: 'GarudaHub siap mengirim pengingat pertandingan dan hasil.',
+      type: 'system',
     );
   }
 
@@ -86,6 +93,7 @@ class NotificationService {
         id: 101,
         title: 'Pengingat pertandingan aktif',
         body: 'Kamu akan mendapat pengingat saat jadwal pertandingan tersedia.',
+        type: 'match',
       );
     }
   }
@@ -99,6 +107,7 @@ class NotificationService {
         id: 102,
         title: 'Notifikasi hasil aktif',
         body: 'GarudaHub akan memberi info saat hasil pertandingan diperbarui.',
+        type: 'result',
       );
     }
   }
@@ -112,6 +121,7 @@ class NotificationService {
         id: 103,
         title: 'Tebak score aktif',
         body: 'Kamu bisa dapat pengingat untuk fitur tebak score.',
+        type: 'quiz',
       );
     }
   }
@@ -120,6 +130,7 @@ class NotificationService {
     required int id,
     required String title,
     required String body,
+    String type = 'system',
   }) async {
     if (!_initialized) {
       await init();
@@ -141,5 +152,16 @@ class NotificationService {
     const details = NotificationDetails(android: androidDetails);
 
     await _plugin.show(id, title, body, details);
+
+    await NotificationInboxService.instance.add(
+      NotificationItem(
+        id: '$id-${DateTime.now().millisecondsSinceEpoch}',
+        title: title,
+        body: body,
+        createdAt: DateTime.now(),
+        isRead: false,
+        type: type,
+      ),
+    );
   }
 }
