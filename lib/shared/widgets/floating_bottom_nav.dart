@@ -96,7 +96,6 @@ class _FloatingBottomNavState extends State<FloatingBottomNav>
 
   @override
   Widget build(BuildContext context) {
-    // Hitung posisi pill indicator
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
@@ -195,28 +194,22 @@ class _DockBar extends StatelessWidget {
 
           return Stack(
             children: [
-              // Sliding pill indicator (skip index 2 = center item)
+              // Sliding pill indicator
               AnimatedBuilder(
                 animation: pillAnim,
                 builder: (context, _) {
-                  final idx = pillAnim.value;
-                  // Jangan tampilkan pill di index 2 (center button)
-                  final showPill = currentIndex != 2;
-                  if (!showPill) return const SizedBox.shrink();
-
-                  final pillLeft = idx * itemWidth + itemWidth / 2 - 28;
+                  if (currentIndex == 2) return const SizedBox.shrink();
+                  final pillLeft =
+                      pillAnim.value * itemWidth + itemWidth / 2 - 28;
                   return Positioned(
                     top: 10,
                     left: pillLeft,
-                    child: Opacity(
-                      opacity: currentIndex == 2 ? 0.0 : 1.0,
-                      child: Container(
-                        width: 56,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFCC0000).withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                    child: Container(
+                      width: 56,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFCC0000).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   );
@@ -226,16 +219,14 @@ class _DockBar extends StatelessWidget {
               // Nav items
               Row(
                 children: List.generate(items.length, (i) {
-                  final isCenter = i == 2;
-                  final isActive = currentIndex == i;
-                  // Slot tengah dikosongkan, diganti tombol mengambang
-                  if (isCenter) {
-                    return Expanded(child: const SizedBox.shrink());
+                  if (i == 2) {
+                    // Slot tengah dikosongkan — diisi floating button
+                    return const Expanded(child: SizedBox.shrink());
                   }
                   return Expanded(
                     child: _NavItemWidget(
                       item: items[i],
-                      isActive: isActive,
+                      isActive: currentIndex == i,
                       entryController: entryController,
                       onTap: () => onTap(i),
                     ),
@@ -268,14 +259,13 @@ class _FloatingCenterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final liftAnim = CurvedAnimation(
-      parent: entryController,
-      curve: Curves.easeOutBack,
-    );
-
     return AnimatedBuilder(
-      animation: liftAnim,
+      animation: entryController,
       builder: (context, child) {
+        final liftAnim = CurvedAnimation(
+          parent: entryController,
+          curve: Curves.easeOutBack,
+        );
         final liftOffset = isActive ? (1 - liftAnim.value) * 14.0 : 0.0;
         return Transform.translate(
           offset: Offset(0, liftOffset),
@@ -290,7 +280,8 @@ class _FloatingCenterButton extends StatelessWidget {
           width: isActive ? 58 : 52,
           height: isActive ? 58 : 52,
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFFCC0000) : const Color(0xFF2A2A2A),
+            color:
+                isActive ? const Color(0xFFCC0000) : const Color(0xFF2A2A2A),
             shape: BoxShape.circle,
             border: Border.all(
               color: isActive
@@ -321,10 +312,8 @@ class _FloatingCenterButton extends StatelessWidget {
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
-            transitionBuilder: (child, anim) => ScaleTransition(
-              scale: anim,
-              child: child,
-            ),
+            transitionBuilder: (child, anim) =>
+                ScaleTransition(scale: anim, child: child),
             child: Icon(
               isActive ? item.activeIcon : item.icon,
               key: ValueKey(isActive),
@@ -339,9 +328,9 @@ class _FloatingCenterButton extends StatelessWidget {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Item navigasi biasa
+// Item navigasi biasa — StatefulWidget untuk bounce animation
 // ──────────────────────────────────────────────────────────────
-class _NavItemWidget extends StatelessWidget {
+class _NavItemWidget extends StatefulWidget {
   final _NavItem item;
   final bool isActive;
   final AnimationController entryController;
@@ -362,7 +351,6 @@ class _NavItemWidgetState extends State<_NavItemWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _bounceCtrl;
   late Animation<double> _liftAnim;
-  late Animation<double> _scaleAnim;
 
   @override
   void initState() {
@@ -379,22 +367,9 @@ class _NavItemWidgetState extends State<_NavItemWidget>
         weight: 45,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: -10.0, end: -3.0)
+        tween: Tween(begin: -10.0, end: 0.0)
             .chain(CurveTween(curve: Curves.elasticOut)),
         weight: 55,
-      ),
-    ]).animate(_bounceCtrl);
-
-    _scaleAnim = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween(begin: 1.0, end: 1.15)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 40,
-      ),
-      TweenSequenceItem(
-        tween: Tween(begin: 1.15, end: 1.0)
-            .chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 60,
       ),
     ]).animate(_bounceCtrl);
   }
@@ -415,20 +390,14 @@ class _NavItemWidgetState extends State<_NavItemWidget>
 
   @override
   Widget build(BuildContext context) {
-    final liftAnim = CurvedAnimation(
-      parent: entryController,
-      curve: Curves.easeOutBack,
-    );
-
     return GestureDetector(
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedBuilder(
-        animation: liftAnim,
+        animation: _liftAnim,
         builder: (context, child) {
-          final liftOffset = isActive ? (1 - liftAnim.value) * 10.0 : 0.0;
           return Transform.translate(
-            offset: Offset(0, liftOffset),
+            offset: Offset(0, widget.isActive ? _liftAnim.value : 0.0),
             child: child,
           );
         },
@@ -447,12 +416,12 @@ class _NavItemWidgetState extends State<_NavItemWidget>
                   child: FadeTransition(opacity: anim, child: child),
                 ),
                 child: Icon(
-                  isActive ? item.activeIcon : item.icon,
-                  key: ValueKey(isActive),
-                  color: isActive
+                  widget.isActive ? widget.item.activeIcon : widget.item.icon,
+                  key: ValueKey(widget.isActive),
+                  color: widget.isActive
                       ? const Color(0xFFCC0000)
                       : const Color(0xFF777777),
-                  size: isActive ? 24 : 22,
+                  size: widget.isActive ? 24 : 22,
                 ),
               ),
               const SizedBox(height: 3),
@@ -461,13 +430,13 @@ class _NavItemWidgetState extends State<_NavItemWidget>
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight:
-                      isActive ? FontWeight.w700 : FontWeight.w400,
-                  color: isActive
+                      widget.isActive ? FontWeight.w700 : FontWeight.w400,
+                  color: widget.isActive
                       ? const Color(0xFFCC0000)
                       : const Color(0xFF555555),
                   letterSpacing: 0.3,
                 ),
-                child: Text(item.label),
+                child: Text(widget.item.label),
               ),
             ],
           ),
