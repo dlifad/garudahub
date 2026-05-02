@@ -59,18 +59,11 @@ class _FloatingBottomNavState extends State<FloatingBottomNav>
           decoration: BoxDecoration(
             color: const Color(0xFF1A1A1A),
             borderRadius: BorderRadius.circular(32),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.4),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            // Ganti shadow besar → border tipis yang elegan
+            border: Border.all(
+              color: Colors.white.withOpacity(0.07),
+              width: 1,
+            ),
           ),
           child: Row(
             children: List.generate(_items.length, (i) {
@@ -135,7 +128,7 @@ class _NavItemWidget extends StatelessWidget {
   }
 }
 
-/// Item tengah — lebih menonjol, terasa seperti FAB mini
+/// Item tengah — lebih menonjol, tanpa glow shadow
 class _CenterItem extends StatelessWidget {
   final _NavItem item;
   final bool isActive;
@@ -155,15 +148,7 @@ class _CenterItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive ? const Color(0xFFCC0000) : const Color(0xFF2A2A2A),
             shape: BoxShape.circle,
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFFCC0000).withOpacity(0.5),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : [],
+            // Shadow dihapus total — tidak ada glow
           ),
           child: Icon(
             isActive ? item.activeIcon : item.icon,
