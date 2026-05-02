@@ -35,16 +35,6 @@ void main() async {
     anonKey: AppConstants.supabaseAnonKey,
   );
 
-  // Status bar transparan
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF0A0A0A),
-      systemNavigationBarIconBrightness: Brightness.light,
-    ),
-  );
-
   // Kunci orientasi portrait
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -76,7 +66,9 @@ class GarudaHubApp extends StatelessWidget {
     return MaterialApp(
       title: 'GarudaHub',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       initialRoute: '/',
       routes: {
         '/': (_) => const SplashScreen(),
@@ -85,8 +77,19 @@ class GarudaHubApp extends StatelessWidget {
         '/home': (_) => const HomeScreen(),
       },
 
-      // Buat menangani accelerometer
       builder: (context, child) {
+        // Status bar & nav bar adaptive sesuai tema
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness:
+              isDark ? Brightness.light : Brightness.dark,
+          systemNavigationBarColor:
+              isDark ? const Color(0xFF0A0A0A) : Colors.white,
+          systemNavigationBarIconBrightness:
+              isDark ? Brightness.light : Brightness.dark,
+        ));
+
         final auth = context.watch<AuthProvider>();
         final chant = context.read<ChantProvider>();
 
