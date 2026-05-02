@@ -17,7 +17,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
   List<PlayerModel> _players  = [];
   bool    _isLoading = true;
   String? _error;
-  String? _filterPos; // null = Semua
+  String? _filterPos;
 
   static const _posOrder = ['GK', 'DEF', 'MID', 'FWD'];
   static const _posLabel = {
@@ -61,10 +61,22 @@ class _PlayerListScreenState extends State<PlayerListScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GARUDA SQUAD'),
-        titleTextStyle: tt.titleLarge?.copyWith(
-          fontWeight: FontWeight.w900,
-          letterSpacing: 1.2,
+        titleSpacing: 16,
+        centerTitle: false,          // ← title ke kiri
+        title: RichText(
+          text: TextSpan(
+            style: tt.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+            ),
+            children: [
+              const TextSpan(text: 'GARUDA '),
+              TextSpan(
+                text: 'SQUAD',
+                style: TextStyle(color: cs.primary),
+              ),
+            ],
+          ),
         ),
         actions: [
           if (!_isLoading && _error == null)
@@ -100,7 +112,6 @@ class _PlayerListScreenState extends State<PlayerListScreen>
             ),
           ),
 
-          // ── Body ───────────────────────────────────────────────
           Expanded(child: _buildBody(cs, tt)),
         ],
       ),
@@ -126,8 +137,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
       );
     }
 
-    final players = _filtered;
-    if (players.isEmpty) {
+    if (_filtered.isEmpty) {
       return const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -140,45 +150,50 @@ class _PlayerListScreenState extends State<PlayerListScreen>
       );
     }
 
-    // Flat list kalau filter posisi aktif
+    // Flat grid kalau filter posisi aktif
     if (_filterPos != null) {
-      return ListView.builder(
-        padding: const EdgeInsets.only(bottom: 16),
-        itemCount: players.length,
-        itemBuilder: (_, i) => PlayerCard(
-          player: players[i],
-          onTap: () => _goDetail(players[i]),
-        ),
-      );
+      return _PlayerGrid(players: _filtered, onTap: _goDetail);
     }
 
-    // Grouped by position
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 16),
-      children: _posOrder.map((pos) {
+    // Grouped by position dengan section header
+    return CustomScrollView(
+      slivers: _posOrder.expand((pos) {
         final list = _players.where((p) => p.position == pos).toList();
-        if (list.isEmpty) return const SizedBox.shrink();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        if (list.isEmpty) return <Widget>[];
+        return [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
-                '${_posLabel[pos]!} (${list.length})',
+                '${_posLabel[pos]!.toUpperCase()}  (${list.length})',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: cs.primary,
-                  fontSize: 13,
-                  letterSpacing: 0.5,
+                  fontSize: 12,
+                  letterSpacing: 1,
                 ),
               ),
             ),
-            ...list.map((p) => PlayerCard(
-              player: p,
-              onTap: () => _goDetail(p),
-            )),
-          ],
-        );
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            sliver: SliverGrid(
+              delegate: SliverChildBuilderDelegate(
+                (_, i) => PlayerCard(
+                  player: list[i],
+                  onTap: () => _goDetail(list[i]),
+                ),
+                childCount: list.length,
+              ),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.72,
+              ),
+            ),
+          ),
+        ];
       }).toList(),
     );
   }
@@ -193,6 +208,32 @@ class _PlayerListScreenState extends State<PlayerListScreen>
   }
 }
 
+// ── Grid helper (untuk flat list per posisi) ──────────────────────────────────
+class _PlayerGrid extends StatelessWidget {
+  final List<PlayerModel> players;
+  final void Function(PlayerModel) onTap;
+  const _PlayerGrid({required this.players, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+      itemCount: players.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.72,
+      ),
+      itemBuilder: (_, i) => PlayerCard(
+        player: players[i],
+        onTap: () => onTap(players[i]),
+      ),
+    );
+  }
+}
+
+// ── Filter chip ───────────────────────────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
   final String label;
   final bool   selected;
