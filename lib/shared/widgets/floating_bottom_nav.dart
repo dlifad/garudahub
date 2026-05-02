@@ -95,12 +95,6 @@ class _FloatingBottomNavState extends State<FloatingBottomNav>
   }
 
   @override
-  void dispose() {
-    _pillController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     // Hitung posisi pill indicator
     return SafeArea(
