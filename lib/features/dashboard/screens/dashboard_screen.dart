@@ -213,14 +213,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     return 'Imbang $_indScore-$_oppScore';
   }
 
-  String _categoryFromTitle(String title) {
-    final t = title.toLowerCase();
-    if (t.contains('transfer')) return 'Transfer';
-    if (t.contains('latih')) return 'Latihan';
-    if (t.contains('jadwal')) return 'Jadwal';
-    return 'Berita';
-  }
-
   Widget _animated({
     required Widget child,
     required AnimationController ctrl,
@@ -358,7 +350,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                   isLoading: _isLoading,
                   news: _news,
                   newsAnim: _newsAnim,
-                  categoryFromTitle: _categoryFromTitle,
                   onTap: (item) => Navigator.push(
                     context,
                     MaterialPageRoute(

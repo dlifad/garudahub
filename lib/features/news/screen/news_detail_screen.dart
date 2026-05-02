@@ -22,8 +22,21 @@ class NewsDetailScreen extends StatelessWidget {
   }
 
   Future<void> _openSource(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
+    final fixedUrl = url.startsWith('http') ? url : 'https://$url';
+    final uri = Uri.parse(fixedUrl);
+
+    try {
+      final success = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!success) {
+        throw 'Gagal membuka URL';
+      }
+    } catch (e) {
+      debugPrint('Error buka URL: $e');
+    }
   }
 
   @override
