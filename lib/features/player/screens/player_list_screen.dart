@@ -246,10 +246,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PlayerDetailScreen(
-          player: player,
-          tournamentId: _selectedTournament?.id,
-        ),
+        builder: (_) => PlayerDetailScreen(player: player),
       ),
     );
   }
