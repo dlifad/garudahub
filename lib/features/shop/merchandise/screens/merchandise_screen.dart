@@ -10,7 +10,8 @@ class MerchandiseScreen extends StatefulWidget {
   final String query;
   final double? minPrice;
   final double? maxPrice;
-  final String sortOption; // 'default' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'
+  final String
+  sortOption; // 'default' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'
 
   const MerchandiseScreen({
     super.key,
@@ -58,6 +59,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
   Widget build(BuildContext context) {
     final prov = context.watch<MerchandiseProvider>();
     final base = AppConstants.baseUrl.replaceAll('/api', '');
+    final cs = Theme.of(context).colorScheme;
 
     if (prov.error != null) {
       return Center(child: Text(prov.error!));
@@ -99,12 +101,14 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
         filteredItems.sort((a, b) => b.price.compareTo(a.price));
         break;
       case 'name_asc':
-        filteredItems.sort((a, b) =>
-            a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        filteredItems.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
         break;
       case 'name_desc':
-        filteredItems.sort((a, b) =>
-            b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+        filteredItems.sort(
+          (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()),
+        );
         break;
       default:
         break;
@@ -136,26 +140,30 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
               return GestureDetector(
                 onTap: () async {
                   FocusScope.of(context).unfocus();
-          
+
                   await Navigator.push(
                     context,
                     PageRouteBuilder(
-                      pageBuilder: (_, _, _) => MerchandiseDetailScreen(item: item),
+                      pageBuilder: (_, _, _) =>
+                          MerchandiseDetailScreen(item: item),
                       transitionsBuilder: (_, animation, _, child) {
                         return FadeTransition(
-                          opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                          opacity: CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeInOut,
+                          ),
                           child: child,
                         );
                       },
                       transitionDuration: const Duration(milliseconds: 350),
                     ),
                   );
-          
+
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -174,7 +182,8 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
                                     width: double.infinity,
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, _, _) => const Center(
-                                        child: Icon(Icons.broken_image)),
+                                      child: Icon(Icons.broken_image),
+                                    ),
                                   )
                                 : const Center(child: Icon(Icons.image)),
                           ),
@@ -189,17 +198,18 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
                               item.name,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: cs.onSurface,
                                 fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               formatCurrency(item.price, 'IDR'),
-                              style: const TextStyle(
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold,
+                              style: TextStyle(
+                                color: cs.primary,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ],
@@ -216,9 +226,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
         if (prov.isLoading && prov.items.isEmpty)
           Container(
             color: Colors.black.withValues(alpha: 0.3),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           ),
 
         if (_showScrollToTop)

@@ -26,8 +26,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   String? _getTemplateAnswer(String text) {
     final t = text.toLowerCase();
     if (t.contains('jadwal')) return _jadwalAnswer();
-    if (t.contains('prediksi skor') || t.contains('next match')) return _prediksiSkorAnswer();
-    if (t.contains('prediksi lineup') || t.contains('lineup')) return _lineupAnswer();
+    if (t.contains('prediksi skor') || t.contains('next match'))
+      return _prediksiSkorAnswer();
+    if (t.contains('prediksi lineup') || t.contains('lineup'))
+      return _lineupAnswer();
     if (t.contains('top scorer')) return _topScorerAnswer();
     if (t.contains('prestasi')) return _prestasiAnswer();
     return null;
@@ -92,10 +94,13 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
   @override
   void initState() {
     super.initState();
-    _msgs.add(AiChatMessage(
-      text: 'Halo Sobat Garuda! 🦅\n\nAku GarudaBot, siap bantu kamu soal Timnas Indonesia sepak bola dan futsal. Mau tanya apa hari ini?',
-      role: MessageRole.model,
-    ));
+    _msgs.add(
+      AiChatMessage(
+        text:
+            'Halo Sobat Garuda! 🦅\n\nAku GarudaBot, siap bantu kamu soal Timnas Indonesia sepak bola dan futsal. Mau tanya apa hari ini?',
+        role: MessageRole.model,
+      ),
+    );
   }
 
   @override
@@ -131,7 +136,9 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
 
     // Bukan template → kirim ke Gemini dengan loading bubble
     setState(() {
-      _msgs.add(AiChatMessage(text: '', role: MessageRole.model, isLoading: true));
+      _msgs.add(
+        AiChatMessage(text: '', role: MessageRole.model, isLoading: true),
+      );
     });
     _toBottom();
 
@@ -181,18 +188,22 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('GarudaBot',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Colors.white)),
-                Row(
-                  children: [
-                    Container(
-                      width: 7, height: 7,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF81C784)),
-                    ),
-                    const SizedBox(width: 4),
-                    Text('AI • Timnas Expert',
-                        style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.8))),
-                  ],
+                Text(
+                  'Garuda Bot',
+                  style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Ai • Timnas Expert',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.8),
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ],
             ),
@@ -206,10 +217,13 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
               GeminiService.clearHistory();
               setState(() {
                 _msgs.clear();
-                _msgs.add(AiChatMessage(
-                  text: 'Chat direset! Halo Sobat Garuda! 🦅 Mau tanya apa soal Timnas?',
-                  role: MessageRole.model,
-                ));
+                _msgs.add(
+                  AiChatMessage(
+                    text:
+                        'Chat direset! Halo Sobat Garuda! 🦅 Mau tanya apa soal Timnas?',
+                    role: MessageRole.model,
+                  ),
+                );
               });
             },
           ),
@@ -222,13 +236,21 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
               height: 44,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 itemCount: _suggestions.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (_, i) => ActionChip(
-                  label: Text(_suggestions[i], style: const TextStyle(fontSize: 11)),
+                  label: Text(
+                    _suggestions[i],
+                    style: const TextStyle(fontSize: 11),
+                  ),
                   backgroundColor: const Color(0xFFCC0001).withOpacity(0.08),
-                  side: BorderSide(color: const Color(0xFFCC0001).withOpacity(0.3)),
+                  side: BorderSide(
+                    color: const Color(0xFFCC0001).withOpacity(0.3),
+                  ),
                   onPressed: () => _send(_suggestions[i]),
                   visualDensity: VisualDensity.compact,
                 ),
@@ -249,12 +271,16 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
           ),
           Container(
             padding: EdgeInsets.only(
-              left: 12, right: 12, top: 8,
+              left: 12,
+              right: 12,
+              top: 8,
               bottom: MediaQuery.of(context).padding.bottom + 8,
             ),
             decoration: BoxDecoration(
               color: cs.surface,
-              border: Border(top: BorderSide(color: cs.outline.withOpacity(0.12))),
+              border: Border(
+                top: BorderSide(color: cs.outline.withOpacity(0.12)),
+              ),
             ),
             child: Row(
               children: [
@@ -273,7 +299,10 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       isDense: true,
                     ),
                   ),
@@ -282,17 +311,27 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
                 GestureDetector(
                   onTap: _loading ? null : _send,
                   child: Container(
-                    width: 44, height: 44,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: _loading ? cs.surfaceContainer : const Color(0xFFCC0001),
+                      color: _loading
+                          ? cs.surfaceContainer
+                          : const Color(0xFFCC0001),
                     ),
                     child: _loading
                         ? const Padding(
                             padding: EdgeInsets.all(12),
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
-                        : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                        : const Icon(
+                            Icons.send_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                   ),
                 ),
               ],
@@ -325,7 +364,14 @@ class _UserBubble extends StatelessWidget {
             bottomRight: Radius.circular(4),
           ),
         ),
-        child: Text(text, style: const TextStyle(color: Colors.white, height: 1.45, fontSize: 13.5)),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            height: 1.45,
+            fontSize: 13.5,
+          ),
+        ),
       ),
     );
   }
@@ -340,13 +386,17 @@ class _BotBubble extends StatefulWidget {
   State<_BotBubble> createState() => _BotBubbleState();
 }
 
-class _BotBubbleState extends State<_BotBubble> with SingleTickerProviderStateMixin {
+class _BotBubbleState extends State<_BotBubble>
+    with SingleTickerProviderStateMixin {
   late AnimationController _dot;
 
   @override
   void initState() {
     super.initState();
-    _dot = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat();
+    _dot = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
   }
 
   @override
@@ -365,11 +415,14 @@ class _BotBubbleState extends State<_BotBubble> with SingleTickerProviderStateMi
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 28, height: 28,
+            width: 28,
+            height: 28,
             margin: const EdgeInsets.only(right: 6, bottom: 8),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [Color(0xFFCC0001), Color(0xFF7B0000)]),
+              gradient: LinearGradient(
+                colors: [Color(0xFFCC0001), Color(0xFF7B0000)],
+              ),
             ),
             alignment: Alignment.center,
             child: const Text('🦅', style: TextStyle(fontSize: 13)),
@@ -397,12 +450,19 @@ class _BotBubbleState extends State<_BotBubble> with SingleTickerProviderStateMi
                             animation: _dot,
                             builder: (_, __) {
                               final t = ((_dot.value - i * 0.22) % 1.0);
-                              final op = (t < 0.5 ? t * 2 : (1 - t) * 2).clamp(0.3, 1.0);
+                              final op = (t < 0.5 ? t * 2 : (1 - t) * 2).clamp(
+                                0.3,
+                                1.0,
+                              );
                               return Opacity(
                                 opacity: op,
                                 child: Container(
-                                  width: 7, height: 7,
-                                  decoration: BoxDecoration(shape: BoxShape.circle, color: cs.onSurfaceVariant),
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: cs.onSurfaceVariant,
+                                  ),
                                 ),
                               );
                             },
@@ -411,8 +471,14 @@ class _BotBubbleState extends State<_BotBubble> with SingleTickerProviderStateMi
                         ],
                       ],
                     )
-                  : Text(widget.text,
-                      style: TextStyle(color: cs.onSurface, height: 1.45, fontSize: 13.5)),
+                  : Text(
+                      widget.text,
+                      style: TextStyle(
+                        color: cs.onSurface,
+                        height: 1.45,
+                        fontSize: 13.5,
+                      ),
+                    ),
             ),
           ),
         ],

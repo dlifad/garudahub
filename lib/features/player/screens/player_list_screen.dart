@@ -14,14 +14,14 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     with AutomaticKeepAliveClientMixin {
   final _service = PlayerService();
 
-  List<PlayerModel> _players  = [];
-  bool    _isLoading = true;
+  List<PlayerModel> _players = [];
+  bool _isLoading = true;
   String? _error;
   String? _filterPos;
 
   static const _posOrder = ['GK', 'DEF', 'MID', 'FWD'];
   static const _posLabel = {
-    'GK':  'Penjaga Gawang',
+    'GK': 'Penjaga Gawang',
     'DEF': 'Bertahan',
     'MID': 'Tengah',
     'FWD': 'Penyerang',
@@ -37,11 +37,14 @@ class _PlayerListScreenState extends State<PlayerListScreen>
   }
 
   Future<void> _load() async {
-    setState(() { _isLoading = true; _error = null; });
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     final result = await _service.getActivePlayers();
     if (mounted) {
       setState(() {
-        _players   = result;
+        _players = result;
         _isLoading = false;
         if (result.isEmpty) _error = 'Belum ada data pemain aktif.';
       });
@@ -62,22 +65,8 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 16,
-        centerTitle: false,          // ← title ke kiri
-        title: RichText(
-          text: TextSpan(
-            style: tt.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
-            ),
-            children: [
-              const TextSpan(text: 'GARUDA '),
-              TextSpan(
-                text: 'SQUAD',
-                style: TextStyle(color: cs.primary),
-              ),
-            ],
-          ),
-        ),
+        centerTitle: false,
+        title: const Text('Garuda Squad'),
         actions: [
           if (!_isLoading && _error == null)
             Padding(
@@ -103,11 +92,13 @@ class _PlayerListScreenState extends State<PlayerListScreen>
                   selected: _filterPos == null,
                   onTap: () => setState(() => _filterPos = null),
                 ),
-                ..._posOrder.map((pos) => _FilterChip(
-                  label: _posLabel[pos]!,
-                  selected: _filterPos == pos,
-                  onTap: () => setState(() => _filterPos = pos),
-                )),
+                ..._posOrder.map(
+                  (pos) => _FilterChip(
+                    label: _posLabel[pos]!,
+                    selected: _filterPos == pos,
+                    onTap: () => setState(() => _filterPos = pos),
+                  ),
+                ),
               ],
             ),
           ),
@@ -201,9 +192,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
   void _goDetail(PlayerModel player) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => PlayerDetailScreen(player: player),
-      ),
+      MaterialPageRoute(builder: (_) => PlayerDetailScreen(player: player)),
     );
   }
 }
@@ -225,10 +214,8 @@ class _PlayerGrid extends StatelessWidget {
         mainAxisSpacing: 10,
         childAspectRatio: 0.72,
       ),
-      itemBuilder: (_, i) => PlayerCard(
-        player: players[i],
-        onTap: () => onTap(players[i]),
-      ),
+      itemBuilder: (_, i) =>
+          PlayerCard(player: players[i], onTap: () => onTap(players[i])),
     );
   }
 }
@@ -236,10 +223,14 @@ class _PlayerGrid extends StatelessWidget {
 // ── Filter chip ───────────────────────────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
   final String label;
-  final bool   selected;
+  final bool selected;
   final VoidCallback onTap;
 
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

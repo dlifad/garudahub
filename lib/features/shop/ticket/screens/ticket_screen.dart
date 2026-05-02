@@ -57,7 +57,7 @@ class _TicketScreenState extends State<TicketScreen> {
   Widget build(BuildContext context) {
     final prov = context.watch<TicketProvider>();
     final base = AppConstants.baseUrl.replaceAll('/api', '');
-
+    final cs = Theme.of(context).colorScheme;
 
     if (prov.error != null) {
       return Center(child: Text(prov.error!));
@@ -105,24 +105,32 @@ class _TicketScreenState extends State<TicketScreen> {
     // Sorting
     switch (widget.sortOption) {
       case 'price_asc':
-        filtered.sort((a, b) =>
-            ((a['min_ticket_price'] ?? 0) as num)
-                .compareTo((b['min_ticket_price'] ?? 0) as num));
+        filtered.sort(
+          (a, b) => ((a['min_ticket_price'] ?? 0) as num).compareTo(
+            (b['min_ticket_price'] ?? 0) as num,
+          ),
+        );
         break;
       case 'price_desc':
-        filtered.sort((a, b) =>
-            ((b['min_ticket_price'] ?? 0) as num)
-                .compareTo((a['min_ticket_price'] ?? 0) as num));
+        filtered.sort(
+          (a, b) => ((b['min_ticket_price'] ?? 0) as num).compareTo(
+            (a['min_ticket_price'] ?? 0) as num,
+          ),
+        );
         break;
       case 'name_asc':
-        filtered.sort((a, b) =>
-            (a['home_team'] ?? '').toLowerCase()
-                .compareTo((b['home_team'] ?? '').toLowerCase()));
+        filtered.sort(
+          (a, b) => (a['home_team'] ?? '').toLowerCase().compareTo(
+            (b['home_team'] ?? '').toLowerCase(),
+          ),
+        );
         break;
       case 'name_desc':
-        filtered.sort((a, b) =>
-            (b['home_team'] ?? '').toLowerCase()
-                .compareTo((a['home_team'] ?? '').toLowerCase()));
+        filtered.sort(
+          (a, b) => (b['home_team'] ?? '').toLowerCase().compareTo(
+            (a['home_team'] ?? '').toLowerCase(),
+          ),
+        );
         break;
       default:
         break;
@@ -133,10 +141,10 @@ class _TicketScreenState extends State<TicketScreen> {
     }
 
     if (filtered.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'Tiket tidak ditemukan',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: cs.onSurface.withValues(alpha: 0.7)),
         ),
       );
     }
@@ -156,16 +164,16 @@ class _TicketScreenState extends State<TicketScreen> {
               final match = filtered[index];
               final logo = match['tournament_logo'];
               final stadium = match['stadium']?['name'];
-          
+
               return GestureDetector(
                 onTap: () {},
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: Colors.black.withValues(alpha: 0.06),
                       width: 1,
                     ),
                   ),
@@ -175,14 +183,17 @@ class _TicketScreenState extends State<TicketScreen> {
                       // Header
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: Colors.white,
                           borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16)),
+                            top: Radius.circular(16),
+                          ),
                           border: Border(
                             bottom: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
+                              color: Colors.black.withValues(alpha: 0.06),
                               width: 1,
                             ),
                           ),
@@ -191,8 +202,8 @@ class _TicketScreenState extends State<TicketScreen> {
                           child: Text(
                             match['tournament_name'] ?? '-',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.orange,
+                            style: TextStyle(
+                              color: cs.primary,
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               letterSpacing: 0.3,
@@ -201,7 +212,7 @@ class _TicketScreenState extends State<TicketScreen> {
                           ),
                         ),
                       ),
-          
+
                       // Body
                       Padding(
                         padding: const EdgeInsets.all(16),
@@ -221,12 +232,16 @@ class _TicketScreenState extends State<TicketScreen> {
                                       '$base$logo',
                                       fit: BoxFit.contain,
                                       errorBuilder: (_, _, _) => const Icon(
-                                          Icons.image,
-                                          color: Colors.black54,
-                                          size: 28),
+                                        Icons.image,
+                                        color: Colors.black54,
+                                        size: 28,
+                                      ),
                                     )
-                                  : const Icon(Icons.emoji_events,
-                                      color: Colors.black54, size: 28),
+                                  : const Icon(
+                                      Icons.emoji_events,
+                                      color: Colors.black54,
+                                      size: 28,
+                                    ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -235,8 +250,8 @@ class _TicketScreenState extends State<TicketScreen> {
                                 children: [
                                   Text(
                                     '${match['home_team']} vs ${match['away_team']}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: cs.onSurface,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                       height: 1.3,
@@ -245,15 +260,24 @@ class _TicketScreenState extends State<TicketScreen> {
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      Icon(Icons.schedule_outlined,
-                                          size: 12,
-                                          color: Colors.white.withValues(alpha: 0.5)),
+                                      Icon(
+                                        Icons.schedule_outlined,
+                                        size: 12,
+                                        color: cs.onSurface.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        _formatTime(match['match_date_local'], context),
+                                        _formatTime(
+                                          match['match_date_local'],
+                                          context,
+                                        ),
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.white.withValues(alpha: 0.65),
+                                          color: cs.onSurface.withValues(
+                                            alpha: 0.65,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -261,16 +285,22 @@ class _TicketScreenState extends State<TicketScreen> {
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      Icon(Icons.stadium_outlined,
-                                          size: 12,
-                                          color: Colors.white.withValues(alpha: 0.5)),
+                                      Icon(
+                                        Icons.stadium_outlined,
+                                        size: 12,
+                                        color: cs.onSurface.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                      ),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
                                           stadium ?? 'To be announced',
                                           style: TextStyle(
                                             fontSize: 11,
-                                            color: Colors.white.withValues(alpha: 0.5),
+                                            color: cs.onSurface.withValues(
+                                              alpha: 0.5,
+                                            ),
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -283,15 +313,17 @@ class _TicketScreenState extends State<TicketScreen> {
                           ],
                         ),
                       ),
-          
+
                       // Footer
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           border: Border(
                             top: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.08),
+                              color: Colors.black.withValues(alpha: 0.06),
                               width: 1,
                             ),
                           ),
@@ -306,15 +338,15 @@ class _TicketScreenState extends State<TicketScreen> {
                                   'Mulai dari',
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: Colors.white.withValues(alpha: 0.45),
+                                    color: cs.onSurface.withValues(alpha: 0.55),
                                     letterSpacing: 0.2,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   _formatPrice(match['min_ticket_price']),
-                                  style: const TextStyle(
-                                    color: Colors.orange,
+                                  style: TextStyle(
+                                    color: cs.primary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15,
                                   ),
@@ -324,15 +356,20 @@ class _TicketScreenState extends State<TicketScreen> {
                             GestureDetector(
                               onTap: () async {
                                 final url = Uri.parse(
-                                    'https://kitagaruda.id/id/ticket');
-                                await launchUrl(url,
-                                    mode: LaunchMode.externalApplication);
+                                  'https://kitagaruda.id/id/ticket',
+                                );
+                                await launchUrl(
+                                  url,
+                                  mode: LaunchMode.externalApplication,
+                                );
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: Colors.orange,
+                                  color: cs.primary,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Text(
@@ -355,7 +392,7 @@ class _TicketScreenState extends State<TicketScreen> {
             },
           ),
         ),
-        
+
         if (_showScrollToTop)
           Positioned(
             bottom: 16,
@@ -373,10 +410,7 @@ class _TicketScreenState extends State<TicketScreen> {
   String _formatPrice(dynamic price) {
     if (price == null) return 'N/A';
     final number = (price as num).toInt().toString();
-    return 'Rp ${number.replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (match) => '.',
-    )}';
+    return 'Rp ${number.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => '.')}';
   }
 
   String _formatTime(String? date, BuildContext context) {
@@ -401,13 +435,16 @@ class _TicketScreenState extends State<TicketScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.confirmation_number_outlined,
-              size: 56, color: Colors.white.withValues(alpha: 0.2)),
+          Icon(
+            Icons.confirmation_number_outlined,
+            size: 56,
+            color: Colors.black.withValues(alpha: 0.15),
+          ),
           const SizedBox(height: 16),
           Text(
             'Tiket Belum Tersedia',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),

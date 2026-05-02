@@ -69,10 +69,12 @@ class _ShopScreenState extends State<ShopScreen> {
     _searchFocus.unfocus();
     final cs = Theme.of(context).colorScheme;
 
-    _minPriceController.text =
-        _minPrice != null ? _minPrice!.toInt().toString() : '';
-    _maxPriceController.text =
-        _maxPrice != null ? _maxPrice!.toInt().toString() : '';
+    _minPriceController.text = _minPrice != null
+        ? _minPrice!.toInt().toString()
+        : '';
+    _maxPriceController.text = _maxPrice != null
+        ? _maxPrice!.toInt().toString()
+        : '';
 
     String tempSort = _sortOption;
 
@@ -128,7 +130,9 @@ class _ShopScreenState extends State<ShopScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                       ),
@@ -144,7 +148,9 @@ class _ShopScreenState extends State<ShopScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                       ),
@@ -255,32 +261,27 @@ class _ShopScreenState extends State<ShopScreen> {
                 bottom: false,
                 child: Column(
                   children: [
-                    const SizedBox(height: 8),
-                    const Text('Shop', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-        
+                    const SizedBox(height: 6),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
                       child: Row(
                         children: [
-                          Expanded(child: _buildSearchField(context)),
-                          const SizedBox(width: 8),
+                          Text(
+                            'Shop',
+                            style: Theme.of(context).appBarTheme.titleTextStyle,
+                          ),
+                          const Spacer(),
                           Stack(
                             clipBehavior: Clip.none,
                             children: [
-                              IconButton.outlined(
+                              IconButton(
                                 onPressed: () => _showFilterSortSheet(context),
                                 icon: const Icon(Icons.tune_rounded),
-                                style: IconButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
                               ),
                               if (_isFilterActive)
                                 Positioned(
-                                  top: 4,
-                                  right: 4,
+                                  top: 6,
+                                  right: 6,
                                   child: Container(
                                     width: 8,
                                     height: 8,
@@ -295,7 +296,14 @@ class _ShopScreenState extends State<ShopScreen> {
                         ],
                       ),
                     ),
-        
+
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                      child: Row(
+                        children: [Expanded(child: _buildSearchField(context))],
+                      ),
+                    ),
+
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                       child: Container(
@@ -324,7 +332,7 @@ class _ShopScreenState extends State<ShopScreen> {
                 ),
               ),
             ),
-        
+
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () async {
