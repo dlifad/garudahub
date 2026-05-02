@@ -68,7 +68,7 @@ ATURAN PENTING:
       }
       return reply;
     } on GenerativeAIException catch (e) {
-      return '⚠️ Error Gemini: \${e.message}';
+      return '⚠️ Error Gemini: ${e.message}';
     } catch (_) {
       return '⚠️ Koneksi gagal. Cek internet kamu ya, Sobat Garuda!';
     }
