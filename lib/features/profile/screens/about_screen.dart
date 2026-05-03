@@ -16,7 +16,7 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Image.asset('assets/images/logo.png', width: 120, height: 120)),
+            Center(child: Image.asset('assets/images/logo_merah.png', width: 120, height: 120)),
             Center(
               child: Text(
                 'GarudaHub',
