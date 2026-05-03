@@ -33,8 +33,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   static const int _fifaRank = 130;
-  static const String _heroImageUrl =
-      'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1200&q=80';
+  // static const String _heroImageUrl =
+  //     'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1200&q=80';
 
   final _service = DashboardService();
 
@@ -279,7 +279,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 begin: const Offset(0, -0.3),
                 child: HeroSection(
                   fifaRank: _fifaRank,
-                  heroImageUrl: _heroImageUrl,
+                  heroImageUrl: 'assets/images/squadtimnas3.jpg',
                   recentMatches: _recentMatches,
                   countdownLabel: _countdownLabel(),
                 ),
@@ -343,7 +343,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              // const SizedBox(height: 8),
               NewsList(
                 isLoading: _isLoading,
                 news: _news,

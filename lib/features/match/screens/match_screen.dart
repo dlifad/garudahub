@@ -157,7 +157,10 @@ class _MatchScreenState extends State<MatchScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
+      backgroundColor: AppColors.softBackground(
+        cs,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+      ),
       body: RefreshIndicator(
         onRefresh: _refresh,
         color: cs.primary,
@@ -166,17 +169,9 @@ class _MatchScreenState extends State<MatchScreen>
           slivers: [
             SliverAppBar(
               pinned: true,
-              backgroundColor: AppColors.bg,
+              backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
               surfaceTintColor: cs.surfaceTint,
-              leading: Icon(Icons.sports_soccer_rounded, color: cs.primary),
               title: const Text('Match'),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.refresh_rounded, color: cs.onSurfaceVariant),
-                  onPressed: _isLoading ? null : _refresh,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-              ],
               bottom: (_isLoading || _years.isEmpty)
                   ? null
                   : PreferredSize(
@@ -340,5 +335,3 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
-
-

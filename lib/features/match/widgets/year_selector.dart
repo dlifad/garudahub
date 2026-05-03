@@ -29,7 +29,7 @@ class YearSelector extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
       child: Row(
         children: [
           Text(
