@@ -12,7 +12,7 @@ import 'package:garudahub/features/dashboard/widgets/ai_chat_widget.dart';
 import 'package:garudahub/features/dashboard/widgets/hero_section.dart';
 import 'package:garudahub/features/dashboard/widgets/news_list.dart';
 import 'package:garudahub/features/dashboard/widgets/next_match_card.dart';
-import 'package:garudahub/features/dashboard/widgets/prediction_card.dart';
+import 'package:garudahub/features/dashboard/widgets/prediction_mini_card.dart';
 import 'package:garudahub/features/dashboard/widgets/section_title.dart';
 import 'package:garudahub/features/notification/screens/notification_screen.dart';
 import 'package:garudahub/features/notification/services/notification_inbox_service.dart';
@@ -51,12 +51,6 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   Timer? _countdownTimer;
   Duration _timeToKickoff = Duration.zero;
-
-  int _indScore = 1;
-  int _oppScore = 0;
-  bool _submittingPrediction = false;
-  bool _predictionLocked = false;
-  String? _predictionStatus;
   int _notifCount = 0;
 
   @override
@@ -96,17 +90,14 @@ class _DashboardScreenState extends State<DashboardScreen>
   void _playEntrance() {
     _heroAnim.forward();
     Future.delayed(
-      const Duration(milliseconds: 150),
-      () => mounted ? _matchAnim.forward() : null,
-    );
+        const Duration(milliseconds: 150),
+        () => mounted ? _matchAnim.forward() : null);
     Future.delayed(
-      const Duration(milliseconds: 300),
-      () => mounted ? _predAnim.forward() : null,
-    );
+        const Duration(milliseconds: 300),
+        () => mounted ? _predAnim.forward() : null);
     Future.delayed(
-      const Duration(milliseconds: 400),
-      () => mounted ? _newsAnim.forward() : null,
-    );
+        const Duration(milliseconds: 400),
+        () => mounted ? _newsAnim.forward() : null);
   }
 
   Future<void> _fetchData() async {
@@ -123,18 +114,15 @@ class _DashboardScreenState extends State<DashboardScreen>
     } catch (_) {
       _errorText = 'Gagal memuat beranda. Coba lagi.';
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _startCountdown() {
     _countdownTimer?.cancel();
     _updateCountdown();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _updateCountdown();
-    });
+    _countdownTimer =
+        Timer.periodic(const Duration(seconds: 1), (_) => _updateCountdown());
   }
 
   Future<void> _loadNotifCount() async {
@@ -155,56 +143,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     });
   }
 
-  Future<void> _submitPrediction() async {
-    final user = context.read<AuthProvider>().user;
-    if (_nextMatch == null || user == null) return;
-    setState(() => _submittingPrediction = true);
-
-    try {
-      final token = await AuthService.getToken();
-      final uri = Uri.parse('${AppConstants.baseUrl}/predictions');
-      final res = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'match_id': _nextMatch!.id,
-          'predicted_indonesia_score': _indScore,
-          'predicted_opponent_score': _oppScore,
-        }),
-      );
-
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      if (res.statusCode == 201) {
-        setState(() {
-          _predictionLocked = true;
-          _predictionStatus =
-              body['message']?.toString() ?? 'Prediksi tersimpan';
-        });
-      } else if (res.statusCode == 409) {
-        setState(() {
-          _predictionLocked = true;
-          _predictionStatus = body['message']?.toString() ?? 'Sudah diprediksi';
-        });
-      } else {
-        setState(() {
-          _predictionStatus =
-              body['message']?.toString() ?? 'Gagal kirim prediksi';
-        });
-      }
-    } catch (_) {
-      setState(
-        () => _predictionStatus = 'Koneksi bermasalah saat kirim prediksi',
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _submittingPrediction = false);
-      }
-    }
-  }
-
   String _countdownLabel() {
     if (_timeToKickoff.inSeconds <= 0) return 'Match Selesai';
     if (_timeToKickoff.inDays >= 1) {
@@ -218,12 +156,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     return '$h:$m:$s';
   }
 
-  String _predictionSummary() {
-    if (_indScore > _oppScore) return 'Indonesia Menang $_indScore-$_oppScore';
-    if (_indScore < _oppScore) return 'Lawan Menang $_indScore-$_oppScore';
-    return 'Imbang $_indScore-$_oppScore';
-  }
-
   Widget _animated({
     required Widget child,
     required AnimationController ctrl,
@@ -232,10 +164,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     return FadeTransition(
       opacity: CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic),
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: begin,
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic)),
+        position: Tween<Offset>(begin: begin, end: Offset.zero)
+            .animate(CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic)),
         child: child,
       ),
     );
@@ -244,7 +174,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -261,6 +190,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Top bar ──────────────────────────────
               Row(
                 children: [
                   Container(
@@ -270,11 +200,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: cs.primary,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
-                      Icons.sports_soccer,
-                      size: 20,
-                      color: cs.onPrimary,
-                    ),
+                    child: Icon(Icons.sports_soccer,
+                        size: 20, color: cs.onPrimary),
                   ),
                   const SizedBox(width: 10),
                   Text(
@@ -289,18 +216,19 @@ class _DashboardScreenState extends State<DashboardScreen>
                   const Spacer(),
                   _notifCount > 0
                       ? Badge(
-                          label: Text('$_notifCount'),
+                          label: Text('\$_notifCount'),
                           child: IconButton(
                             onPressed: () async {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const NotificationScreen(),
-                                ),
+                                    builder: (_) =>
+                                        const NotificationScreen()),
                               );
                               await _loadNotifCount();
                             },
-                            icon: const Icon(Icons.notifications_outlined),
+                            icon: const Icon(
+                                Icons.notifications_outlined),
                           ),
                         )
                       : IconButton(
@@ -308,16 +236,19 @@ class _DashboardScreenState extends State<DashboardScreen>
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const NotificationScreen(),
-                              ),
+                                  builder: (_) =>
+                                      const NotificationScreen()),
                             );
                             await _loadNotifCount();
                           },
-                          icon: const Icon(Icons.notifications_outlined),
+                          icon: const Icon(
+                              Icons.notifications_outlined),
                         ),
                 ],
               ),
               const SizedBox(height: 16),
+
+              // ── Hero ─────────────────────────────────
               _animated(
                 ctrl: _heroAnim,
                 begin: const Offset(0, -0.3),
@@ -329,42 +260,41 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
               const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0),
-                child: AiChatWidget(),
+
+              // ── Quick Actions: GarudaBot + Prediksi ──
+              _animated(
+                ctrl: _predAnim,
+                begin: const Offset(0, 0.2),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Expanded(child: AiChatWidget()),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: PredictionMiniCard(
+                          lastIndScore: 1,
+                          lastOppScore: 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
+
+              // ── Next Match ───────────────────────────
               const SectionTitle('Pertandingan Berikutnya'),
               const SizedBox(height: 12),
               _animated(
                 ctrl: _matchAnim,
                 begin: const Offset(0.3, 0),
-                child: NextMatchCard(isLoading: _isLoading, match: _nextMatch),
+                child: NextMatchCard(
+                    isLoading: _isLoading, match: _nextMatch),
               ),
               const SizedBox(height: 20),
-              const SectionTitle('Prediksi Skor'),
-              const SizedBox(height: 12),
-              _animated(
-                ctrl: _predAnim,
-                begin: const Offset(0, 0.3),
-                child: PredictionCard(
-                  match: _nextMatch,
-                  indScore: _indScore,
-                  oppScore: _oppScore,
-                  predictionLocked: _predictionLocked,
-                  submittingPrediction: _submittingPrediction,
-                  predictionStatus: _predictionStatus,
-                  onUpInd: () => setState(() => _indScore++),
-                  onDownInd: () =>
-                      setState(() => _indScore = (_indScore - 1).clamp(0, 20)),
-                  onUpOpp: () => setState(() => _oppScore++),
-                  onDownOpp: () =>
-                      setState(() => _oppScore = (_oppScore - 1).clamp(0, 20)),
-                  onSubmit: _submitPrediction,
-                  predictionSummary: _predictionSummary(),
-                ),
-              ),
-              const SizedBox(height: 20),
+
+              // ── News ─────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -372,7 +302,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   TextButton(
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const NewsScreen()),
+                      MaterialPageRoute(
+                          builder: (_) => const NewsScreen()),
                     ),
                     child: const Text('Lihat semua'),
                   ),
@@ -386,13 +317,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                 onTap: (item) => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => NewsDetailScreen(news: item),
-                  ),
+                      builder: (_) => NewsDetailScreen(news: item)),
                 ),
               ),
-              if (_errorText != null) ...[
+              if (_errorText != null) ...[  
                 const SizedBox(height: 8),
-                Text(_errorText!, style: TextStyle(color: cs.error)),
+                Text(_errorText!,
+                    style: TextStyle(color: cs.error)),
               ],
               const SizedBox(height: 24),
             ],
