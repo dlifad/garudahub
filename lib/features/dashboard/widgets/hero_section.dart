@@ -32,17 +32,29 @@ class HeroSection extends StatelessWidget {
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
+        color: cs.surface,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.22),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.18),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.26),
+            blurRadius: 36,
+            spreadRadius: 2,
+            offset: const Offset(0, 14),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: cs.primary.withOpacity(0.10),
+            blurRadius: 24,
+            spreadRadius: -2,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.10),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -60,6 +72,22 @@ class HeroSection extends StatelessWidget {
                   Container(color: cs.surfaceContainerHighest),
             ),
             Container(color: const Color(0x99000000)),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.08),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
