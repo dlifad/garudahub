@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -47,25 +48,25 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Reset Password')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base),
         child: Column(
           children: [
             GarudaTextField(label: 'Kode OTP', controller: _codeCtrl),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             GarudaTextField(
               label: 'Password Baru',
               controller: _passCtrl,
               isPassword: true,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             GarudaTextField(
               label: 'Konfirmasi Password',
               controller: _confirmCtrl,
               isPassword: true,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
 
             GarudaButton(
               text: 'Reset Password',

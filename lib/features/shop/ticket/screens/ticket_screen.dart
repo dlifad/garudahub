@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:garudahub/core/constants/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -158,7 +159,10 @@ class _TicketScreenState extends State<TicketScreen> {
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             controller: _scrollController,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.base,
+              vertical: AppSpacing.base,
+            ),
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final match = filtered[index];
@@ -168,7 +172,7 @@ class _TicketScreenState extends State<TicketScreen> {
               return GestureDetector(
                 onTap: () {},
                 child: Container(
-                  margin: const EdgeInsets.only(bottom: 16),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.base),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -183,8 +187,8 @@ class _TicketScreenState extends State<TicketScreen> {
                       // Header
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
+                          horizontal: AppSpacing.base,
+                          vertical: AppSpacing.md - 2,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -215,14 +219,14 @@ class _TicketScreenState extends State<TicketScreen> {
 
                       // Body
                       Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.base),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
                               width: 64,
                               height: 64,
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(AppSpacing.sm),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
@@ -243,7 +247,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                       size: 28,
                                     ),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: AppSpacing.md),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +261,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                       height: 1.3,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: AppSpacing.sm),
                                   Row(
                                     children: [
                                       Icon(
@@ -267,7 +271,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                           alpha: 0.5,
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
+                                      const SizedBox(width: AppSpacing.xs),
                                       Text(
                                         _formatTime(
                                           match['match_date_local'],
@@ -282,7 +286,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: AppSpacing.xs),
                                   Row(
                                     children: [
                                       Icon(
@@ -292,7 +296,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                           alpha: 0.5,
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
+                                      const SizedBox(width: AppSpacing.xs),
                                       Expanded(
                                         child: Text(
                                           stadium ?? 'To be announced',
@@ -317,8 +321,8 @@ class _TicketScreenState extends State<TicketScreen> {
                       // Footer
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                          horizontal: AppSpacing.base,
+                          vertical: AppSpacing.md,
                         ),
                         decoration: BoxDecoration(
                           border: Border(
@@ -342,7 +346,7 @@ class _TicketScreenState extends State<TicketScreen> {
                                     letterSpacing: 0.2,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: AppSpacing.xs - 2),
                                 Text(
                                   _formatPrice(match['min_ticket_price']),
                                   style: TextStyle(
@@ -365,8 +369,8 @@ class _TicketScreenState extends State<TicketScreen> {
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                                  horizontal: AppSpacing.base,
+                                  vertical: AppSpacing.sm,
                                 ),
                                 decoration: BoxDecoration(
                                   color: cs.primary,
@@ -396,7 +400,7 @@ class _TicketScreenState extends State<TicketScreen> {
         if (_showScrollToTop)
           Positioned(
             bottom: 90,
-            right: 16,
+            right: AppSpacing.base,
             child: FloatingActionButton.small(
               onPressed: _scrollToTop,
               tooltip: 'Kembali ke atas',
@@ -440,7 +444,7 @@ class _TicketScreenState extends State<TicketScreen> {
             size: 56,
             color: Colors.black.withValues(alpha: 0.15),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.base),
           Text(
             'Tiket Belum Tersedia',
             style: TextStyle(

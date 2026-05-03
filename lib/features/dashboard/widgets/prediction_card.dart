@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/core/utils/flag_utils.dart';
 
@@ -38,7 +39,7 @@ class PredictionCard extends StatelessWidget {
     final m = match;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [cs.primaryContainer.withOpacity(0.3), cs.surface],
@@ -55,7 +56,7 @@ class PredictionCard extends StatelessWidget {
             'Siapa yang menang menurutmu?',
             style: TextStyle(fontWeight: FontWeight.w700, color: cs.onSurface),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           m == null
             ? Text(
                 'Belum ada match untuk diprediksi',
@@ -64,7 +65,7 @@ class PredictionCard extends StatelessWidget {
             : Row(
                 children: [
                   Text(m.homeTeam),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: AppSpacing.sm - 2),
                   Image.network(
                     FlagUtils.getFlagUrl(m.homeFlag),
                     width: 20,
@@ -72,9 +73,9 @@ class PredictionCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 16),
                   ),    
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   const Text('VS'),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Image.network(
                     FlagUtils.getFlagUrl(m.awayFlag),
                     width: 20,
@@ -82,11 +83,11 @@ class PredictionCard extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 16),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: AppSpacing.sm - 2),
                   Text(m.awayTeam),
                 ],
               ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           if (m != null)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -96,17 +97,17 @@ class PredictionCard extends StatelessWidget {
                   onUp: onUpInd,
                   onDown: onDownInd,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 _scoreBox(indScore),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                   child: Text(
                     '-',
                     style: TextStyle(fontSize: 26, color: cs.onSurfaceVariant),
                   ),
                 ),
                 _scoreBox(oppScore),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 _scoreStepper(
                   canUse: !predictionLocked,
                   onUp: onUpOpp,
@@ -114,7 +115,7 @@ class PredictionCard extends StatelessWidget {
                 ),
               ],
             ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.92, end: 1),
             duration: const Duration(milliseconds: 300),
@@ -129,13 +130,13 @@ class PredictionCard extends StatelessWidget {
             ),
           ),
           if (predictionStatus != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               predictionStatus!,
               style: TextStyle(color: predictionLocked ? Colors.green : cs.error),
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
@@ -199,7 +200,7 @@ class PredictionCard extends StatelessWidget {
             child: const Icon(Icons.arrow_upward),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         SizedBox(
           width: 44,
           height: 44,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../auth/providers/auth_provider.dart';
 
@@ -69,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.sm - 2),
 
             Text(
               'Pusat Informasi Timnas Indonesia',
@@ -80,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
 
-            const SizedBox(height: 64),
+            const SizedBox(height: AppSpacing.xxl + AppSpacing.base),
 
             // Loader (titik-titik)
             _DotLoader(
@@ -127,7 +128,7 @@ class _DotLoader extends StatelessWidget {
                     : 0.0;
 
             return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 5),
+              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs + 1),
               child: Transform.scale(
                 scale: scale.clamp(0.0, 1.0),
                 child: Container(

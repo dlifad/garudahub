@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 import 'package:garudahub/features/shop/merchandise/models/merchandise_model.dart';
 import 'package:garudahub/features/shop/providers/currency_provider.dart';
@@ -35,7 +36,12 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.item.name)),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 50),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.base,
+          AppSpacing.base,
+          AppSpacing.base,
+          AppSpacing.xxl + 2,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -64,7 +70,7 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             Text(
               widget.item.name,
@@ -74,7 +80,7 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
 
             Text(
               formatCurrency(converted, currency.selected),
@@ -85,10 +91,10 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
 
             Wrap(
-              spacing: 8,
+              spacing: AppSpacing.sm,
               children: ['IDR', 'USD', 'EUR', 'MYR'].map((c) {
                 final isSelected = currency.selected == c;
 
@@ -109,17 +115,17 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
               }).toList(),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             if (widget.item.sizes.trim().isNotEmpty) ...[
               Text(
                 'Ukuran: ${widget.item.sizes}',
                 style: const TextStyle(fontSize: 14),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
             ],
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
 
             Text(
               widget.item.description,
@@ -132,7 +138,12 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
         ),
       ),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.base,
+            AppSpacing.sm,
+            AppSpacing.base,
+            AppSpacing.md,
+          ),
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -145,7 +156,9 @@ class _MerchandiseDetailScreenState extends State<MerchandiseDetailScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.md + 2,
+                ),
               ),
               child: const Text('Beli Sekarang'),
             ),

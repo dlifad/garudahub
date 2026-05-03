@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import '../models/notification_item.dart';
 import '../services/notification_inbox_service.dart';
 
@@ -69,7 +70,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.notifications_off, size: 48, color: cs.outline),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Belum ada notifikasi',
                     style: TextStyle(color: cs.onSurfaceVariant),
@@ -78,9 +79,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             )
           : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base,
+                AppSpacing.md,
+                AppSpacing.base,
+                AppSpacing.lg,
+              ),
               itemCount: _items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(height: AppSpacing.md - 2),
               itemBuilder: (_, i) => _NotificationCard(
                 item: _items[i],
                 onTap: () async {
@@ -111,7 +118,7 @@ class _NotificationCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Ink(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(AppSpacing.md + 2),
         decoration: BoxDecoration(
           color: item.isRead
               ? cs.surfaceContainerHighest
@@ -127,7 +134,7 @@ class _NotificationCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _typeIcon(item.type, cs),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,9 +161,9 @@ class _NotificationCard extends StatelessWidget {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm - 2),
                   Text(item.body, style: TextStyle(color: cs.onSurfaceVariant)),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     _formatTime(item.createdAt),
                     style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),

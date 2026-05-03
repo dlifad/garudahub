@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import '../models/player_model.dart';
 
 class PlayerDetailScreen extends StatelessWidget {
@@ -106,7 +107,7 @@ class PlayerDetailScreen extends StatelessWidget {
                           ),
                         ),
                         if (player.isNaturalized) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -140,7 +141,12 @@ class PlayerDetailScreen extends StatelessWidget {
           // ── Body ────────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 80),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base + AppSpacing.xs,
+                AppSpacing.xs,
+                AppSpacing.base + AppSpacing.xs,
+                AppSpacing.xxl + AppSpacing.sm,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -154,7 +160,7 @@ class PlayerDetailScreen extends StatelessWidget {
                   ),
                   if (player.nickname?.isNotEmpty == true)
                     Padding(
-                      padding: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.only(top: AppSpacing.xs - 2),
                       child: Text(
                         '"${player.nickname}"',
                         style: tt.bodyMedium?.copyWith(
@@ -164,7 +170,7 @@ class PlayerDetailScreen extends StatelessWidget {
                       ),
                     ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.lg - AppSpacing.xs),
 
                   // Stat cards
                   Row(
@@ -177,7 +183,7 @@ class PlayerDetailScreen extends StatelessWidget {
                           cs: cs,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: _StatBox(
                           value: '${player.goals}',
@@ -189,7 +195,7 @@ class PlayerDetailScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Section label
                   Row(
@@ -202,7 +208,7 @@ class PlayerDetailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(
                         'INFORMASI PEMAIN',
                         style: tt.labelMedium?.copyWith(
@@ -214,7 +220,7 @@ class PlayerDetailScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
 
                   // Info card
                   Container(
@@ -349,7 +355,10 @@ class _StatBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md + 2,
+        horizontal: AppSpacing.md + 2,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(14),
@@ -365,7 +374,7 @@ class _StatBox extends StatelessWidget {
             ),
             child: Icon(icon, color: cs.onPrimaryContainer, size: 18),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -402,7 +411,10 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.base,
+        vertical: AppSpacing.md,
+      ),
       child: Row(
         children: [
           Container(
@@ -414,7 +426,7 @@ class _InfoRow extends StatelessWidget {
             ),
             child: Icon(icon, size: 16, color: cs.primary),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           SizedBox(
             width: 90,
             child: Text(

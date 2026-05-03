@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -12,7 +13,7 @@ class AboutScreen extends StatelessWidget {
         title: const Text('Tentang GarudaHub'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -26,7 +27,7 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
 
             Center(
               child: Text(
@@ -38,14 +39,14 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             _sectionTitle(context, 'Tentang Aplikasi'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
 
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.base),
                 child: Text(
                   'GarudaHub adalah aplikasi mobile yang menjadi pusat informasi '
                   'Tim Nasional Sepak Bola Indonesia. Aplikasi ini menyediakan data pertandingan, '
@@ -59,10 +60,10 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             _sectionTitle(context, 'Fitur Utama'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
 
             Card(
               child: Column(
@@ -80,10 +81,10 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             _sectionTitle(context, 'Fitur Tambahan'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
 
             Card(
               child: Column(
@@ -103,10 +104,10 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             _sectionTitle(context, 'Pengembang'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
 
             Card(
               child: Column(
@@ -126,7 +127,7 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             Center(
               child: Text(

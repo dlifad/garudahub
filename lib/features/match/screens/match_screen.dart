@@ -7,6 +7,7 @@ import 'package:garudahub/features/match/services/match_service.dart';
 import 'package:garudahub/features/match/widgets/record_stats_card.dart';
 import 'package:garudahub/features/match/widgets/tournament_section.dart';
 import 'package:garudahub/features/match/widgets/year_selector.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 // kAllTimeYear = -1 (all time sentinel)
 
 const int kAllTimeYear = -1;
@@ -174,7 +175,7 @@ class _MatchScreenState extends State<MatchScreen>
                   icon: Icon(Icons.refresh_rounded, color: cs.onSurfaceVariant),
                   onPressed: _isLoading ? null : _refresh,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
               ],
               bottom: (_isLoading || _years.isEmpty)
                   ? null
@@ -187,7 +188,7 @@ class _MatchScreenState extends State<MatchScreen>
                             selected: _selectedYear,
                             onChanged: _changeYear,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
                         ],
                       ),
                     ),
@@ -202,7 +203,7 @@ class _MatchScreenState extends State<MatchScreen>
                 child: _ErrorState(message: _error!, onRetry: _init),
               )
             else ...[
-              const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
               SliverToBoxAdapter(
                 child: RecordStatsCard(
                   year: _selectedYear,
@@ -210,10 +211,15 @@ class _MatchScreenState extends State<MatchScreen>
                   isLoading: _yearIsLoading,
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 8)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.base,
+                    0,
+                    AppSpacing.base,
+                    AppSpacing.sm,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -224,7 +230,7 @@ class _MatchScreenState extends State<MatchScreen>
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(
                         _selectedYear == kAllTimeYear
                             ? 'SEMUA TURNAMEN'
@@ -235,7 +241,7 @@ class _MatchScreenState extends State<MatchScreen>
                           letterSpacing: 1,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       if (_yearIsLoading)
                         SizedBox(
                           width: 12,
@@ -265,7 +271,7 @@ class _MatchScreenState extends State<MatchScreen>
                     );
                   }, childCount: _tournamentsForYear.length),
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
             ],
           ],
         ),
@@ -281,7 +287,7 @@ class _EmptyYear extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.all(48),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       child: Column(
         children: [
           Icon(
@@ -289,7 +295,7 @@ class _EmptyYear extends StatelessWidget {
             size: 52,
             color: cs.onSurfaceVariant.withOpacity(0.35),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             year == kAllTimeYear
                 ? 'Belum ada data turnamen'
@@ -311,18 +317,18 @@ class _ErrorState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.wifi_off_rounded, size: 48, color: cs.onSurfaceVariant),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               message,
               style: TextStyle(color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.base + AppSpacing.xs),
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 16),

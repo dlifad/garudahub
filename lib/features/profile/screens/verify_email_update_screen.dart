@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/profile/providers/profile_provider.dart';
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
@@ -141,10 +142,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg + AppSpacing.xs,
+              ),
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
 
                   Row(
                     children: [
@@ -155,7 +158,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
 
                   Icon(
                     Icons.mark_email_unread,
@@ -163,7 +166,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     color: cs.primary,
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.base + AppSpacing.xs),
 
                   Text(
                     'Verifikasi Email',
@@ -173,7 +176,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.md - 2),
 
                   Text(
                     'Masukkan kode 6 digit yang dikirim ke\n${widget.email}',
@@ -185,7 +188,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,7 +245,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                             filled: true,
                             fillColor: cs.surfaceVariant,
                             contentPadding:
-                                const EdgeInsets.symmetric(vertical: 14),
+                                const EdgeInsets.symmetric(vertical: AppSpacing.md + 2),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: cs.outline),
@@ -258,7 +261,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     }),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xl),
 
                   GarudaButton(
                     text: 'Verifikasi',
@@ -266,7 +269,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     isLoading: provider.isLoading,
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   GestureDetector(
                     onTap: _resendOtp,
@@ -283,7 +286,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
@@ -293,3 +296,4 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     );
   }
 }
+

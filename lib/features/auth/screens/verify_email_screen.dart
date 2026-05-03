@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
-
+import 'package:garudahub/core/theme/app_theme.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   final String email;
@@ -12,8 +12,10 @@ class VerifyEmailScreen extends StatefulWidget {
 }
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
-  final List<TextEditingController> _codeControllers =
-      List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> _codeControllers = List.generate(
+    6,
+    (_) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
   bool _isLoading = false;
   int _resendCountdown = 60;
@@ -39,11 +41,18 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   Future<void> _verify() async {
     if (_code.length < 6) {
-      showGarudaSnackbar(context, 'Masukkan 6 digit kode verifikasi', isError: true);
+      showGarudaSnackbar(
+        context,
+        'Masukkan 6 digit kode verifikasi',
+        isError: true,
+      );
       return;
     }
     setState(() => _isLoading = true);
-    final result = await AuthService.verifyEmail(email: widget.email, code: _code);
+    final result = await AuthService.verifyEmail(
+      email: widget.email,
+      code: _code,
+    );
     if (!mounted) return;
     setState(() => _isLoading = false);
     if (result['success'] == true) {
@@ -52,7 +61,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       if (!mounted) return;
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
     } else {
-      showGarudaSnackbar(context, result['data']['message'] ?? 'Kode tidak valid', isError: true);
+      showGarudaSnackbar(
+        context,
+        result['data']['message'] ?? 'Kode tidak valid',
+        isError: true,
+      );
     }
   }
 
@@ -77,7 +90,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -94,37 +106,41 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
-                  Row(children: [
-                    IconButton.filledTonal(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                    ),
-                  ]),
-                  const SizedBox(height: 40),
-            
-                  Icon(
-                    Icons.mark_email_unread,
-                    size: 56,
-                    color: cs.primary,
+                  const SizedBox(height: AppSpacing.xl),
+                  Row(
+                    children: [
+                      IconButton.filledTonal(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Text('Verifikasi Email',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(color: cs.onBackground, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  Icon(Icons.mark_email_unread, size: 56, color: cs.primary),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Verifikasi Email',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: cs.onBackground,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Masukkan kode 6 digit yang dikirim ke\n${widget.email}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14, height: 1.6),
+                    style: TextStyle(
+                      color: cs.onSurfaceVariant,
+                      fontSize: 14,
+                      height: 1.6,
+                    ),
                   ),
-                  const SizedBox(height: 40),
-            
+                  const SizedBox(height: AppSpacing.xl),
+
                   // OTP boxes
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,13 +164,17 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                           onChanged: (value) {
                             if (value.isNotEmpty) {
                               if (i < 5) {
-                                FocusScope.of(context).requestFocus(_focusNodes[i + 1]);
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_focusNodes[i + 1]);
                               } else {
                                 FocusScope.of(context).unfocus();
                               }
                             } else {
                               if (i > 0) {
-                                FocusScope.of(context).requestFocus(_focusNodes[i - 1]);
+                                FocusScope.of(
+                                  context,
+                                ).requestFocus(_focusNodes[i - 1]);
                               }
                             }
                           },
@@ -163,30 +183,42 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                             counterText: '',
                             filled: true,
                             fillColor: cs.surfaceVariant,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.md,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: cs.outline),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: cs.primary, width: 2),
+                              borderSide: BorderSide(
+                                color: cs.primary,
+                                width: 2,
+                              ),
                             ),
                           ),
-                        )
+                        ),
                       );
                     }),
                   ),
-                  const SizedBox(height: 32),
-            
-                  GarudaButton(text: 'Verifikasi', onPressed: _verify, isLoading: _isLoading),
-                  const SizedBox(height: 24),
-            
+                  const SizedBox(height: AppSpacing.xl),
+
+                  GarudaButton(
+                    text: 'Verifikasi',
+                    onPressed: _verify,
+                    isLoading: _isLoading,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
                   GestureDetector(
                     onTap: _resend,
                     child: RichText(
                       text: TextSpan(
-                        style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
                         children: [
                           const TextSpan(text: 'Tidak terima kode? '),
                           TextSpan(
@@ -194,7 +226,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                 ? 'Kirim ulang (${_resendCountdown}s)'
                                 : 'Kirim ulang',
                             style: TextStyle(
-                              color: _resendCountdown > 0 ? cs.onSurfaceVariant : cs.primary,
+                              color: _resendCountdown > 0
+                                  ? cs.onSurfaceVariant
+                                  : cs.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

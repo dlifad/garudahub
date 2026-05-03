@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:garudahub/features/match/models/tournament_coach.dart';
 import 'package:garudahub/features/match/models/tournament_model.dart';
@@ -86,7 +87,12 @@ class _TournamentSectionState extends State<TournamentSection>
     final coach    = _representativeCoach;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.base,
+        0,
+        AppSpacing.base,
+        AppSpacing.md,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
@@ -100,7 +106,12 @@ class _TournamentSectionState extends State<TournamentSection>
           InkWell(
             onTap: _toggle,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base,
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+              ),
               child: Row(
                 children: [
                   // Logo
@@ -121,7 +132,7 @@ class _TournamentSectionState extends State<TournamentSection>
                         : Icon(Icons.emoji_events_rounded,
                             size: 18, color: cs.primary),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.md - 2),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,18 +146,18 @@ class _TournamentSectionState extends State<TournamentSection>
                           ),
                           maxLines: 1, overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.xs - 2),
                         Row(
                           children: [
                             if (coach != null) ...[
                               Icon(Icons.sports_rounded, size: 11, color: cs.primary),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: AppSpacing.xs - 1),
                               Flexible(child: Text(coach.name,
                                   style: tt.labelSmall?.copyWith(
                                     color: cs.primary,
                                     fontSize: 11, fontWeight: FontWeight.w600,
                                   ), overflow: TextOverflow.ellipsis)),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.sm),
                             ],
                             if (total > 0)
                               Text('$finished/$total laga',
@@ -160,8 +171,8 @@ class _TournamentSectionState extends State<TournamentSection>
                   if (widget.tournament.confederation?.isNotEmpty == true) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      margin: const EdgeInsets.only(right: 6),
+                          horizontal: AppSpacing.sm, vertical: AppSpacing.xs - 1),
+                      margin: const EdgeInsets.only(right: AppSpacing.sm - 2),
                       decoration: BoxDecoration(
                         color: cs.secondaryContainer,
                         borderRadius: BorderRadius.circular(6),
@@ -195,14 +206,14 @@ class _TournamentSectionState extends State<TournamentSection>
                       color: cs.outline.withOpacity(0.15)),
                   if (widget.isLoading)
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(width: 16, height: 16,
                               child: CircularProgressIndicator(
                                   strokeWidth: 2, color: cs.primary)),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: AppSpacing.md - 2),
                           Text('Memuat...',
                               style: TextStyle(
                                   color: cs.onSurfaceVariant, fontSize: 13)),
@@ -211,7 +222,7 @@ class _TournamentSectionState extends State<TournamentSection>
                     )
                   else if (widget.matches.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
                       child: Text('Belum ada data pertandingan',
                           style: tt.bodySmall
                               ?.copyWith(color: cs.onSurfaceVariant)))
@@ -221,7 +232,7 @@ class _TournamentSectionState extends State<TournamentSection>
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: widget.matches.length,
                       separatorBuilder: (_, __) => Divider(
-                          height: 1, indent: 16, endIndent: 16,
+                          height: 1, indent: AppSpacing.base, endIndent: AppSpacing.base,
                           color: cs.outline.withOpacity(0.1)),
                       itemBuilder: (ctx, i) =>
                           _MatchRow(match: widget.matches[i]),
@@ -255,7 +266,12 @@ class _MatchRow extends StatelessWidget {
           MaterialPageRoute(
               builder: (_) => MatchDetailScreen(match: match))),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 11, 12, 11),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.base,
+          AppSpacing.md - 1,
+          AppSpacing.md,
+          AppSpacing.md - 1,
+        ),
         child: Row(
           children: [
             SizedBox(
@@ -274,7 +290,7 @@ class _MatchRow extends StatelessWidget {
               ),
             ),
             _HABadge(isHome: match.isHome),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.md - 2),
             Expanded(
               child: Text(match.opponentName,
                   style: tt.bodySmall?.copyWith(
@@ -282,9 +298,9 @@ class _MatchRow extends StatelessWidget {
                       fontWeight: FontWeight.w500, fontSize: 13),
                   overflow: TextOverflow.ellipsis),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             _ScoreBadge(match: match),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Icon(Icons.chevron_right_rounded,
                 color: cs.onSurfaceVariant, size: 18),
           ],
@@ -301,7 +317,10 @@ class _HABadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm - 1,
+        vertical: AppSpacing.xs - 1,
+      ),
       decoration: BoxDecoration(
         color: isHome ? cs.primaryContainer : cs.secondaryContainer,
         borderRadius: BorderRadius.circular(6),
@@ -328,7 +347,10 @@ class _ScoreBadge extends StatelessWidget {
     }
     if (match.isOngoing) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm - 1,
+          vertical: AppSpacing.xs - 1,
+        ),
         decoration: BoxDecoration(
           color: Colors.orange.withOpacity(0.18),
           borderRadius: BorderRadius.circular(6),
@@ -349,7 +371,10 @@ class _ScoreBadge extends StatelessWidget {
     else if (match.result == 'LOSS') c = cs.error;
     else c = Colors.orange;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: c.withOpacity(0.14),
         borderRadius: BorderRadius.circular(6),

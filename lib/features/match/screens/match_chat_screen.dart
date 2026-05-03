@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -235,7 +236,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         backgroundColor: const Color(0xFFCC0001),
         foregroundColor: Colors.white,
         elevation: 0,
-        titleSpacing: 0,
+        titleSpacing: AppSpacing.xs - 4,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
           onPressed: () => Navigator.pop(context),
@@ -260,15 +261,15 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         actions: [
           // mini scoreboard / status
           Container(
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            margin: const EdgeInsets.only(right: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md - 2, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(children: [
               const Text('🇮🇩', style: TextStyle(fontSize: 13)),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 isUpcoming
                     ? 'vs'
@@ -278,7 +279,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                     fontWeight: FontWeight.w800,
                     fontSize: 13),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               Text(widget.match.opponentFlag ?? '🏳️',
                   style: const TextStyle(fontSize: 13)),
             ]),
@@ -307,7 +308,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   : Stack(children: [
                       ListView.builder(
                         controller:   _scroll,
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                        padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.sm),
                         itemCount:    _messages.length,
                         itemBuilder:  (ctx, i) {
                           final msg    = _messages[i];
@@ -433,11 +434,11 @@ class _ChatBubble extends StatelessWidget {
         children: [
           if (showName && !isMine)
             Padding(
-              padding: const EdgeInsets.only(left: 8, bottom: 3),
+              padding: const EdgeInsets.only(left: AppSpacing.sm, bottom: AppSpacing.xs - 1),
               child: Row(children: [
                 Text(msg.avatarEmoji,
                     style: const TextStyle(fontSize: 13)),
-                const SizedBox(width: 5),
+                const SizedBox(width: AppSpacing.xs + 1),
                 Text(
                   msg.username,
                   style: TextStyle(
@@ -449,8 +450,7 @@ class _ChatBubble extends StatelessWidget {
               ]),
             ),
           Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 13, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md + 1, vertical: AppSpacing.sm + 1),
             decoration: BoxDecoration(
               color:       bubbleBg,
               borderRadius: radius,
@@ -467,10 +467,10 @@ class _ChatBubble extends StatelessWidget {
               children: [
                 if (isPredict)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(children: [
                       const Text('🔮', style: TextStyle(fontSize: 11)),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Text('Prediksi Skor',
                           style: TextStyle(
                             fontSize: 10,
@@ -481,10 +481,10 @@ class _ChatBubble extends StatelessWidget {
                   ),
                 if (isChant)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(children: [
                       const Text('📣', style: TextStyle(fontSize: 11)),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Text('Yel-Yel',
                           style: TextStyle(
                             fontSize: 10,
@@ -501,7 +501,7 @@ class _ChatBubble extends StatelessWidget {
                     height: 1.35,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: AppSpacing.xs - 1),
                 Text(
                   _time(msg.createdAt),
                   style: TextStyle(
@@ -555,11 +555,9 @@ class _InputBar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.only(
-        left: 8, right: 8, top: 8,
+      padding: EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.sm, top: AppSpacing.sm,
         bottom: MediaQuery.of(context).viewInsets.bottom > 0
-            ? 8
-            : MediaQuery.of(context).padding.bottom + 8,
+            ? AppSpacing.sm : MediaQuery.of(context).padding.bottom + AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
@@ -583,7 +581,7 @@ class _InputBar extends StatelessWidget {
           onTap:   () => onTypeChanged(
               msgType == 'predict' ? 'normal' : 'predict'),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         // Chant button
         _TypeBtn(
           icon:    '📣',
@@ -591,7 +589,7 @@ class _InputBar extends StatelessWidget {
           tooltip: 'Yel-Yel',
           onTap:   onToggleChants,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         // Text field
         Expanded(
           child: Container(
@@ -616,14 +614,13 @@ class _InputBar extends StatelessWidget {
                     color: cs.onSurfaceVariant.withOpacity(0.5),
                     fontSize: 13),
                 border:      InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.md - 2),
               ),
               onSubmitted: (_) => onSend(),
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         // Send button
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -636,7 +633,7 @@ class _InputBar extends StatelessWidget {
           ),
           child: sending
               ? const Padding(
-                  padding: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(AppSpacing.md - 2),
                   child: CircularProgressIndicator(
                       strokeWidth: 1.5, color: Colors.white))
               : IconButton(
@@ -707,14 +704,14 @@ class _ChantRow extends StatelessWidget {
       color: cs.surfaceContainerLow,
       child: ListView.separated(
         scrollDirection:   Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm - 2),
         itemCount:         chants.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (_, i) => InkWell(
           onTap: () => onTap(chants[i]),
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md + 2, vertical: AppSpacing.xs + 1),
             decoration: BoxDecoration(
               color: const Color(0xFFFF8F00).withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
@@ -746,7 +743,7 @@ class _EmptyChat extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text('🦅', style: TextStyle(fontSize: 52)),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Jadilah yang pertama\nberdiskusi tentang laga ini!',
             textAlign: TextAlign.center,
@@ -757,7 +754,7 @@ class _EmptyChat extends StatelessWidget {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.sm - 2),
           Text(
             'Indonesia vs $vs',
             style: TextStyle(
@@ -768,3 +765,4 @@ class _EmptyChat extends StatelessWidget {
     );
   }
 }
+

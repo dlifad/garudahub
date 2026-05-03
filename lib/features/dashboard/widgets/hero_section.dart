@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 
 class HeroSection extends StatelessWidget {
@@ -56,13 +57,16 @@ class HeroSection extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm - 2,
+                      ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(999),
@@ -81,9 +85,9 @@ class HeroSection extends StatelessWidget {
                 Row(
                   children: [
                     _HeroStatCard(title: 'FIFA', value: 'Rank #$fifaRank'),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     _HeroStatCard(title: 'Form', value: form.isEmpty ? '—' : form),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     _HeroStatCard(title: 'Kickoff', value: countdownLabel),
                   ],
                 ),
@@ -106,7 +110,10 @@ class _HeroStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.14),
           borderRadius: BorderRadius.circular(12),
@@ -119,7 +126,7 @@ class _HeroStatCard extends StatelessWidget {
               title,
               style: const TextStyle(color: Colors.white70, fontSize: 11),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.xs - 2),
             Text(
               value,
               overflow: TextOverflow.ellipsis,

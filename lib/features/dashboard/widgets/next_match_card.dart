@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +38,7 @@ class NextMatchCard extends StatelessWidget {
     if (m == null) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
@@ -45,7 +46,7 @@ class NextMatchCard extends StatelessWidget {
         child: Column(
           children: [
             Icon(Icons.event_busy, color: cs.onSurfaceVariant),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               'Belum ada pertandingan terjadwal',
               style: TextStyle(color: cs.onSurfaceVariant),
@@ -62,7 +63,7 @@ class NextMatchCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFDC0000), Color(0xFFB00000)],
@@ -80,7 +81,10 @@ class NextMatchCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm - 2,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(999),
@@ -94,7 +98,7 @@ class NextMatchCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
@@ -109,7 +113,7 @@ class NextMatchCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppSpacing.sm - 2),
                     Expanded(
                       child: Text(
                         m.homeTeam,
@@ -135,9 +139,12 @@ class NextMatchCard extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xs - 2),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(999),
@@ -166,7 +173,7 @@ class NextMatchCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppSpacing.sm - 2),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: Image.network(
@@ -181,14 +188,14 @@ class NextMatchCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.md - 2),
           Row(
             children: [
               Expanded(
                 child: Row(
                   children: [
                     const Icon(Icons.calendar_today, size: 14, color: Colors.white),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(dateLabel,
                         style: const TextStyle(
@@ -202,13 +209,13 @@ class NextMatchCard extends StatelessWidget {
                 ),
               ),
               Container(width: 1, height: 16, color: Colors.white24),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     const Icon(Icons.stadium, size: 14, color: Colors.white),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Flexible(
                       child: Text(m.venueName,
                         textAlign: TextAlign.right,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/shop/merchandise/providers/merchandise_provider.dart';
 import 'package:garudahub/features/shop/merchandise/screens/merchandise_screen.dart';
 import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
@@ -90,10 +91,10 @@ class _ShopScreenState extends State<ShopScreen> {
           builder: (ctx, setSheetState) {
             return Padding(
               padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+                left: AppSpacing.base,
+                right: AppSpacing.base,
+                top: AppSpacing.base,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.lg,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -110,13 +111,13 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   const SectionTitle(title: 'Filter & Urutkan'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   const SectionTitle(title: 'Filter Harga'),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
                   Row(
                     children: [
                       Expanded(
@@ -130,13 +131,13 @@ class _ShopScreenState extends State<ShopScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: TextField(
                           controller: _maxPriceController,
@@ -148,21 +149,21 @@ class _ShopScreenState extends State<ShopScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.lg),
 
                   const SectionTitle(title: 'Urutkan'),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
                     children: [
                       _SortChip(
                         label: 'Default',
@@ -196,7 +197,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   Row(
                     children: [
@@ -211,7 +212,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: GarudaButton(
                           text: 'Terapkan',
@@ -261,9 +262,14 @@ class _ShopScreenState extends State<ShopScreen> {
                 bottom: false,
                 child: Column(
                   children: [
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.sm),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.base,
+                        AppSpacing.sm,
+                        AppSpacing.base,
+                        AppSpacing.md,
+                      ),
                       child: Row(
                         children: [
                           Text(
@@ -280,8 +286,8 @@ class _ShopScreenState extends State<ShopScreen> {
                               ),
                               if (_isFilterActive)
                                 Positioned(
-                                  top: 6,
-                                  right: 6,
+                                  top: AppSpacing.sm,
+                                  right: AppSpacing.sm,
                                   child: Container(
                                     width: 8,
                                     height: 8,
@@ -298,14 +304,24 @@ class _ShopScreenState extends State<ShopScreen> {
                     ),
 
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.base,
+                        AppSpacing.sm,
+                        AppSpacing.base,
+                        AppSpacing.sm,
+                      ),
                       child: Row(
                         children: [Expanded(child: _buildSearchField(context))],
                       ),
                     ),
 
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.base,
+                        AppSpacing.sm,
+                        AppSpacing.base,
+                        AppSpacing.base,
+                      ),
                       child: Container(
                         height: 45,
                         decoration: BoxDecoration(

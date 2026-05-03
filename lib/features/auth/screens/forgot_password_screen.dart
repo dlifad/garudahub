@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'reset_password_screen.dart';
 
@@ -20,7 +21,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final res = await AuthService.forgotPassword(_emailCtrl.text.trim());
     if (!mounted) return;
     setState(() => _loading = false);
-    
+
     if (res['success']) {
       Navigator.push(
         context,
@@ -38,14 +39,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Lupa Kata Sandi')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base),
         child: Column(
           children: [
-            GarudaTextField(
-              label: 'Email',
-              controller: _emailCtrl,
-            ),
-            const SizedBox(height: 20),
+            GarudaTextField(label: 'Email', controller: _emailCtrl),
+            const SizedBox(height: AppSpacing.lg),
             GarudaButton(
               text: 'Kirim Kode',
               onPressed: _submit,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 import 'package:garudahub/features/shop/services/currency_formatter.dart';
 import 'package:garudahub/features/shop/merchandise/providers/merchandise_provider.dart';
@@ -127,12 +128,12 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             controller: _scrollController,
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: filteredItems.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
               childAspectRatio: 0.7,
             ),
             itemBuilder: (context, i) {
@@ -190,7 +191,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -204,7 +205,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSpacing.sm),
                             Text(
                               formatCurrency(item.price, 'IDR'),
                               style: TextStyle(
@@ -232,7 +233,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
         if (_showScrollToTop)
           Positioned(
             bottom: 90,
-            right: 16,
+            right: AppSpacing.base,
             child: FloatingActionButton.small(
               onPressed: _scrollToTop,
               tooltip: 'Kembali ke atas',

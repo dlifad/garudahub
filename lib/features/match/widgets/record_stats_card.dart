@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/match/models/match_record.dart';
 
 class RecordStatsCard extends StatelessWidget {
@@ -20,8 +21,13 @@ class RecordStatsCard extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.base,
+        AppSpacing.md,
+        AppSpacing.base,
+        AppSpacing.base,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -47,7 +53,7 @@ class RecordStatsCard extends StatelessWidget {
           Row(
             children: [
               const Text('🇮🇩', style: TextStyle(fontSize: 18)),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'INDONESIA $year',
                 style: tt.labelMedium?.copyWith(
@@ -69,7 +75,7 @@ class RecordStatsCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md),
 
           // ── Stats row ─────────────────────────────────────────
           if (isLoading || record.isEmpty)
@@ -117,7 +123,7 @@ class RecordStatsCard extends StatelessWidget {
 
           // ── Win rate bar ──────────────────────────────────────
           if (!isLoading && !record.isEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Text(
@@ -127,7 +133,7 @@ class RecordStatsCard extends StatelessWidget {
                     fontSize: 11,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
@@ -140,7 +146,7 @@ class RecordStatsCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   '${(record.winRate * 100).toStringAsFixed(0)}%',
                   style: const TextStyle(
@@ -161,7 +167,7 @@ class RecordStatsCard extends StatelessWidget {
     return Row(
       children: List.generate(6, (i) => Expanded(
         child: Container(
-          margin: EdgeInsets.only(right: i < 5 ? 8 : 0),
+          margin: EdgeInsets.only(right: i < 5 ? AppSpacing.sm : 0),
           height: 36,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.15),
@@ -196,7 +202,7 @@ class _StatItem extends StatelessWidget {
               fontSize: 20,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xs - 2),
           Text(
             label,
             style: const TextStyle(
@@ -216,7 +222,7 @@ class _StatDivider extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 1,
         height: 32,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         color: Colors.white.withOpacity(0.15),
       );
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -68,7 +69,7 @@ class NewsDetailScreen extends StatelessWidget {
                               size: 40,
                               color: cs.onSurfaceVariant,
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSpacing.sm - 2),
                             Text(
                               'Gambar tidak tersedia',
                               style: TextStyle(
@@ -86,7 +87,7 @@ class NewsDetailScreen extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.base),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -94,8 +95,8 @@ class NewsDetailScreen extends StatelessWidget {
                   if (news.source != null)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                        horizontal: AppSpacing.md - 2,
+                        vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
                         color: cs.primaryContainer,
@@ -111,7 +112,7 @@ class NewsDetailScreen extends StatelessWidget {
                       ),
                     ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.md),
 
                   // Judul
                   Text(
@@ -123,7 +124,7 @@ class NewsDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.md - 2),
 
                   // Author & tanggal
                   Row(
@@ -133,7 +134,7 @@ class NewsDetailScreen extends StatelessWidget {
                         size: 14,
                         color: cs.onSurface.withOpacity(0.5),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
                           [
@@ -149,9 +150,9 @@ class NewsDetailScreen extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
                   Divider(color: cs.outlineVariant),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   // Konten
                   Text(
@@ -162,7 +163,7 @@ class NewsDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Tombol baca di sumber asli
                   if (news.sourceUrl != null)
@@ -175,7 +176,7 @@ class NewsDetailScreen extends StatelessWidget {
                       ),
                     ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
 
@@ -69,7 +70,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Ganti Kata Sandi')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
         child: Form(
           key: _formKey,
           child: Column(
@@ -98,7 +99,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   child: const Text('Lupa password lama? Reset di sini', style: TextStyle(fontSize: 12),),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.base),
 
               GarudaTextField(
                 label: 'Kata Sandi Baru',
@@ -110,7 +111,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.base),
 
               GarudaTextField(
                 label: 'Konfirmasi Kata Sandi',
@@ -121,7 +122,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   return null;
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               GarudaButton(
                 text: 'Simpan Perubahan',

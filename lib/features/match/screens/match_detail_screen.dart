@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:garudahub/features/match/models/lineup_player.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
@@ -123,7 +124,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
           child: Column(
             children: [
               // ── Drag handle ──────────────────────────────────
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Container(
                 width: 40,
                 height: 4,
@@ -138,13 +139,13 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
 
               // ── Header ───────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.base + AppSpacing.xs, AppSpacing.base, AppSpacing.base + AppSpacing.xs, AppSpacing.sm),
                 child: Row(
                   children: [
                     Icon(Icons.stadium_rounded,
                         color: Theme.of(context).colorScheme.primary,
                         size: 20),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         m.venue ?? 'Stadion',
@@ -162,7 +163,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                         backgroundColor: Theme.of(context)
                             .colorScheme
                             .surfaceContainerHighest,
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(AppSpacing.sm - 2),
                       ),
                     ),
                   ],
@@ -197,17 +198,17 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
               match: m, coach: _coach, coachLoading: _coachLoading),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.base, AppSpacing.base + AppSpacing.xs, AppSpacing.base, AppSpacing.xl + AppSpacing.sm),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
 
                 // ── Match Info ─────────────────────────────────────
                 _MatchInfoCard(match: m),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.base + AppSpacing.xs),
 
                 // ── Lineup ─────────────────────────────────────────
                 _buildLineupSection(context, cs),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
 
                 // ── Stadium & LBS ─────────────────────────────────────────
                 _StadiumLBSCard(
@@ -222,7 +223,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                     _loadUserLocation();
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.base + AppSpacing.xs),
 
                 // ── Discussion CTA ─────────────────────────────────
                 FilledButton.icon(
@@ -261,7 +262,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(color: cs.primary, strokeWidth: 2),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.md - 2),
             Text('Memuat susunan pemain...',
                 style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
           ],
@@ -271,7 +272,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
 
     if (_lineup == null || _lineup!.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(36),
+        padding: const EdgeInsets.all(AppSpacing.xl + AppSpacing.xs),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
@@ -280,7 +281,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
           children: [
             Icon(Icons.groups_2_rounded, size: 42,
                 color: cs.onSurfaceVariant.withOpacity(0.3)),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text('Susunan pemain belum tersedia',
                 style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
           ],
@@ -312,7 +313,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
               ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSpacing.md - 2),
         // Field
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -323,10 +324,10 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
         ),
         // Subs
         if (_lineup!.substitutes.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.base),
           const _SectionTitle(
               icon: Icons.swap_horiz_rounded, label: 'PEMAIN PENGGANTI'),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _SubsCard(substitutes: _lineup!.substitutes),
         ],
       ],
@@ -380,7 +381,7 @@ class _StadiumLBSCard extends StatelessWidget {
       children: [
         const _SectionTitle(
             icon: Icons.stadium_rounded, label: 'LOKASI STADION'),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
 
         Container(
           decoration: BoxDecoration(
@@ -393,7 +394,7 @@ class _StadiumLBSCard extends StatelessWidget {
             children: [
               // ── Stadium header row ──────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.base, AppSpacing.md, AppSpacing.md, AppSpacing.md),
                 child: Row(
                   children: [
                     Expanded(
@@ -427,7 +428,7 @@ class _StadiumLBSCard extends StatelessWidget {
                       style: FilledButton.styleFrom(
                         backgroundColor: cs.primary,
                         foregroundColor: cs.onPrimary,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         shape: RoundedRectangleBorder(
@@ -448,7 +449,7 @@ class _StadiumLBSCard extends StatelessWidget {
               // ── LBS section ────────────────────────────────────
               if (locationLoading)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.base + AppSpacing.xs),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -457,7 +458,7 @@ class _StadiumLBSCard extends StatelessWidget {
                         child: CircularProgressIndicator(
                           strokeWidth: 2, color: cs.primary),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppSpacing.md - 2),
                       Text('Mendeteksi lokasi Anda...',
                           style: tt.labelSmall?.copyWith(
                               color: cs.onSurfaceVariant)),
@@ -466,12 +467,12 @@ class _StadiumLBSCard extends StatelessWidget {
                 )
               else if (locationError != null)
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.base),
                   child: Row(
                     children: [
                       Icon(Icons.location_off_rounded,
                           size: 18, color: cs.error),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(locationError!,
                             style: tt.labelSmall?.copyWith(
@@ -493,7 +494,7 @@ class _StadiumLBSCard extends StatelessWidget {
               else if (distanceKm != null) ...[
                 // Distance + time strip
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.base, AppSpacing.md, AppSpacing.base, AppSpacing.base),
                   child: Row(
                     children: [
                       _LBSStat(
@@ -505,7 +506,9 @@ class _StadiumLBSCard extends StatelessWidget {
                       ),
                       Container(width: 1, height: 40,
                           color: cs.outline.withValues(alpha: 0.15),
-                          margin: const EdgeInsets.symmetric(horizontal: 16)),
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.base,
+                          )),
                       _LBSStat(
                         icon: Icons.schedule_rounded,
                         iconColor: cs.primary,
@@ -552,7 +555,7 @@ class _LBSStat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(icon, color: iconColor, size: 18),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.md - 2),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,7 +613,7 @@ class _HeroHeader extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 20),
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.base + AppSpacing.xs),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -622,9 +625,9 @@ class _HeroHeader extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   style: IconButton.styleFrom(
                       backgroundColor: Colors.white.withOpacity(0.15),
-                      padding: const EdgeInsets.all(8)),
+                      padding: const EdgeInsets.all(AppSpacing.sm)),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(match.tournamentName.toUpperCase(),
                       style: const TextStyle(
@@ -635,7 +638,7 @@ class _HeroHeader extends StatelessWidget {
                 _StatusChip(match: match),
               ]),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── Teams + Score ─────────────────────────────────────
               IntrinsicHeight(
@@ -648,14 +651,16 @@ class _HeroHeader extends StatelessWidget {
                         _FlagImage(
                             code: match.isHome ? match.homeFlag : match.awayFlag,
                             size: 60),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         const Text('Indonesia',
                             style: TextStyle(color: Colors.white,
                                 fontWeight: FontWeight.w700, fontSize: 14)),
                       ],
                     )),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm - 2,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -664,7 +669,7 @@ class _HeroHeader extends StatelessWidget {
                                 style: TextStyle(color: Colors.white,
                                     fontSize: 32,
                                     fontWeight: FontWeight.w900)),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(timeStr,
                                 style: const TextStyle(
                                     color: Colors.white60, fontSize: 13)),
@@ -678,7 +683,7 @@ class _HeroHeader extends StatelessWidget {
                             ),
                             if (match.isFinished && match.result != null)
                               Padding(
-                                padding: const EdgeInsets.only(top: 5),
+                                padding: const EdgeInsets.only(top: AppSpacing.xs + 1),
                                 child: _ResultBadge(result: match.result!),
                               ),
                             if (match.halfTimeScore?.isNotEmpty == true)
@@ -693,7 +698,7 @@ class _HeroHeader extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _FlagImage(code: match.opponentFlag, size: 60),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(match.opponentName,
                             style: const TextStyle(color: Colors.white70,
                                 fontWeight: FontWeight.w500, fontSize: 14),
@@ -706,12 +711,12 @@ class _HeroHeader extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
 
               if (match.goals != null && match.goals!.isNotEmpty)
                   _InlineGoalScorers(goals: match.goals!, match: match),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.base + 2),
 
               // ── Info strip ────────────────────────────────────────
               Container(
@@ -726,7 +731,7 @@ class _HeroHeader extends StatelessWidget {
                     _InfoRow(
                         icon: Icons.calendar_today_rounded,
                         text: '$dateStr  •  $timeStr ${tzProvider.label}'),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     _InfoRow(
                       icon: Icons.stadium_rounded,
                       text: hasCoordinate
@@ -739,7 +744,7 @@ class _HeroHeader extends StatelessWidget {
 
               // ── Coach strip ───────────────────────────────────────
               if (!coachLoading && coach != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 8),
@@ -752,7 +757,7 @@ class _HeroHeader extends StatelessWidget {
                     children: [
                       const Icon(Icons.sports_rounded,
                           color: Colors.white70, size: 14),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       const Text('Pelatih Kepala: ',
                           style: TextStyle(
                               color: Colors.white60, fontSize: 12)),
@@ -801,7 +806,7 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     if (match.isOngoing) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
         decoration: BoxDecoration(
           color: Colors.orange, borderRadius: BorderRadius.circular(6)),
         child: const Text('LIVE',
@@ -810,7 +815,7 @@ class _StatusChip extends StatelessWidget {
     }
     if (match.isFinished) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(6)),
@@ -832,7 +837,7 @@ class _ResultBadge extends StatelessWidget {
     else if (result == 'LOSS') { c = const Color(0xFFEF5350); label = 'KALAH'; }
     else { c = Colors.orange; label = 'SERI'; }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs - 1),
       decoration: BoxDecoration(
         color: c.withOpacity(0.25),
         borderRadius: BorderRadius.circular(6),
@@ -854,7 +859,7 @@ class _InfoRow extends StatelessWidget {
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
       Icon(icon, color: Colors.white54, size: 12),
-      const SizedBox(width: 6),
+      const SizedBox(width: AppSpacing.sm - 2),
       Flexible(child: Text(text,
           style: const TextStyle(color: Colors.white70, fontSize: 12),
           textAlign: TextAlign.center,
@@ -897,7 +902,7 @@ class _MatchInfoCard extends StatelessWidget {
       children: [
         const _SectionTitle(
             icon: Icons.info_outline_rounded, label: 'INFO PERTANDINGAN'),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Container(
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest,
@@ -915,7 +920,7 @@ class _MatchInfoCard extends StatelessWidget {
                       horizontal: 16, vertical: 12),
                   child: Row(children: [
                     Icon(r.icon, size: 18, color: cs.primary),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.md),
                     SizedBox(width: 110,
                         child: Text(r.label,
                             style: tt.labelSmall?.copyWith(
@@ -975,7 +980,7 @@ class _SubsCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: cs.onSurface))),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1028,9 +1033,9 @@ class _SectionTitle extends StatelessWidget {
       Container(width: 3, height: 16,
           decoration: BoxDecoration(
               color: cs.primary, borderRadius: BorderRadius.circular(2))),
-      const SizedBox(width: 8),
+      const SizedBox(width: AppSpacing.sm),
       Icon(icon, size: 15, color: cs.primary),
-      const SizedBox(width: 6),
+      const SizedBox(width: AppSpacing.sm - 2),
       Text(label, style: tt.labelMedium?.copyWith(
           color: cs.onSurface,
           fontWeight: FontWeight.w800, letterSpacing: 0.8)),
@@ -1060,7 +1065,7 @@ class _InlineGoalScorers extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: AppSpacing.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1096,3 +1101,5 @@ class _InlineGoalScorers extends StatelessWidget {
     );
   }
 }
+
+

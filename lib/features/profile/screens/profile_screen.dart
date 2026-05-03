@@ -24,6 +24,7 @@ import 'package:garudahub/features/profile/screens/edit_profile_screen.dart';
 import 'package:garudahub/features/chant/providers/chant_provider.dart';
 
 import 'package:garudahub/core/providers/timezone_provider.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -56,7 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!mounted) return;
 
     setState(() {
-      _isNotificationEnabled = NotificationService.instance.notificationsEnabled;
+      _isNotificationEnabled =
+          NotificationService.instance.notificationsEnabled;
       _isMatchNotificationEnabled =
           NotificationService.instance.matchNotificationsEnabled;
       _isResultNotificationEnabled =
@@ -81,11 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final file = await processImage(rawFile);
 
-      await profileProvider.updateProfile(
-        auth,
-        name: name,
-        imageFile: file,
-      );
+      await profileProvider.updateProfile(auth, name: name, imageFile: file);
 
       if (!mounted) return;
       showGarudaSnackbar(context, 'Foto berhasil diperbarui');
@@ -102,15 +100,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final name = user?.name ?? '';
 
     if (user?.profilePhoto == null || user!.profilePhoto!.isEmpty) {
-      showGarudaSnackbar(context, 'Belum ada foto untuk dihapus', isError: true);
+      showGarudaSnackbar(
+        context,
+        'Belum ada foto untuk dihapus',
+        isError: true,
+      );
       return;
     }
 
-    await profileProvider.updateProfile(
-      auth,
-      name: name,
-      removePhoto: true,
-    );
+    await profileProvider.updateProfile(auth, name: name, removePhoto: true);
 
     if (!mounted) return;
     showGarudaSnackbar(context, 'Foto berhasil dihapus');
@@ -125,7 +123,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final resized = img.copyResize(image, width: 600);
     final jpg = img.encodeJpg(resized, quality: 65);
 
-    final newPath = '${file.parent.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final newPath =
+        '${file.parent.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
     final newFile = File(newPath);
 
     await newFile.writeAsBytes(jpg);
@@ -188,9 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     if (profile.isLoading && user == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
@@ -202,27 +199,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SliverToBoxAdapter(
             child: Padding(
-                  padding: EdgeInsets.fromLTRB(20,20,20,20 + MediaQuery.of(context).padding.bottom),
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.base,
+                AppSpacing.sm,
+                AppSpacing.base,
+                AppSpacing.base + MediaQuery.of(context).padding.bottom,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildProfileCard(context, cs, user),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.lg),
 
                   _SectionLabel('Akun'),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildAccountSection(context, cs, auth),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   _SectionLabel('Notifikasi'),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildNotificationSection(context, cs),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   _SectionLabel('Lainnya'),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildOtherSection(context, cs),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   _buildLogoutButton(context, cs, auth),
                 ],
@@ -235,15 +237,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // Section Builders
-  Widget _buildProfileCard(BuildContext context, ColorScheme cs, UserModel? user) {
+  Widget _buildProfileCard(
+    BuildContext context,
+    ColorScheme cs,
+    UserModel? user,
+  ) {
     final base = AppConstants.baseUrl.replaceAll('/api', '');
-    final imageUrl = user?.profilePhoto != null && user!.profilePhoto!.isNotEmpty
+    final imageUrl =
+        user?.profilePhoto != null && user!.profilePhoto!.isNotEmpty
         ? '$base${user.profilePhoto}'
         : null;
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base),
         child: Row(
           children: [
             GestureDetector(
@@ -271,18 +278,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : null,
                   ),
                   Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(AppSpacing.xs),
                     decoration: BoxDecoration(
                       color: cs.secondaryContainer,
                       shape: BoxShape.circle,
                       border: Border.all(color: cs.surface, width: 2),
                     ),
-                    child: Icon(Icons.edit, size: 12, color: cs.onSecondaryContainer),
+                    child: Icon(
+                      Icons.edit,
+                      size: 12,
+                      color: cs.onSecondaryContainer,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.base),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,11 +301,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     user?.name ?? 'Pengguna GarudaHub',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: cs.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     user?.email ?? '',
                     style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
@@ -308,7 +319,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAccountSection(BuildContext context, ColorScheme cs, AuthProvider auth) {
+  Widget _buildAccountSection(
+    BuildContext context,
+    ColorScheme cs,
+    AuthProvider auth,
+  ) {
     final tz = context.watch<TimezoneProvider>();
     return Card(
       child: Column(
@@ -421,10 +436,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required bool enabled,
     required ValueChanged<bool> onChanged,
   }) {
-    return Switch(
-      value: value,
-      onChanged: enabled ? onChanged : null,
-    );
+    return Switch(value: value, onChanged: enabled ? onChanged : null);
   }
 
   Future<void> _onNotificationToggle(BuildContext context, bool val) async {
@@ -447,7 +459,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _onMatchNotificationToggle(BuildContext context, bool val) async {
+  Future<void> _onMatchNotificationToggle(
+    BuildContext context,
+    bool val,
+  ) async {
     await NotificationService.instance.setMatchNotificationsEnabled(val);
 
     if (!mounted) return;
@@ -460,7 +475,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _onResultNotificationToggle(BuildContext context, bool val) async {
+  Future<void> _onResultNotificationToggle(
+    BuildContext context,
+    bool val,
+  ) async {
     await NotificationService.instance.setResultNotificationsEnabled(val);
 
     if (!mounted) return;
@@ -521,7 +539,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context, ColorScheme cs, AuthProvider auth) {
+  Widget _buildLogoutButton(
+    BuildContext context,
+    ColorScheme cs,
+    AuthProvider auth,
+  ) {
     return FilledButton.tonal(
       onPressed: () => _confirmLogout(context, auth),
       style: FilledButton.styleFrom(
@@ -534,7 +556,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.logout, size: 18),
-          SizedBox(width: 8),
+          SizedBox(width: AppSpacing.sm),
           Text('Keluar', style: TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
@@ -549,13 +571,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final isAvailable = snapshot.data ?? false;
         return Switch(
           value: auth.isBiometricEnabled,
-          onChanged: isAvailable ? (val) => _onBiometricToggle(context, auth, val) : null,
+          onChanged: isAvailable
+              ? (val) => _onBiometricToggle(context, auth, val)
+              : null,
         );
       },
     );
   }
 
-  Future<void> _onBiometricToggle(BuildContext context, AuthProvider auth, bool val) async {
+  Future<void> _onBiometricToggle(
+    BuildContext context,
+    AuthProvider auth,
+    bool val,
+  ) async {
     if (val) {
       final ok = await BiometricService.authenticate();
       if (!ok) {
@@ -574,9 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (context.mounted) {
       showGarudaSnackbar(
         context,
-        val
-            ? 'Biometrik berhasil diaktifkan'
-            : 'Biometrik dinonaktifkan',
+        val ? 'Biometrik berhasil diaktifkan' : 'Biometrik dinonaktifkan',
       );
     }
   }
@@ -609,7 +635,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       showDragHandle: true,
       builder: (_) {
         return ListView(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md - 2),
           children: TimezoneProvider.options.entries.map((e) {
             final isSelected = e.key == tzProvider.selected;
 
@@ -622,10 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 tzProvider.setTimezone(e.key);
                 Navigator.pop(context);
 
-                showGarudaSnackbar(
-                  context,
-                  'Zona waktu diubah ke ${e.value}',
-                );
+                showGarudaSnackbar(context, 'Zona waktu diubah ke ${e.value}');
               },
             );
           }).toList(),
@@ -659,7 +682,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 chant.stop();
 
                 if (context.mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/login', (_) => false);
                 }
               },
               style: FilledButton.styleFrom(backgroundColor: cs.error),
@@ -699,7 +724,12 @@ class _MenuTile extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
 
-  const _MenuTile({required this.icon, required this.label, this.trailing, this.onTap});
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    this.trailing,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -707,7 +737,8 @@ class _MenuTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: cs.onSurfaceVariant),
       title: Text(label, style: TextStyle(color: cs.onSurface)),
-      trailing: trailing ?? Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+      trailing:
+          trailing ?? Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     );

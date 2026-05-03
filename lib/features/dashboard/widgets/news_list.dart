@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/news/models/news_data.dart';
 
 class NewsList extends StatelessWidget {
@@ -23,7 +24,7 @@ class NewsList extends StatelessWidget {
       return Column(
         children: List.generate(3, (i) {
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
             height: 90,
             decoration: BoxDecoration(
               color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -36,7 +37,7 @@ class NewsList extends StatelessWidget {
 
     if (news.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
         child: Center(
           child: Text(
             'Belum ada berita terbaru',
@@ -71,7 +72,7 @@ class NewsList extends StatelessWidget {
               curve: Curves.easeOut,
             )),
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: AppSpacing.md - 2),
               child: Material(
                 color: cs.surface,
                 elevation: 1,
@@ -117,12 +118,14 @@ class NewsList extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
 
                       // Content
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.md - 2,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -139,7 +142,7 @@ class NewsList extends StatelessWidget {
                                 ),
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: AppSpacing.sm - 2),
 
                               // Time
                               Row(
@@ -149,7 +152,7 @@ class NewsList extends StatelessWidget {
                                     size: 11,
                                     color: cs.onSurfaceVariant,
                                   ),
-                                  const SizedBox(width: 3),
+                                  const SizedBox(width: AppSpacing.xs - 1),
                                   Text(
                                     item.relativeTime,
                                     style: TextStyle(
@@ -164,7 +167,7 @@ class NewsList extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                     ],
                   ),
                 ),

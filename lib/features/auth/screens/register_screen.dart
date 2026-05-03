@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'verify_email_screen.dart';
 
@@ -22,7 +23,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_agreeTerms) {
-      showGarudaSnackbar(context, 'Setujui syarat & ketentuan terlebih dahulu', isError: true);
+      showGarudaSnackbar(
+        context,
+        'Setujui syarat & ketentuan terlebih dahulu',
+        isError: true,
+      );
       return;
     }
     setState(() => _isLoading = true);
@@ -38,10 +43,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => VerifyEmailScreen(email: _emailCtrl.text.trim())),
+        MaterialPageRoute(
+          builder: (_) => VerifyEmailScreen(email: _emailCtrl.text.trim()),
+        ),
       );
     } else {
-      showGarudaSnackbar(context, result['data']['message'] ?? 'Registrasi gagal', isError: true);
+      showGarudaSnackbar(
+        context,
+        result['data']['message'] ?? 'Registrasi gagal',
+        isError: true,
+      );
     }
   }
 
@@ -59,7 +70,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           maxChildSize: 0.95,
           builder: (_, controller) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.base,
+                vertical: AppSpacing.base,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -68,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Container(
                       width: 40,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
+                      margin: const EdgeInsets.only(bottom: AppSpacing.base),
                       decoration: BoxDecoration(
                         color: Colors.grey[400],
                         borderRadius: BorderRadius.circular(10),
@@ -80,29 +94,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Text(
                       'Syarat & Ketentuan',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Center(
                     child: Text(
                       'GarudaHub',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
                   const Divider(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   // Konten scroll
                   Expanded(
                     child: ListView(
                       controller: controller,
                       children: const [
                         _TermsIntro(),
-                        SizedBox(height: 16),
+                        SizedBox(height: AppSpacing.base),
                         _TermsSection(
                           number: '1',
                           title: 'Penggunaan Akun',
@@ -145,9 +159,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           content:
                               'Dengan mencentang "Syarat & Ketentuan", Anda menyatakan setuju untuk terikat dengan seluruh aturan yang berlaku di GarudaHub.',
                         ),
-                        SizedBox(height: 16),
+                        SizedBox(height: AppSpacing.base),
                         _TermsFooter(),
-                        SizedBox(height: 24),
+                        SizedBox(height: AppSpacing.lg),
                       ],
                     ),
                   ),
@@ -184,12 +198,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // Back + Title
                   Row(
@@ -198,26 +212,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () => Navigator.of(context).pop(),
                         icon: const Icon(Icons.arrow_back_ios_new, size: 18),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Buat Akun Baru',
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: cs.onSurface, fontWeight: FontWeight.bold)),
-                            Text('Mau lihat perkembangan King Indonesia? Daftar sekarang.',
-                                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13)),
+                            Text(
+                              'Buat Akun Baru',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: cs.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            Text(
+                              'Mau lihat perkembangan King Indonesia? Daftar sekarang.',
+                              style: TextStyle(
+                                color: cs.onSurfaceVariant,
+                                fontSize: 13,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.lg),
 
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Column(
                         children: [
                           GarudaTextField(
@@ -225,47 +249,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _nameCtrl,
                             prefixIcon: Icons.person_outline,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Nama wajib diisi';
+                              if (v == null || v.isEmpty)
+                                return 'Nama wajib diisi';
                               if (v.length < 2) return 'Nama terlalu pendek';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.base),
                           GarudaTextField(
                             label: 'Email',
                             controller: _emailCtrl,
                             prefixIcon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Email wajib diisi';
+                              if (v == null || v.isEmpty)
+                                return 'Email wajib diisi';
                               if (!v.contains('@')) return 'Email tidak valid';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.base),
                           GarudaTextField(
                             label: 'Kata Sandi',
                             controller: _passCtrl,
                             prefixIcon: Icons.lock_outline,
                             isPassword: true,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Kata sandi wajib diisi';
+                              if (v == null || v.isEmpty)
+                                return 'Kata sandi wajib diisi';
                               if (v.length < 6) return 'Minimal 6 karakter';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.base),
                           GarudaTextField(
                             label: 'Konfirmasi Kata Sandi',
                             controller: _confirmPassCtrl,
                             prefixIcon: Icons.lock_outline,
                             isPassword: true,
                             validator: (v) {
-                              if (v != _passCtrl.text) return 'Kata sandi tidak cocok';
+                              if (v != _passCtrl.text)
+                                return 'Kata sandi tidak cocok';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.lg),
 
                           // Terms checkbox
                           Row(
@@ -273,7 +301,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             children: [
                               Checkbox(
                                 value: _agreeTerms,
-                                onChanged: (v) => setState(() => _agreeTerms = v ?? false),
+                                onChanged: (v) =>
+                                    setState(() => _agreeTerms = v ?? false),
                               ),
                               Expanded(
                                 child: RichText(
@@ -284,14 +313,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       height: 1.4,
                                     ),
                                     children: [
-                                      const TextSpan(text: 'Saya setuju dengan '),
+                                      const TextSpan(
+                                        text: 'Saya setuju dengan ',
+                                      ),
                                       TextSpan(
                                         text: 'Syarat & Ketentuan',
                                         style: TextStyle(
                                           color: cs.primary,
                                           fontWeight: FontWeight.bold,
                                         ),
-                                        recognizer: TapGestureRecognizer()..onTap = _showTerms,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = _showTerms,
                                       ),
                                       const TextSpan(text: ' GarudaHub'),
                                     ],
@@ -300,7 +332,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSpacing.lg),
 
                           GarudaButton(
                             text: 'Daftar Sekarang',
@@ -311,22 +343,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Sudah punya akun? ',
-                          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14)),
+                      Text(
+                        'Sudah punya akun? ',
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
+                      ),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
-                        child: Text('Masuk',
-                            style: TextStyle(
-                                color: cs.primary, fontSize: 14, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'Masuk',
+                          style: TextStyle(
+                            color: cs.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
@@ -368,7 +410,7 @@ class _TermsSection extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: AppSpacing.base),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -376,7 +418,7 @@ class _TermsSection extends StatelessWidget {
           Container(
             width: 28,
             height: 28,
-            margin: const EdgeInsets.only(top: 1, right: 12),
+            margin: const EdgeInsets.only(top: 1, right: AppSpacing.md),
             decoration: BoxDecoration(
               color: cs.primary.withValues(alpha: 0.12),
               shape: BoxShape.circle,
@@ -398,17 +440,17 @@ class _TermsSection extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   content,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        height: 1.6,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    height: 1.6,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   textAlign: TextAlign.left,
                 ),
               ],
@@ -428,9 +470,9 @@ class _TermsFooter extends StatelessWidget {
     return Text(
       'Terakhir diperbarui: April 2026',
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey,
-            fontStyle: FontStyle.italic,
-          ),
+        color: Colors.grey,
+        fontStyle: FontStyle.italic,
+      ),
     );
   }
 }

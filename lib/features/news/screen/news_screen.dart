@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/news/providers/news_provider.dart';
 import 'package:garudahub/features/news/screen/news_detail_screen.dart';
 import 'package:provider/provider.dart';
@@ -52,7 +53,7 @@ class _NewsScreenState extends State<NewsScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(provider.error!),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     ElevatedButton(
                       onPressed: provider.fetchNews,
                       child: const Text('Coba lagi'),
@@ -65,9 +66,9 @@ class _NewsScreenState extends State<NewsScreen> {
               return const Center(child: Text('Belum ada berita'));
             }
             return ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.base),
               itemCount: provider.news.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (_, i) {
                 final item = provider.news[i];
                 return Card(
@@ -91,7 +92,7 @@ class _NewsScreenState extends State<NewsScreen> {
                             errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                           ),
                         Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(AppSpacing.md),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -103,7 +104,7 @@ class _NewsScreenState extends State<NewsScreen> {
                                 ),
                               ),
                               if (item.author != null || item.source != null) ...[
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xs),
                                 Text(
                                   [item.author, item.source]
                                       .whereType<String>()

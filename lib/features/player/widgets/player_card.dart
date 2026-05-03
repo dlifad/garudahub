@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:shimmer/shimmer.dart';
 import '../models/player_model.dart';
 
@@ -63,20 +64,20 @@ class PlayerCard extends StatelessWidget {
 
                   // Badge posisi kiri atas
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: AppSpacing.sm,
+                    left: AppSpacing.sm,
                     child: _PosBadge(label: player.position, color: posCol),
                   ),
 
                   // Badge NAT kanan atas
                   if (player.isNaturalized)
                     Positioned(
-                      top: 8,
-                      right: 8,
+                      top: AppSpacing.sm,
+                      right: AppSpacing.sm,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                          horizontal: AppSpacing.sm - 2,
+                          vertical: AppSpacing.xs - 2,
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFD4AF37).withOpacity(0.2),
@@ -103,7 +104,12 @@ class PlayerCard extends StatelessWidget {
 
             // ── Info bawah ────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                AppSpacing.md,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -116,14 +122,14 @@ class PlayerCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     player.currentClub ?? '-',
                     style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                 ],
               ),
             ),
@@ -198,7 +204,10 @@ class _PosBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm - 1,
+        vertical: AppSpacing.xs - 1,
+      ),
       decoration: BoxDecoration(
         color: color.withOpacity(0.85),
         borderRadius: BorderRadius.circular(6),

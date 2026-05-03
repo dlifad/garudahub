@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/profile/screens/verify_email_update_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
@@ -99,7 +100,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(title: const Text('Edit Profil')),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
           child: Form(
             key: _formKey,
             child: Column(
@@ -115,7 +116,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ? 'Nama wajib diisi'
                           : null,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.base + AppSpacing.xs),
                 TextFormField(
                   controller: emailController,
                   decoration: const InputDecoration(
@@ -132,7 +133,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.base + AppSpacing.xs),
                 SizedBox(
                   width: double.infinity,
                   height: 50,

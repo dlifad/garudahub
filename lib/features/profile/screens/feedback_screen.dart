@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:garudahub/shared/widgets/garuda_widgets.dart';
@@ -46,14 +47,14 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Beri Penilaian')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
         child: Column(
           children: [
             Text(
               'Bagikan penilaian, saran, atau pesan kamu untuk GarudaHub',
               style: TextStyle(color: cs.onSurfaceVariant),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
 
             TextField(
               controller: _controller,
@@ -64,7 +65,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.base + AppSpacing.xs),
 
             SizedBox(
               width: double.infinity,

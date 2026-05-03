@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/ai/models/chat_message_model.dart';
 import 'package:garudahub/features/ai/services/gemini_service.dart';
 
@@ -184,7 +185,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
               alignment: Alignment.center,
               child: const Text('🦅', style: TextStyle(fontSize: 16)),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.md - 2),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -196,7 +197,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xs - 2),
                 Text(
                   'Ai • Timnas Expert',
                   style: TextStyle(
@@ -241,7 +242,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
                   vertical: 6,
                 ),
                 itemCount: _suggestions.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
                 itemBuilder: (_, i) => ActionChip(
                   label: Text(
                     _suggestions[i],
@@ -259,7 +260,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
           Expanded(
             child: ListView.builder(
               controller: _scroll,
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
               itemCount: _msgs.length,
               itemBuilder: (_, i) {
                 final m = _msgs[i];
@@ -307,7 +308,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 GestureDetector(
                   onTap: _loading ? null : _send,
                   child: Container(
@@ -321,7 +322,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
                     ),
                     child: _loading
                         ? const Padding(
-                            padding: EdgeInsets.all(12),
+                            padding: EdgeInsets.all(AppSpacing.md),
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               color: Colors.white,
@@ -353,8 +354,8 @@ class _UserBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8, left: 56),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm, left: 56),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md + 2, vertical: AppSpacing.md - 2),
         decoration: const BoxDecoration(
           color: Color(0xFFCC0001),
           borderRadius: BorderRadius.only(
@@ -417,7 +418,7 @@ class _BotBubbleState extends State<_BotBubble>
           Container(
             width: 28,
             height: 28,
-            margin: const EdgeInsets.only(right: 6, bottom: 8),
+            margin: const EdgeInsets.only(right: AppSpacing.sm - 2, bottom: AppSpacing.sm),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
@@ -429,8 +430,8 @@ class _BotBubbleState extends State<_BotBubble>
           ),
           Flexible(
             child: Container(
-              margin: const EdgeInsets.only(bottom: 8, right: 56),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.only(bottom: AppSpacing.sm, right: 56),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md + 2, vertical: AppSpacing.md - 2),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest,
                 borderRadius: const BorderRadius.only(
@@ -467,7 +468,7 @@ class _BotBubbleState extends State<_BotBubble>
                               );
                             },
                           ),
-                          if (i < 2) const SizedBox(width: 4),
+                          if (i < 2) const SizedBox(width: AppSpacing.xs),
                         ],
                       ],
                     )
@@ -486,3 +487,4 @@ class _BotBubbleState extends State<_BotBubble>
     );
   }
 }
+

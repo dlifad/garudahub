@@ -15,6 +15,7 @@ import 'package:garudahub/features/dashboard/widgets/next_match_card.dart';
 import 'package:garudahub/features/dashboard/widgets/prediction_card.dart';
 import 'package:garudahub/features/dashboard/widgets/section_title.dart';
 import 'package:garudahub/features/notification/screens/notification_screen.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/notification/services/notification_inbox_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -253,9 +254,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: MediaQuery.of(context).padding.top + 12,
+            left: AppSpacing.base,
+            right: AppSpacing.base,
+            top: MediaQuery.of(context).padding.top + AppSpacing.md,
             bottom: 100,
           ),
           child: Column(
@@ -276,7 +277,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: cs.onPrimary,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.md - 2),
                   Text(
                     'GarudaHub',
                     style: TextStyle(
@@ -317,7 +318,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.base),
               _animated(
                 ctrl: _heroAnim,
                 begin: const Offset(0, -0.3),
@@ -328,22 +329,22 @@ class _DashboardScreenState extends State<DashboardScreen>
                   countdownLabel: _countdownLabel(),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.base),
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0),
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: AiChatWidget(),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               const SectionTitle('Pertandingan Berikutnya'),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _animated(
                 ctrl: _matchAnim,
                 begin: const Offset(0.3, 0),
                 child: NextMatchCard(isLoading: _isLoading, match: _nextMatch),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               const SectionTitle('Prediksi Skor'),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               _animated(
                 ctrl: _predAnim,
                 begin: const Offset(0, 0.3),
@@ -364,7 +365,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   predictionSummary: _predictionSummary(),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -378,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               NewsList(
                 isLoading: _isLoading,
                 news: _news,
@@ -391,10 +392,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
               if (_errorText != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(_errorText!, style: TextStyle(color: cs.error)),
               ],
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
             ],
           ),
         ),
@@ -402,3 +403,4 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 }
+

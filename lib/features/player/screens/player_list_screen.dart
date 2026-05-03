@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import '../models/player_model.dart';
 import '../services/player_service.dart';
 import '../widgets/player_card.dart';
@@ -64,13 +65,13 @@ class _PlayerListScreenState extends State<PlayerListScreen>
 
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 16,
+        titleSpacing: AppSpacing.base,
         centerTitle: false,
         title: const Text('Garuda Squad'),
         actions: [
           if (!_isLoading && _error == null)
             Padding(
-              padding: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.only(right: AppSpacing.md),
               child: Chip(
                 label: Text('${_filtered.length} Pemain'),
                 visualDensity: VisualDensity.compact,
@@ -85,7 +86,10 @@ class _PlayerListScreenState extends State<PlayerListScreen>
             height: 48,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
               children: [
                 _FilterChip(
                   label: 'Semua',
@@ -119,9 +123,9 @@ class _PlayerListScreenState extends State<PlayerListScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.error_outline, size: 48, color: cs.error),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(_error!, style: tt.bodyMedium),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
             FilledButton(onPressed: _load, child: const Text('Coba Lagi')),
           ],
         ),
@@ -134,7 +138,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.groups_outlined, size: 64, color: Colors.grey),
-            SizedBox(height: 12),
+            SizedBox(height: AppSpacing.md),
             Text('Belum ada pemain', style: TextStyle(color: Colors.grey)),
           ],
         ),
@@ -154,7 +158,12 @@ class _PlayerListScreenState extends State<PlayerListScreen>
         return [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base,
+                AppSpacing.base,
+                AppSpacing.base,
+                AppSpacing.sm,
+              ),
               child: Text(
                 '${_posLabel[pos]!.toUpperCase()}  (${list.length})',
                 style: TextStyle(
@@ -167,7 +176,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             sliver: SliverGrid(
               delegate: SliverChildBuilderDelegate(
                 (_, i) => PlayerCard(
@@ -178,8 +187,8 @@ class _PlayerListScreenState extends State<PlayerListScreen>
               ),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+                crossAxisSpacing: AppSpacing.md,
+                mainAxisSpacing: AppSpacing.md,
                 childAspectRatio: 0.72,
               ),
             ),
@@ -206,12 +215,17 @@ class _PlayerGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.md,
+        AppSpacing.base,
+      ),
       itemCount: players.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+        crossAxisSpacing: AppSpacing.md,
+        mainAxisSpacing: AppSpacing.md,
         childAspectRatio: 0.72,
       ),
       itemBuilder: (_, i) =>
@@ -235,7 +249,7 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: AppSpacing.sm),
       child: FilterChip(
         label: Text(label),
         selected: selected,

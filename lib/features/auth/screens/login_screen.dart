@@ -9,6 +9,7 @@ import 'package:garudahub/core/models/user_model.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/auth/screens/forgot_password_screen.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 import 'package:garudahub/features/chant/providers/chant_provider.dart';
 
@@ -58,7 +59,11 @@ class _LoginScreenState extends State<LoginScreen> {
       }
       Navigator.of(context).pushReplacementNamed('/home');
     } else {
-      showGarudaSnackbar(context, result['data']['message'] ?? 'Login gagal', isError: true);
+      showGarudaSnackbar(
+        context,
+        result['data']['message'] ?? 'Login gagal',
+        isError: true,
+      );
     }
   }
 
@@ -134,17 +139,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  const SizedBox(height: 60),
+                  const SizedBox(height: AppSpacing.xxl),
                   Image.asset(
                     'assets/images/logo.png',
                     width: 120,
                     height: 120,
-                  ),  
+                  ),
                   Text(
                     'GARUDAHUB',
                     style: TextStyle(
@@ -154,25 +159,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       letterSpacing: 3,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Selamat datang kembali!',
                     style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppSpacing.xl),
 
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Masuk',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(color: cs.onSurface, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 24),
+                          Text(
+                            'Masuk',
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: cs.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
 
                           GarudaTextField(
                             label: 'Email',
@@ -180,12 +188,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             prefixIcon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Email wajib diisi';
+                              if (v == null || v.isEmpty)
+                                return 'Email wajib diisi';
                               if (!v.contains('@')) return 'Email tidak valid';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.base),
 
                           GarudaTextField(
                             label: 'Kata Sandi',
@@ -193,12 +202,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             prefixIcon: Icons.lock_outline,
                             isPassword: true,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Kata sandi wajib diisi';
+                              if (v == null || v.isEmpty)
+                                return 'Kata sandi wajib diisi';
                               if (v.length < 6) return 'Minimal 6 karakter';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: AppSpacing.xs),
 
                           Align(
                             alignment: Alignment.centerRight,
@@ -207,14 +217,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const ForgotPasswordScreen(),
+                                    builder: (_) =>
+                                        const ForgotPasswordScreen(),
                                   ),
                                 );
                               },
                               child: const Text('Lupa kata sandi?'),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.sm),
 
                           GarudaButton(
                             text: 'Masuk',
@@ -222,24 +233,41 @@ class _LoginScreenState extends State<LoginScreen> {
                             isLoading: _isLoading,
                           ),
 
-                          if (_biometricAvailable && auth.isBiometricEnabled) ...[
-                            const SizedBox(height: 16),
-                            Row(children: [
-                              Expanded(child: Divider(color: cs.outlineVariant)),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                child: Text('atau', style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13)),
-                              ),
-                              Expanded(child: Divider(color: cs.outlineVariant)),
-                            ]),
-                            const SizedBox(height: 16),
+                          if (_biometricAvailable &&
+                              auth.isBiometricEnabled) ...[
+                            const SizedBox(height: AppSpacing.base),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(color: cs.outlineVariant),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.md,
+                                  ),
+                                  child: Text(
+                                    'atau',
+                                    style: TextStyle(
+                                      color: cs.onSurfaceVariant,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Divider(color: cs.outlineVariant),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.base),
                             OutlinedButton.icon(
                               onPressed: _biometricLogin,
                               icon: const Icon(Icons.fingerprint, size: 22),
                               label: const Text('Masuk dengan Biometrik'),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 52),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
                               ),
                             ),
                           ],
@@ -247,22 +275,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Belum punya akun? ',
-                          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14)),
+                      Text(
+                        'Belum punya akun? ',
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
+                      ),
                       GestureDetector(
-                        onTap: () => Navigator.of(context).pushNamed('/register'),
-                        child: Text('Daftar sekarang',
-                            style: TextStyle(
-                                color: cs.primary, fontSize: 14, fontWeight: FontWeight.bold)),
+                        onTap: () =>
+                            Navigator.of(context).pushNamed('/register'),
+                        child: Text(
+                          'Daftar sekarang',
+                          style: TextStyle(
+                            color: cs.primary,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
