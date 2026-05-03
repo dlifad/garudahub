@@ -191,12 +191,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 16,
+        centerTitle: false,
+        title: const Text('Profil'),
+      ),
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.medium(
-            title: const Text('Profil'),
-            backgroundColor: cs.surface,
-          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(

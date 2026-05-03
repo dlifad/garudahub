@@ -201,18 +201,27 @@ class _ShopScreenState extends State<ShopScreen> {
 
                   Row(
                     children: [
-                      Expanded(
-                        child: GarudaButton(
-                          text: 'Reset',
-                          color: cs.surfaceContainerHighest,
-                          onPressed: () {
-                            _minPriceController.clear();
-                            _maxPriceController.clear();
-                            setSheetState(() => tempSort = 'default');
-                          },
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              _minPriceController.clear();
+                              _maxPriceController.clear();
+                              setSheetState(() => tempSort = 'default');
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: cs.outline),
+                              foregroundColor: cs.onSurface,
+                              minimumSize: const Size(double.infinity, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(28),
+                              ),
+                            ),
+                            child: const Text('Reset',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: GarudaButton(
                           text: 'Terapkan',
