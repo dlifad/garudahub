@@ -175,7 +175,7 @@ class _MatchScreenState extends State<MatchScreen>
               bottom: (_isLoading || _years.isEmpty)
                   ? null
                   : PreferredSize(
-                      preferredSize: const Size.fromHeight(58),
+                      preferredSize: const Size.fromHeight(40),
                       child: Column(
                         children: [
                           YearSelector(

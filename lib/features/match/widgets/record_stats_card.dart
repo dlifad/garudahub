@@ -19,6 +19,7 @@ class RecordStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final title = year == -1 ? 'INDONESIA' : 'INDONESIA $year';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
@@ -55,7 +56,7 @@ class RecordStatsCard extends StatelessWidget {
               const Text('🇮🇩', style: TextStyle(fontSize: 18)),
               const SizedBox(width: AppSpacing.sm),
               Text(
-                'INDONESIA $year',
+                title,
                 style: tt.labelMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
