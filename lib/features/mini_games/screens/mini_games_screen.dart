@@ -53,25 +53,25 @@ class MiniGamesScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // ── Section label ───────────────────────────────
-            Text(
-              'Pilih Game',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Uji kemampuan & prediksimu bersama Timnas',
-              style: TextStyle(
-                fontSize: 12,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
+            // // ── Section label ───────────────────────────────
+            // Text(
+            //   'Pilih Game',
+            //   style: TextStyle(
+            //     fontSize: 15,
+            //     fontWeight: FontWeight.w700,
+            //     color: cs.onSurface,
+            //   ),
+            // ),
+            // const SizedBox(height: 4),
+            // Text(
+            //   'Uji kemampuan & prediksimu bersama Timnas',
+            //   style: TextStyle(
+            //     fontSize: 12,
+            //     color: cs.onSurfaceVariant,
+            //   ),
+            // ),
 
-            const SizedBox(height: 16),
+            //const SizedBox(height: 8),
 
             // ── Adu Penalti ────────────────────────────────
             _GameCard(
