@@ -69,11 +69,16 @@ class NextMatchCard extends StatelessWidget {
           colors: [Color(0xFFDC0000), Color(0xFFB00000)],
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x4DDC0000),
-            blurRadius: 16,
-            offset: Offset(0, 6),
+            color: const Color(0xFFDC0000).withOpacity(0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),

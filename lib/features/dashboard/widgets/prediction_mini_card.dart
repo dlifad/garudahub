@@ -21,12 +21,17 @@ class PredictionMiniCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.outline.withOpacity(0.12)),
+        border: Border.all(color: const Color(0xFFCC0001).withOpacity(0.10)),
         boxShadow: [
           BoxShadow(
-            color: cs.shadow.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: const Color(0xFFCC0001).withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
         ],
       ),

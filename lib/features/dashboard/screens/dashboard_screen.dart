@@ -392,139 +392,140 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: _shimmerCtrl,
-        builder: (_, __) {
-          return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF14532D),
-                  Color(0xFF166534),
-                  Color(0xFF15803D),
-                ],
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFF22C55E).withOpacity(0.25),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFCC0001).withOpacity(0.12),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFCC0001).withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Ikon bola + shimmer ring merah
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedBuilder(
+                  animation: _shimmerCtrl,
+                  builder: (_, __) => Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFCC0001).withOpacity(
+                          0.2 +
+                              0.3 *
+                                  (0.5 +
+                                      0.5 *
+                                          (_shimmerCtrl.value * 2 - 1).abs()),
+                        ),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCC0001).withOpacity(0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text('⚽', style: TextStyle(fontSize: 24)),
+                  ),
                 ),
               ],
             ),
-            child: Row(
-              children: [
-                // Ikon bola + shimmer ring
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF4ADE80).withOpacity(
-                            0.3 +
-                                0.4 *
-                                    (0.5 +
-                                        0.5 *
-                                            (_shimmerCtrl.value * 2 - 1).abs()),
-                          ),
-                          width: 2,
+            const SizedBox(width: 14),
+            // Teks
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Mini Games',
+                        style: TextStyle(
+                          color: cs.onSurface,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Center(
-                        child: Text('⚽', style: TextStyle(fontSize: 24)),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 14),
-                // Teks
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Text(
-                            'Mini Games',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFCC0001).withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: const Color(0xFFCC0001).withOpacity(0.3),
+                            width: 1,
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF4ADE80).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: const Color(0xFF4ADE80).withOpacity(0.5),
-                                width: 1,
-                              ),
-                            ),
-                            child: const Text(
-                              'NEW',
-                              style: TextStyle(
-                                color: Color(0xFF4ADE80),
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
+                        ),
+                        child: const Text(
+                          'NEW',
+                          style: TextStyle(
+                            color: Color(0xFFCC0001),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.5,
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Adu penalti pakai gyro HP kamu!',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.65),
-                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
-                ),
-                // Arrow
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Adu penalti pakai gyro HP kamu!',
+                    style: TextStyle(
+                      color: cs.onSurface.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          );
-        },
+            // Arrow — merah
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFCC0001).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                color: Color(0xFFCC0001),
+                size: 18,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
