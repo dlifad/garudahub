@@ -58,37 +58,54 @@ class _PenaltyGameScreenState extends State<PenaltyGameScreen> {
               children: [
                 Positioned.fill(child: CustomPaint(painter: FieldPainter())),
                 Positioned(
-                  top: MediaQuery.of(context).size.height * 0.06,
-                  left: 0, right: 0,
+                  top: MediaQuery.of(context).size.height * 0.22 - 80,
+                  left: 0,
+                  right: 0,
                   child: _GoalWidget(),
                 ),
                 Positioned(
-                  top: MediaQuery.of(context).size.height * 0.14,
-                  left: 0, right: 0,
+                  top: MediaQuery.of(context).size.height * 0.22 - 10,
+                  left: 0,
+                  right: 0,
                   child: Center(
                     child: GoalkeeperWidget(
                       diveZone: state.keeperDive,
-                      isDiving: state.phase == GamePhase.result || state.phase == GamePhase.shooting,
+                      isDiving:
+                          state.phase == GamePhase.result ||
+                          state.phase == GamePhase.shooting,
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 0, left: 0, right: 0,
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   child: SafeArea(
-                    child: _HudBar(currentShot: state.currentShot, totalShots: state.totalShots, goals: state.goals),
+                    child: _HudBar(
+                      currentShot: state.currentShot,
+                      totalShots: state.totalShots,
+                      goals: state.goals,
+                    ),
                   ),
                 ),
                 Positioned(
                   bottom: MediaQuery.of(context).size.height * 0.14,
-                  left: 0, right: 0,
+                  left: 0,
+                  right: 0,
                   child: Column(
                     children: [
-                      AimArrowWidget(currentZone: state.currentAim, isActive: state.phase == GamePhase.aiming),
+                      AimArrowWidget(
+                        currentZone: state.currentAim,
+                        isActive: state.phase == GamePhase.aiming,
+                      ),
                       const SizedBox(height: 16),
                       Center(
                         child: BallWidget(
-                          isShooting: state.phase == GamePhase.shooting,
+                          isShooting:
+                              state.phase == GamePhase.shooting ||
+                              state.phase == GamePhase.result,
                           targetZone: state.currentAim,
+                          isGoal: state.lastResult == ShotResult.goal,
                           onShootComplete: () {},
                         ),
                       ),
@@ -98,11 +115,17 @@ class _PenaltyGameScreenState extends State<PenaltyGameScreen> {
                 if (state.phase == GamePhase.aiming)
                   Positioned(
                     bottom: MediaQuery.of(context).size.height * 0.06,
-                    left: 0, right: 0,
+                    left: 0,
+                    right: 0,
                     child: Center(
                       child: Text(
                         'TAP LAYAR UNTUK TEMBAK',
-                        style: TextStyle(color: Colors.white.withOpacity(0.55), fontSize: 11, letterSpacing: 3, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.55),
+                          fontSize: 11,
+                          letterSpacing: 3,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -128,7 +151,9 @@ class _GoalWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
-    return Center(child: CustomPaint(size: Size(w * 0.72, 80), painter: _GoalPainter()));
+    return Center(
+      child: CustomPaint(size: Size(w * 0.72, 80), painter: _GoalPainter()),
+    );
   }
 }
 
@@ -137,23 +162,42 @@ class _GoalPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    final postPaint = Paint()..color = Colors.white..strokeWidth = 5..style = PaintingStyle.stroke..strokeCap = StrokeCap.round;
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), Paint()..color = Colors.white.withOpacity(0.07));
-    final netPaint = Paint()..color = Colors.white.withOpacity(0.14)..strokeWidth = 0.8;
-    for (double x = 0; x <= w; x += 12) canvas.drawLine(Offset(x, 0), Offset(x, h), netPaint);
-    for (double y = 0; y <= h; y += 12) canvas.drawLine(Offset(0, y), Offset(w, y), netPaint);
+    final postPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()..color = Colors.white.withOpacity(0.07),
+    );
+    final netPaint = Paint()
+      ..color = Colors.white.withOpacity(0.14)
+      ..strokeWidth = 0.8;
+    for (double x = 0; x <= w; x += 12)
+      canvas.drawLine(Offset(x, 0), Offset(x, h), netPaint);
+    for (double y = 0; y <= h; y += 12)
+      canvas.drawLine(Offset(0, y), Offset(w, y), netPaint);
     canvas.drawLine(Offset(0, 0), Offset(0, h), postPaint);
     canvas.drawLine(Offset(w, 0), Offset(w, h), postPaint);
     canvas.drawLine(Offset(0, 0), Offset(w, 0), postPaint);
-    canvas.drawRect(Rect.fromLTWH(0, h - 4, w, 4), Paint()..color = Colors.black.withOpacity(0.3));
+    canvas.drawRect(
+      Rect.fromLTWH(0, h - 4, w, 4),
+      Paint()..color = Colors.black.withOpacity(0.3),
+    );
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter old) => false;
 }
 
 class _HudBar extends StatelessWidget {
   final int currentShot, totalShots, goals;
-  const _HudBar({required this.currentShot, required this.totalShots, required this.goals});
+  const _HudBar({
+    required this.currentShot,
+    required this.totalShots,
+    required this.goals,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -173,23 +217,48 @@ class _HudBar extends StatelessWidget {
 class _HudChip extends StatelessWidget {
   final String label, value;
   final bool accent;
-  const _HudChip({required this.label, required this.value, this.accent = false});
+  const _HudChip({
+    required this.label,
+    required this.value,
+    this.accent = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: accent ? const Color(0xFF16A34A).withOpacity(0.25) : Colors.black.withOpacity(0.45),
+        color: accent
+            ? const Color(0xFF16A34A).withOpacity(0.25)
+            : Colors.black.withOpacity(0.45),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: accent ? const Color(0xFF22C55E).withOpacity(0.4) : Colors.white.withOpacity(0.1)),
+        border: Border.all(
+          color: accent
+              ? const Color(0xFF22C55E).withOpacity(0.4)
+              : Colors.white.withOpacity(0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(label, style: TextStyle(fontSize: 9, color: Colors.white.withOpacity(0.45), letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9,
+              color: Colors.white.withOpacity(0.45),
+              letterSpacing: 1.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(value, style: TextStyle(fontSize: 15, color: accent ? const Color(0xFF4ADE80) : Colors.white, fontWeight: FontWeight.w800)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              color: accent ? const Color(0xFF4ADE80) : Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );

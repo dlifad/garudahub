@@ -13,7 +13,7 @@ class FieldPainter extends CustomPainter {
       const Color(0xFF1A5C28),
       const Color(0xFF1E6B30),
     ];
-    final stripeH = 24.0;
+    const stripeH = 24.0;
     for (double y = 0; y < h; y += stripeH) {
       final idx = ((y / stripeH).floor()) % 2;
       canvas.drawRect(
@@ -22,7 +22,7 @@ class FieldPainter extends CustomPainter {
       );
     }
 
-    // Overlay perspektif (atas gelap jauh, bawah terang dekat)
+    // Overlay perspektif
     final perspGrad = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -52,13 +52,13 @@ class FieldPainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(0, 0, w, h * 0.5));
     canvas.drawRect(Rect.fromLTWH(0, 0, w, h * 0.5), lightPaint);
 
-    // Garis lapangan perspektif
     final linePaint = Paint()
       ..color = Colors.white.withOpacity(0.28)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    final horizonY = h * 0.34;
+    // ✅ Dinaikkan dari 0.34 → 0.22 agar sejajar dengan bawah gawang
+    final horizonY = h * 0.22;
 
     // Garis horizon
     canvas.drawLine(Offset(0, horizonY), Offset(w, horizonY), linePaint);
@@ -67,8 +67,8 @@ class FieldPainter extends CustomPainter {
     final penBoxPath = Path()
       ..moveTo(w * 0.14, horizonY)
       ..lineTo(w * 0.86, horizonY)
-      ..lineTo(w * 0.92, h * 0.52)
-      ..lineTo(w * 0.08, h * 0.52)
+      ..lineTo(w * 0.92, h * 0.42)
+      ..lineTo(w * 0.08, h * 0.42)
       ..close();
     canvas.drawPath(penBoxPath, linePaint..color = Colors.white.withOpacity(0.28));
 
@@ -76,33 +76,33 @@ class FieldPainter extends CustomPainter {
     final sixYardPath = Path()
       ..moveTo(w * 0.31, horizonY)
       ..lineTo(w * 0.69, horizonY)
-      ..lineTo(w * 0.72, h * 0.43)
-      ..lineTo(w * 0.28, h * 0.43)
+      ..lineTo(w * 0.72, h * 0.34)
+      ..lineTo(w * 0.28, h * 0.34)
       ..close();
     canvas.drawPath(sixYardPath, linePaint..color = Colors.white.withOpacity(0.22));
 
     // Busur penalti
     final arcPath = Path();
-    arcPath.moveTo(w * 0.34, h * 0.52);
-    arcPath.quadraticBezierTo(w * 0.5, h * 0.63, w * 0.66, h * 0.52);
+    arcPath.moveTo(w * 0.34, h * 0.42);
+    arcPath.quadraticBezierTo(w * 0.5, h * 0.54, w * 0.66, h * 0.42);
     canvas.drawPath(arcPath, linePaint..color = Colors.white.withOpacity(0.22));
 
     // Garis tengah lapangan
     canvas.drawLine(
-      Offset(0, h * 0.74),
-      Offset(w, h * 0.74),
+      Offset(0, h * 0.68),
+      Offset(w, h * 0.68),
       linePaint..color = Colors.white.withOpacity(0.2),
     );
 
     // Lingkaran tengah (elips)
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(w / 2, h * 0.74), width: w * 0.35, height: h * 0.09),
+      Rect.fromCenter(center: Offset(w / 2, h * 0.68), width: w * 0.35, height: h * 0.09),
       linePaint..color = Colors.white.withOpacity(0.18),
     );
 
     // Titik tengah
     canvas.drawCircle(
-      Offset(w / 2, h * 0.74),
+      Offset(w / 2, h * 0.68),
       3,
       Paint()..color = Colors.white.withOpacity(0.35),
     );

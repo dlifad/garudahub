@@ -105,7 +105,7 @@ class _PenaltyEndScreenState extends State<PenaltyEndScreen>
               child: SafeArea(
                 child: Column(
                   children: [
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 120),
                     Text(
                       _ratingTitle,
                       style: TextStyle(

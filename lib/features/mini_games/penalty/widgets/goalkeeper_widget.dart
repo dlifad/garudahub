@@ -20,7 +20,7 @@ class _GoalkeeperWidgetState extends State<GoalkeeperWidget>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     _diveX = Tween<double>(begin: 0, end: 0).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
     );
