@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:garudahub/core/constants/constants.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
-import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
 import 'package:garudahub/features/dashboard/widgets/ai_chat_widget.dart';
@@ -16,9 +13,7 @@ import 'package:garudahub/features/dashboard/widgets/prediction_mini_card.dart';
 import 'package:garudahub/features/dashboard/widgets/section_title.dart';
 import 'package:garudahub/features/notification/screens/notification_screen.dart';
 import 'package:garudahub/features/notification/services/notification_inbox_service.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:garudahub/core/theme/app_theme.dart';
 
 import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:garudahub/features/news/screen/news_screen.dart';
@@ -122,8 +117,8 @@ class _DashboardScreenState extends State<DashboardScreen>
   void _startCountdown() {
     _countdownTimer?.cancel();
     _updateCountdown();
-    _countdownTimer =
-        Timer.periodic(const Duration(seconds: 1), (_) => _updateCountdown());
+    _countdownTimer = Timer.periodic(
+        const Duration(seconds: 1), (_) => _updateCountdown());
   }
 
   Future<void> _loadNotifCount() async {
@@ -165,8 +160,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     return FadeTransition(
       opacity: CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic),
       child: SlideTransition(
-        position: Tween<Offset>(begin: begin, end: Offset.zero)
-            .animate(CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic)),
+        position: Tween<Offset>(begin: begin, end: Offset.zero).animate(
+            CurvedAnimation(parent: ctrl, curve: Curves.easeOutCubic)),
         child: child,
       ),
     );
@@ -177,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: cs.surface,
       body: RefreshIndicator(
         onRefresh: _fetchData,
         child: SingleChildScrollView(
@@ -191,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Top bar ──────────────────────────────
+              // Top bar
               Row(
                 children: [
                   Container(
@@ -217,7 +212,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   const Spacer(),
                   _notifCount > 0
                       ? Badge(
-                          label: Text('\$_notifCount'),
+                          label: Text('$_notifCount'),
                           child: IconButton(
                             onPressed: () async {
                               await Navigator.push(
@@ -228,8 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                               );
                               await _loadNotifCount();
                             },
-                            icon: const Icon(
-                                Icons.notifications_outlined),
+                            icon: const Icon(Icons.notifications_outlined),
                           ),
                         )
                       : IconButton(
@@ -242,14 +236,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                             );
                             await _loadNotifCount();
                           },
-                          icon: const Icon(
-                              Icons.notifications_outlined),
+                          icon: const Icon(Icons.notifications_outlined),
                         ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // ── Hero ─────────────────────────────────
+              // Hero
               _animated(
                 ctrl: _heroAnim,
                 begin: const Offset(0, -0.3),
@@ -262,31 +255,30 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 16),
 
-              // ── Quick Actions: GarudaBot + Prediksi ──
+              // Quick Actions row: GarudaBot | Prediksi
+              // Pakai Row biasa (bukan IntrinsicHeight) agar tidak overflow
               _animated(
                 ctrl: _predAnim,
                 begin: const Offset(0, 0.2),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Expanded(child: AiChatWidget()),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: PredictionMiniCard(
-                          lastIndScore: 1,
-                          lastOppScore: 0,
-                        ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Expanded(child: AiChatWidget()),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: PredictionMiniCard(
+                        lastIndScore: 1,
+                        lastOppScore: 0,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 20),
 
-              // ── Next Match ───────────────────────────
+              // Next Match
               const SectionTitle('Pertandingan Berikutnya'),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               _animated(
                 ctrl: _matchAnim,
                 begin: const Offset(0.3, 0),
@@ -295,7 +287,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 20),
 
-              // ── News ─────────────────────────────────
+              // News
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -306,14 +298,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       MaterialPageRoute(
                           builder: (_) => const NewsScreen()),
                     ),
-                    child: Text(
-                      'Lihat semua',
-                      style: TextStyle(
-                        color: cs.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
+                    child: const Text('Lihat semua'),
                   ),
                 ],
               ),
@@ -328,12 +313,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                       builder: (_) => NewsDetailScreen(news: item)),
                 ),
               ),
-              if (_errorText != null) ...[  
+              if (_errorText != null) ...[
                 const SizedBox(height: 8),
                 Text(_errorText!,
                     style: TextStyle(color: cs.error)),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -341,4 +326,3 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 }
-

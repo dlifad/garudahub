@@ -3,15 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import 'package:garudahub/core/constants/constants.dart';
-import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
 
-// ── Model ─────────────────────────────────────────────
 class PredictionHistory {
   final int id;
   final String homeTeam;
@@ -51,7 +48,6 @@ class PredictionHistory {
   }
 }
 
-// ── Screen ────────────────────────────────────────────
 class PredictionScreen extends StatefulWidget {
   const PredictionScreen({super.key});
 
@@ -101,9 +97,9 @@ class _PredictionScreenState extends State<PredictionScreen> {
     try {
       final token = await AuthService.getToken();
       final res = await http.get(
-        Uri.parse('\${AppConstants.baseUrl}/predictions/mine'),
+        Uri.parse('${AppConstants.baseUrl}/predictions/mine'),
         headers: {
-          if (token != null) 'Authorization': 'Bearer \$token',
+          if (token != null) 'Authorization': 'Bearer $token',
         },
       );
       if (res.statusCode == 200) {
@@ -130,10 +126,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
     try {
       final token = await AuthService.getToken();
       final res = await http.post(
-        Uri.parse('\${AppConstants.baseUrl}/predictions'),
+        Uri.parse('${AppConstants.baseUrl}/predictions'),
         headers: {
           'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer \$token',
+          if (token != null) 'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
           'match_id': _nextMatch!.id,
@@ -172,8 +168,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
     );
     final token = await AuthService.getToken();
     await http.delete(
-      Uri.parse('\${AppConstants.baseUrl}/predictions/\${item.id}'),
-      headers: {if (token != null) 'Authorization': 'Bearer \$token'},
+      Uri.parse('${AppConstants.baseUrl}/predictions/${item.id}'),
+      headers: {if (token != null) 'Authorization': 'Bearer $token'},
     );
     await _loadHistory();
   }
@@ -202,16 +198,16 @@ class _PredictionScreenState extends State<PredictionScreen> {
     if (confirmed != true) return;
     final token = await AuthService.getToken();
     await http.delete(
-      Uri.parse('\${AppConstants.baseUrl}/predictions/\$id'),
-      headers: {if (token != null) 'Authorization': 'Bearer \$token'},
+      Uri.parse('${AppConstants.baseUrl}/predictions/$id'),
+      headers: {if (token != null) 'Authorization': 'Bearer $token'},
     );
     await _loadHistory();
   }
 
   String _predSummary() {
-    if (_indScore > _oppScore) return 'Indonesia Menang \$_indScore–\$_oppScore';
-    if (_indScore < _oppScore) return 'Lawan Menang \$_indScore–\$_oppScore';
-    return 'Imbang \$_indScore–\$_oppScore';
+    if (_indScore > _oppScore) return 'Indonesia Menang $_indScore\u2013$_oppScore';
+    if (_indScore < _oppScore) return 'Lawan Menang $_indScore\u2013$_oppScore';
+    return 'Imbang $_indScore\u2013$_oppScore';
   }
 
   String _countryCode(String flag) =>
@@ -237,10 +233,9 @@ class _PredictionScreenState extends State<PredictionScreen> {
           onRefresh: _loadData,
           child: ListView(
             controller: _scrollCtrl,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
-              // ── Header ─────────────────────────────
+              // Header
               Row(
                 children: [
                   GestureDetector(
@@ -253,8 +248,9 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 16),
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -270,14 +266,13 @@ class _PredictionScreenState extends State<PredictionScreen> {
               ),
               const SizedBox(height: 20),
 
-              // ── Input Card ─────────────────────────
+              // Input Card
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: cs.surface,
                   borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: cs.outline.withOpacity(0.12)),
+                  border: Border.all(color: cs.outline.withOpacity(0.12)),
                   boxShadow: [
                     BoxShadow(
                       color: cs.shadow.withOpacity(0.06),
@@ -297,24 +292,22 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         color: cs.onSurface,
                       ),
                     ),
-                    if (m != null) ...[  
+                    if (m != null) ...[
                       const SizedBox(height: 3),
                       Text(
-                        '\${m.homeTeam} vs \${m.awayTeam} · \${_formatDate(m.matchDateUtc)}',
+                        '${m.homeTeam} vs ${m.awayTeam} \u00b7 ${_formatDate(m.matchDateUtc)}',
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w400,
                           color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],
                     const SizedBox(height: 20),
-
-                    // Score stepper row
                     if (m == null)
-                      Text('Belum ada pertandingan',
-                          style:
-                              TextStyle(color: cs.onSurfaceVariant))
+                      Text(
+                        'Belum ada pertandingan',
+                        style: TextStyle(color: cs.onSurfaceVariant),
+                      )
                     else
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -329,9 +322,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                 : () => setState(() => _indScore++),
                             onDown: _predictionLocked
                                 ? null
-                                : () => setState(() =>
-                                    _indScore =
-                                        (_indScore - 1).clamp(0, 20)),
+                                : () => setState(
+                                    () => _indScore = (_indScore - 1).clamp(0, 20)),
                           ),
                           Padding(
                             padding:
@@ -341,8 +333,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: cs.onSurfaceVariant
-                                    .withOpacity(0.4),
+                                color: cs.onSurfaceVariant.withOpacity(0.4),
                                 letterSpacing: 1,
                               ),
                             ),
@@ -355,15 +346,13 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                 : () => setState(() => _oppScore++),
                             onDown: _predictionLocked
                                 ? null
-                                : () => setState(() =>
-                                    _oppScore =
-                                        (_oppScore - 1).clamp(0, 20)),
+                                : () => setState(
+                                    () => _oppScore = (_oppScore - 1).clamp(0, 20)),
                           ),
                           const SizedBox(width: 10),
                           _teamCol(context, m.awayFlag, m.awayTeam),
                         ],
                       ),
-
                     const SizedBox(height: 18),
 
                     // Summary banner
@@ -376,8 +365,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         color: const Color(0xFFCC0001).withOpacity(0.07),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color:
-                              const Color(0xFFCC0001).withOpacity(0.18),
+                          color: const Color(0xFFCC0001).withOpacity(0.18),
                         ),
                       ),
                       child: Row(
@@ -419,7 +407,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       ),
                     ),
 
-                    if (_statusMsg != null) ...[  
+                    if (_statusMsg != null) ...[
                       const SizedBox(height: 8),
                       Text(
                         _statusMsg!,
@@ -435,7 +423,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
                     const SizedBox(height: 14),
 
-                    // Submit button
                     SizedBox(
                       width: double.infinity,
                       height: 48,
@@ -460,8 +447,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                 width: 16,
                                 height: 16,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white),
+                                    strokeWidth: 2, color: Colors.white),
                               )
                             : const Icon(Icons.send_rounded, size: 18),
                         label: Text(
@@ -477,7 +463,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
               const SizedBox(height: 24),
 
-              // ── Riwayat ────────────────────────────
+              // Riwayat
               Text(
                 'Riwayat Prediksi',
                 style: TextStyle(
@@ -490,17 +476,18 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
               if (_loadingHistory)
                 const Center(
-                    child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(),
-                ))
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               else if (_history.isEmpty)
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Column(
                       children: [
-                        const Text('⚽',
+                        const Text('\u26bd',
                             style: TextStyle(fontSize: 40)),
                         const SizedBox(height: 10),
                         Text(
@@ -508,7 +495,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
                           style: TextStyle(
                             color: cs.onSurfaceVariant,
                             fontSize: 14,
-                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
@@ -524,7 +510,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
     );
   }
 
-  // ── Stepper ───────────────────────────────────────────
   Widget _stepperCol(
     BuildContext context, {
     required int score,
@@ -532,6 +517,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     VoidCallback? onDown,
   }) {
     final cs = Theme.of(context).colorScheme;
+
     Widget btn(VoidCallback? fn, IconData icon) => GestureDetector(
           onTap: fn,
           child: Container(
@@ -560,7 +546,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
           transitionBuilder: (child, anim) =>
               ScaleTransition(scale: anim, child: child),
           child: Text(
-            '\$score',
+            '$score',
             key: ValueKey(score),
             style: const TextStyle(
               fontSize: 40,
@@ -575,7 +561,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
     );
   }
 
-  // ── Team label ────────────────────────────────────────
   Widget _teamCol(BuildContext context, String flag, String name) {
     final cs = Theme.of(context).colorScheme;
     return Column(
@@ -596,6 +581,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
             name,
             textAlign: TextAlign.center,
             maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
@@ -608,7 +594,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
     );
   }
 
-  // ── History Item ──────────────────────────────────────
   Widget _historyItem(BuildContext context, PredictionHistory item) {
     final cs = Theme.of(context).colorScheme;
     final isPending = item.status == 'pending';
@@ -621,17 +606,17 @@ class _PredictionScreenState extends State<PredictionScreen> {
       case 'draw_correct':
         chipBg = Colors.green.shade50;
         chipFg = Colors.green.shade700;
-        chipLabel = '🎯 Tepat!';
+        chipLabel = '\u{1F3AF} Tepat!';
         break;
       case 'wrong':
         chipBg = Colors.red.shade50;
         chipFg = Colors.red.shade700;
-        chipLabel = '❌ Meleset';
+        chipLabel = '\u274c Meleset';
         break;
       default:
         chipBg = Colors.orange.shade50;
         chipFg = Colors.orange.shade700;
-        chipLabel = '⏳ Menunggu';
+        chipLabel = '\u23f3 Menunggu';
     }
 
     return Container(
@@ -652,7 +637,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
         padding: const EdgeInsets.all(14),
         child: Column(
           children: [
-            // Header row
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -661,7 +645,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '\${item.homeTeam} vs \${item.awayTeam}',
+                        '${item.homeTeam} vs ${item.awayTeam}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -673,7 +657,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         _formatDate(item.matchDate),
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w400,
                           color: cs.onSurfaceVariant,
                         ),
                       ),
@@ -698,10 +681,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
-
-            // Score row
             Row(
               children: [
                 Expanded(
@@ -731,7 +711,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                   ),
                 ),
                 Text(
-                  '\${item.predictedHome}',
+                  '${item.predictedHome}',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -741,16 +721,15 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    '—',
+                    '\u2014',
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
                       color: cs.onSurfaceVariant.withOpacity(0.4),
                     ),
                   ),
                 ),
                 Text(
-                  '\${item.predictedAway}',
+                  '${item.predictedAway}',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -787,12 +766,9 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 ),
               ],
             ),
-
-            // Action buttons (pending only)
-            if (isPending) ...[  
+            if (isPending) ...[
               const SizedBox(height: 10),
-              Divider(
-                  color: cs.outline.withOpacity(0.1), height: 1),
+              Divider(color: cs.outline.withOpacity(0.1), height: 1),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -802,16 +778,15 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       child: Container(
                         height: 34,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFCC0001)
-                              .withOpacity(0.08),
+                          color:
+                              const Color(0xFFCC0001).withOpacity(0.08),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.edit_rounded,
-                                size: 14,
-                                color: Color(0xFFCC0001)),
+                                size: 14, color: Color(0xFFCC0001)),
                             SizedBox(width: 5),
                             Text(
                               'Edit Prediksi',
@@ -840,8 +815,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.close_rounded,
-                                size: 14,
-                                color: cs.onSurfaceVariant),
+                                size: 14, color: cs.onSurfaceVariant),
                             const SizedBox(width: 5),
                             Text(
                               'Batalkan',

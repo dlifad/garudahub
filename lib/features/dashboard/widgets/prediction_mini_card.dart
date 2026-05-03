@@ -38,93 +38,75 @@ class PredictionMiniCard extends StatelessWidget {
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (_) => const PredictionScreen()),
+              builder: (_) => const PredictionScreen(),
+            ),
           ),
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Watermark bg
-                Positioned(
-                  right: -6,
-                  bottom: -6,
-                  child: Text(
-                    '⚽',
-                    style: TextStyle(
-                      fontSize: 52,
-                      color: Colors.black.withOpacity(0.05),
-                    ),
+                // Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFCC0001).withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('\u26bd', style: TextStyle(fontSize: 9)),
+                      SizedBox(width: 4),
+                      Text(
+                        'Prediksi',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFCC0001),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 8),
+                Text(
+                  'Prediksi\nSkor',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                    height: 1.15,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
                   children: [
-                    // Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color:
-                            const Color(0xFFCC0001).withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('⚽', style: TextStyle(fontSize: 9)),
-                          SizedBox(width: 4),
-                          Text(
-                            'Prediksi',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFFCC0001),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Prediksi\nSkor',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        height: 1.15,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Score chips
-                    Row(
-                      children: [
-                        _scoreChip(homeScore),
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 5),
-                          child: Text(
-                            '—',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant
-                                  .withOpacity(0.4),
-                            ),
-                          ),
+                    _scoreChip(homeScore),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 5),
+                      child: Text(
+                        '\u2014',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurfaceVariant.withOpacity(0.4),
                         ),
-                        _scoreChip(awayScore),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Masuk & prediksi →',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFCC0001),
                       ),
                     ),
+                    _scoreChip(awayScore),
                   ],
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Masuk & prediksi \u2192',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFCC0001),
+                  ),
                 ),
               ],
             ),
@@ -144,7 +126,7 @@ class PredictionMiniCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        '\$score',
+        '$score',
         style: const TextStyle(
           color: Colors.white,
           fontSize: 16,
