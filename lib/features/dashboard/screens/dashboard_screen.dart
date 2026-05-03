@@ -15,10 +15,10 @@ import 'package:garudahub/features/dashboard/widgets/next_match_card.dart';
 import 'package:garudahub/features/dashboard/widgets/prediction_card.dart';
 import 'package:garudahub/features/dashboard/widgets/section_title.dart';
 import 'package:garudahub/features/notification/screens/notification_screen.dart';
-import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/notification/services/notification_inbox_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 
 import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:garudahub/features/news/screen/news_screen.dart';
@@ -245,23 +245,24 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final user = context.watch<AuthProvider>().user;
+    final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.bg,
       body: RefreshIndicator(
         onRefresh: _fetchData,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.only(
-            left: AppSpacing.base,
-            right: AppSpacing.base,
-            top: MediaQuery.of(context).padding.top + AppSpacing.md,
+            left: 16,
+            right: 16,
+            top: MediaQuery.of(context).padding.top + 12,
             bottom: 100,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── App Bar ──────────────────────────────────────────
               Row(
                 children: [
                   Container(
@@ -277,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: cs.onPrimary,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md - 2),
+                  const SizedBox(width: 10),
                   Text(
                     'GarudaHub',
                     style: TextStyle(
@@ -318,7 +319,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                         ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.base),
+              const SizedBox(height: 16),
+
+              // ── Hero Section (TIDAK DIUBAH) ───────────────────────
               _animated(
                 ctrl: _heroAnim,
                 begin: const Offset(0, -0.3),
@@ -329,22 +332,25 @@ class _DashboardScreenState extends State<DashboardScreen>
                   countdownLabel: _countdownLabel(),
                 ),
               ),
-              const SizedBox(height: AppSpacing.base),
-              const Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: AiChatWidget(),
-              ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 20),
+
+              // ── Pertandingan Berikutnya (dipindah naik) ───────────
               const SectionTitle('Pertandingan Berikutnya'),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 10),
               _animated(
                 ctrl: _matchAnim,
                 begin: const Offset(0.3, 0),
                 child: NextMatchCard(isLoading: _isLoading, match: _nextMatch),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 20),
+
+              // ── GarudaBot AI (dipindah turun) ─────────────────────
+              const AiChatWidget(),
+              const SizedBox(height: 20),
+
+              // ── Prediksi Skor ─────────────────────────────────────
               const SectionTitle('Prediksi Skor'),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: 10),
               _animated(
                 ctrl: _predAnim,
                 begin: const Offset(0, 0.3),
@@ -365,7 +371,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                   predictionSummary: _predictionSummary(),
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 20),
+
+              // ── Berita Terbaru ────────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -375,11 +383,18 @@ class _DashboardScreenState extends State<DashboardScreen>
                       context,
                       MaterialPageRoute(builder: (_) => const NewsScreen()),
                     ),
-                    child: const Text('Lihat semua'),
+                    child: Text(
+                      'Lihat semua',
+                      style: TextStyle(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: 8),
               NewsList(
                 isLoading: _isLoading,
                 news: _news,
@@ -392,10 +407,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
               if (_errorText != null) ...[
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: 8),
                 Text(_errorText!, style: TextStyle(color: cs.error)),
               ],
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: 20),
             ],
           ),
         ),

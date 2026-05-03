@@ -64,6 +64,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         titleSpacing: AppSpacing.base,
         centerTitle: false,

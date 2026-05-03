@@ -29,7 +29,7 @@ class PlayerCard extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: cs.surfaceContainerHighest,
+        color: Colors.white,
         elevation: 1,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -129,8 +129,9 @@ class RecordStatsCard extends StatelessWidget {
                 Text(
                   'Win rate',
                   style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.88),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -152,7 +153,7 @@ class RecordStatsCard extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -205,9 +206,13 @@ class _StatItem extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs - 2),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white60,
-              fontSize: 10,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              height: 1.15,
             ),
             textAlign: TextAlign.center,
           ),

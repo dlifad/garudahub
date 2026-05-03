@@ -94,7 +94,7 @@ class _TournamentSectionState extends State<TournamentSection>
         AppSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: cs.outline.withOpacity(0.15)),
       ),
@@ -202,8 +202,13 @@ class _TournamentSectionState extends State<TournamentSection>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Divider(height: 1,
-                      color: cs.outline.withOpacity(0.15)),
+                  Container(
+                    height: 1,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.base,
+                    ),
+                    color: cs.primary.withOpacity(0.28),
+                  ),
                   if (widget.isLoading)
                     Padding(
                       padding: const EdgeInsets.all(AppSpacing.base + AppSpacing.xs),
@@ -227,15 +232,24 @@ class _TournamentSectionState extends State<TournamentSection>
                           style: tt.bodySmall
                               ?.copyWith(color: cs.onSurfaceVariant)))
                   else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: widget.matches.length,
-                      separatorBuilder: (_, __) => Divider(
-                          height: 1, indent: AppSpacing.base, endIndent: AppSpacing.base,
-                          color: cs.outline.withOpacity(0.1)),
-                      itemBuilder: (ctx, i) =>
-                          _MatchRow(match: widget.matches[i]),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(widget.matches.length, (i) {
+                        final isLast = i == widget.matches.length - 1;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _MatchRow(match: widget.matches[i]),
+                            if (!isLast)
+                              Divider(
+                                height: 1,
+                                indent: AppSpacing.base,
+                                endIndent: AppSpacing.base,
+                                color: cs.outline.withOpacity(0.1),
+                              ),
+                          ],
+                        );
+                      }),
                     ),
                 ],
               ),

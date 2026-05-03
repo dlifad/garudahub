@@ -157,7 +157,7 @@ class _MatchScreenState extends State<MatchScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.bg,
       body: RefreshIndicator(
         onRefresh: _refresh,
         color: cs.primary,
@@ -166,7 +166,7 @@ class _MatchScreenState extends State<MatchScreen>
           slivers: [
             SliverAppBar(
               pinned: true,
-              backgroundColor: cs.surface,
+              backgroundColor: AppColors.bg,
               surfaceTintColor: cs.surfaceTint,
               leading: Icon(Icons.sports_soccer_rounded, color: cs.primary),
               title: const Text('Match'),
