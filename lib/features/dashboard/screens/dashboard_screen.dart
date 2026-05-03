@@ -19,6 +19,9 @@ import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:garudahub/features/news/screen/news_screen.dart';
 import 'package:garudahub/features/news/screen/news_detail_screen.dart';
 
+// Mini Games
+import 'package:garudahub/features/mini_games/screens/mini_games_screen.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -38,6 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   late final AnimationController _matchAnim;
   late final AnimationController _predAnim;
   late final AnimationController _newsAnim;
+  late final AnimationController _miniGameAnim;
 
   MatchData? _nextMatch;
   List<MatchData> _recentMatches = const [];
@@ -68,6 +72,10 @@ class _DashboardScreenState extends State<DashboardScreen>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+    _miniGameAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
     _playEntrance();
     _fetchData();
     _loadNotifCount();
@@ -80,6 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     _matchAnim.dispose();
     _predAnim.dispose();
     _newsAnim.dispose();
+    _miniGameAnim.dispose();
     super.dispose();
   }
 
@@ -89,8 +98,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         const Duration(milliseconds: 150),
         () => mounted ? _matchAnim.forward() : null);
     Future.delayed(
-        const Duration(milliseconds: 300),
-        () => mounted ? _predAnim.forward() : null);
+      const Duration(milliseconds: 300),
+      () => mounted ? _predAnim.forward() : null,
+    );
     Future.delayed(
         const Duration(milliseconds: 400),
         () => mounted ? _newsAnim.forward() : null);
@@ -173,155 +183,134 @@ class _DashboardScreenState extends State<DashboardScreen>
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: RefreshIndicator(
-        onRefresh: _fetchData,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: MediaQuery.of(context).padding.top + 12,
-            bottom: 100,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top bar
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.sports_soccer,
-                        size: 20, color: cs.onPrimary),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'GarudaHub',
-                    style: TextStyle(
-                      color: cs.primary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                      fontSize: 20,
-                    ),
-                  ),
-                  const Spacer(),
-                  _notifCount > 0
-                      ? Badge(
-                          label: Text('$_notifCount'),
-                          child: IconButton(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const NotificationScreen()),
-                              );
-                              await _loadNotifCount();
-                            },
-                            icon: const Icon(Icons.notifications_outlined),
-                          ),
-                        )
-                      : IconButton(
-                          onPressed: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      const NotificationScreen()),
-                            );
-                            await _loadNotifCount();
-                          },
-                          icon: const Icon(Icons.notifications_outlined),
-                        ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Hero
-              _animated(
-                ctrl: _heroAnim,
-                begin: const Offset(0, -0.3),
-                child: HeroSection(
-                  fifaRank: _fifaRank,
-                  heroImageUrl: _heroImageUrl,
-                  recentMatches: _recentMatches,
-                  countdownLabel: _countdownLabel(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Next Match
-              const SectionTitle('Pertandingan Berikutnya'),
-              const SizedBox(height: 12),
-              _animated(
-                ctrl: _matchAnim,
-                begin: const Offset(0.3, 0),
-                child: NextMatchCard(
-                    isLoading: _isLoading, match: _nextMatch),
-              ),
-              const SizedBox(height: 20),
-
-              // Quick Actions row: GarudaBot | Prediksi
-              // IntrinsicHeight agar kedua card sama tinggi
-              _animated(
-                ctrl: _predAnim,
-                begin: const Offset(0, 0.2),
-                child: IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Expanded(child: AiChatWidget()),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: PredictionMiniCard(
-                          lastIndScore: 1,
-                          lastOppScore: 0,
-                        ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _fetchData,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // News
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SectionTitle('Berita Terbaru'),
-                  TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const NewsScreen()),
+                      child: Icon(
+                        Icons.sports_soccer,
+                        size: 20,
+                        color: cs.onPrimary,
+                      ),
                     ),
-                    child: const Text('Lihat semua'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              NewsList(
-                isLoading: _isLoading,
-                news: _news,
-                newsAnim: _newsAnim,
-                onTap: (item) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => NewsDetailScreen(news: item)),
+                    const SizedBox(width: 10),
+                    Text(
+                      'GarudaHub',
+                      style: TextStyle(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const Spacer(),
+                    Badge(
+                      label: const Text('3'),
+                      child: IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.notifications_outlined),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              if (_errorText != null) ...[
                 const SizedBox(height: 8),
-                Text(_errorText!,
-                    style: TextStyle(color: cs.error)),
+                Text(
+                  'Halo, ${user?.name.split(' ').first ?? 'Garuda'}',
+                  style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 16),
+                _animated(
+                  ctrl: _heroAnim,
+                  begin: const Offset(0, -0.3),
+                  child: HeroSection(
+                    fifaRank: _fifaRank,
+                    heroImageUrl: _heroImageUrl,
+                    recentMatches: _recentMatches,
+                    countdownLabel: _countdownLabel(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const SectionTitle('Pertandingan Berikutnya'),
+                const SizedBox(height: 12),
+                _animated(
+                  ctrl: _matchAnim,
+                  begin: const Offset(0.3, 0),
+                  child: NextMatchCard(
+                    isLoading: _isLoading,
+                    match: _nextMatch,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const SectionTitle('Prediksi Skor'),
+                const SizedBox(height: 12),
+                _animated(
+                  ctrl: _predAnim,
+                  begin: const Offset(0, 0.3),
+                  child: PredictionCard(
+                    match: _nextMatch,
+                    indScore: _indScore,
+                    oppScore: _oppScore,
+                    predictionLocked: _predictionLocked,
+                    submittingPrediction: _submittingPrediction,
+                    predictionStatus: _predictionStatus,
+                    onUpInd: () => setState(() => _indScore++),
+                    onDownInd: () =>
+                        setState(() => _indScore = (_indScore - 1).clamp(0, 20)),
+                    onUpOpp: () => setState(() => _oppScore++),
+                    onDownOpp: () =>
+                        setState(() => _oppScore = (_oppScore - 1).clamp(0, 20)),
+                    onSubmit: _submitPrediction,
+                    predictionSummary: _predictionSummary(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SectionTitle('Berita Terbaru'),
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NewsScreen()),
+                      ),
+                      child: const Text('Lihat semua'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                NewsList(
+                  isLoading: _isLoading,
+                  news: _news,
+                  newsAnim: _newsAnim,
+                  onTap: (item) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NewsDetailScreen(news: item),
+                    ),
+                  ),
+                ),
+                if (_errorText != null) ...[
+                  const SizedBox(height: 8),
+                  Text(_errorText!, style: TextStyle(color: cs.error)),
+                ],
+                const SizedBox(height: 24),
               ],
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
         ),
       ),

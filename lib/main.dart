@@ -23,6 +23,9 @@ import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
 import 'package:garudahub/features/shop/providers/currency_provider.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
 
+// Mini Games
+import 'features/mini_games/screens/mini_games_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DbHelper.database;
@@ -75,6 +78,7 @@ class GarudaHubApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/register': (_) => const RegisterScreen(),
         '/home': (_) => const HomeScreen(),
+        '/mini-games': (_) => const MiniGamesScreen(),
       },
 
       builder: (context, child) {
