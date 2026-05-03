@@ -10,7 +10,7 @@ class PenaltyProvider extends ChangeNotifier {
   StreamSubscription? _accelSub;
   final _random = Random();
 
-  // Threshold miring (m/s²), tuning di sini kalau terlalu sensitif/lambat
+  // Threshold miring (m/s²)
   static const double _tiltThreshold = 3.0;
 
   PenaltyGameState get state => _state;
@@ -27,11 +27,9 @@ class PenaltyProvider extends ChangeNotifier {
     _accelSub = accelerometerEventStream().listen((event) {
       if (_state.phase != GamePhase.aiming) return;
 
-      // Portrait mode:
-      // event.y negatif = HP miring ke kanan
-      // event.y positif = HP miring ke kiri
-      // Balik tanda agar intuitif: kanan = right, kiri = left
-      final tilt = -event.y;
+      // HP dipegang portrait tapi orientasi sensor landscape:
+      // event.x positif = miring kanan, negatif = miring kiri
+      final tilt = event.x;
 
       AimZone newZone;
       if (tilt < -_tiltThreshold) {
