@@ -26,71 +26,73 @@ class PlayerDetailScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: pageBg,
+      extendBodyBehindAppBar: true,
       body: CustomScrollView(
         slivers: [
-          // ── Hero foto ────────────────────────────────────
-          SliverAppBar(
-            expandedHeight: 360,
-            pinned: true,
-            backgroundColor: pageBg,
-            surfaceTintColor: cs.surfaceTint,
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Tint background warna posisi
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [col.withOpacity(0.12), pageBg],
-                      ),
-                    ),
-                  ),
-
-                  // Foto
-                  if (_resolvePhotoUrl(player.photoUrl) != null)
-                    CachedNetworkImage(
-                      imageUrl: _resolvePhotoUrl(player.photoUrl)!,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
-                      placeholder: (_, __) => Shimmer.fromColors(
-                        baseColor: cs.surfaceContainerHighest,
-                        highlightColor: cs.surfaceContainer,
-                        child: Container(color: cs.surfaceContainerHighest),
-                      ),
-                      errorWidget: (_, __, ___) =>
-                          _HeroFallback(name: player.name, color: col),
-                    )
-                  else
-                    _HeroFallback(name: player.name, color: col),
-
-                  // Gradient fade ke surface di bawah
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 160,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [pageBg, Colors.transparent],
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Foto hero ─────────────────────────
+                SizedBox(
+                  height: 400,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Tint background warna posisi
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [col.withOpacity(0.12), pageBg],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                      // Foto
+                      if (_resolvePhotoUrl(player.photoUrl) != null)
+                        CachedNetworkImage(
+                          imageUrl: _resolvePhotoUrl(player.photoUrl)!,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
+                          placeholder: (_, __) => Shimmer.fromColors(
+                            baseColor: cs.surfaceContainerHighest,
+                            highlightColor: cs.surfaceContainer,
+                            child: Container(color: cs.surfaceContainerHighest),
+                          ),
+                          errorWidget: (_, __, ___) =>
+                              _HeroFallback(name: player.name, color: col),
+                        )
+                      else
+                        _HeroFallback(name: player.name, color: col),
 
-                  // Badge posisi + naturalisasi — sejajar dengan body (16px)
-                  Positioned(
-                    bottom: 20,
-                    left: AppSpacing.base, // 16px — dari hardcode 20
-                    child: Row(
-                      children: [
-                        Container(
+                      // Gradient fade bawah
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 130, // dari 220 → jauh lebih pendek
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                pageBg, // opaque penuh di paling bawah
+                                Colors
+                                    .transparent, // langsung transparent, tanpa stops tengah
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Badge POSISI — kiri bawah foto
+                      Positioned(
+                        bottom: 16,
+                        left: AppSpacing.base,
+                        child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 5,
@@ -108,181 +110,201 @@ class PlayerDetailScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (player.isNaturalized) ...[
-                          const SizedBox(width: AppSpacing.sm),
-                          Container(
+                      ),
+
+                      // Badge NATURALISASI — kanan bawah foto
+                      if (player.isNaturalized)
+                        Positioned(
+                          bottom: 16,
+                          right: AppSpacing.base,
+                          child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFD4AF37).withOpacity(0.15),
-                              border: Border.all(
-                                color: const Color(0xFFD4AF37),
-                              ),
+                              color: const Color(0xFF8B6914),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              '🌍 Naturalisasi',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFFD4AF37),
-                              ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('🌍', style: TextStyle(fontSize: 11)),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Naturalisasi',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      Positioned(
+                        top: MediaQuery.of(context).padding.top + 8,
+                        left: 12,
+                        child: GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Konten — langsung di bawah foto, NO overlap ───────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.base,
+                    AppSpacing.sm,
+                    AppSpacing.base,
+                    AppSpacing.xxl + AppSpacing.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: AppSpacing.sm),
+                      // Nama + nickname
+                      Text(
+                        player.name.toUpperCase(),
+                        style: tt.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      if (player.nickname?.isNotEmpty == true)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: AppSpacing.xs - 2,
+                          ),
+                          child: Text(
+                            '"${player.nickname}"',
+                            style: tt.bodyMedium?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+
+                      const SizedBox(height: AppSpacing.lg - AppSpacing.xs),
+
+                      // Stat cards
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatBox(
+                              value: '${player.caps}',
+                              label: 'Caps',
+                              icon: Icons.shield_rounded,
+                              cs: cs,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: _StatBox(
+                              value: '${player.goals}',
+                              label: 'Gol',
+                              icon: Icons.sports_soccer_rounded,
+                              cs: cs,
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // ── Body ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Container(
-              decoration: BoxDecoration(
-                color: pageBg,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-              ),
-              child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.base, // 16px — dari base+xs (20px)
-                AppSpacing.xs,
-                AppSpacing.base, // 16px
-                AppSpacing.xxl + AppSpacing.sm,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Nama + nickname
-                  Text(
-                    player.name.toUpperCase(),
-                    style: tt.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  if (player.nickname?.isNotEmpty == true)
-                    Padding(
-                      padding: const EdgeInsets.only(top: AppSpacing.xs - 2),
-                      child: Text(
-                        '"${player.nickname}"',
-                        style: tt.bodyMedium?.copyWith(
-                          color: cs.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
                       ),
-                    ),
 
-                  const SizedBox(height: AppSpacing.lg - AppSpacing.xs),
+                      const SizedBox(height: AppSpacing.lg),
 
-                  // Stat cards
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatBox(
-                          value: '${player.caps}',
-                          label: 'Caps',
-                          icon: Icons.shield_rounded,
-                          cs: cs,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: _StatBox(
-                          value: '${player.goals}',
-                          label: 'Gol',
-                          icon: Icons.sports_soccer_rounded,
-                          cs: cs,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Section label
-                  Row(
-                    children: [
-                      Container(
-                        width: 3,
-                        height: 14,
-                        decoration: BoxDecoration(
-                          color: cs.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        'INFORMASI PEMAIN',
-                        style: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  // Info card
-                  Container(
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      children: [
-                        _InfoRow(
-                          icon: Icons.business_center_rounded,
-                          label: 'Klub',
-                          value: player.currentClub ?? '-',
-                          cs: cs,
-                        ),
-                        _divider(cs),
-                        if (player.clubCountry != null) ...[
-                          _InfoRow(
-                            icon: Icons.flag_rounded,
-                            label: 'Negara Klub',
-                            value: player.clubCountry!,
-                            cs: cs,
+                      // Section label
+                      Row(
+                        children: [
+                          Container(
+                            width: 3,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: cs.primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
-                          _divider(cs),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(
+                            'INFORMASI PEMAIN',
+                            style: tt.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                              color: cs.onSurface,
+                            ),
+                          ),
                         ],
-                        _InfoRow(
-                          icon: Icons.cake_rounded,
-                          label: 'Tgl. Lahir',
-                          value: _fmtDate(player.dateOfBirth),
-                          cs: cs,
+                      ),
+
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Info card
+                      Container(
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        _divider(cs),
-                        _InfoRow(
-                          icon: Icons.person_pin_rounded,
-                          label: 'Posisi',
-                          value: player.positionLabel,
-                          cs: cs,
+                        child: Column(
+                          children: [
+                            _InfoRow(
+                              icon: Icons.business_center_rounded,
+                              label: 'Klub',
+                              value: player.currentClub ?? '-',
+                              cs: cs,
+                            ),
+                            _divider(cs),
+                            if (player.clubCountry != null) ...[
+                              _InfoRow(
+                                icon: Icons.flag_rounded,
+                                label: 'Negara Klub',
+                                value: player.clubCountry!,
+                                cs: cs,
+                              ),
+                              _divider(cs),
+                            ],
+                            _InfoRow(
+                              icon: Icons.cake_rounded,
+                              label: 'Tgl. Lahir',
+                              value: _fmtDate(player.dateOfBirth),
+                              cs: cs,
+                            ),
+                            _divider(cs),
+                            _InfoRow(
+                              icon: Icons.person_pin_rounded,
+                              label: 'Posisi',
+                              value: player.positionLabel,
+                              cs: cs,
+                            ),
+                            _divider(cs),
+                            _InfoRow(
+                              icon: Icons.public_rounded,
+                              label: 'Status',
+                              value: player.isNaturalized
+                                  ? 'Naturalisasi'
+                                  : 'WNI Asli',
+                              cs: cs,
+                            ),
+                          ],
                         ),
-                        _divider(cs),
-                        _InfoRow(
-                          icon: Icons.public_rounded,
-                          label: 'Status',
-                          value: player.isNaturalized
-                              ? 'Naturalisasi'
-                              : 'WNI Asli',
-                          cs: cs,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              ],
             ),
           ),
         ],
@@ -313,7 +335,7 @@ class PlayerDetailScreen extends StatelessWidget {
         'Des',
       ];
       final age = DateTime.now().year - dt.year;
-      return '${dt.day} ${m[dt.month]} ${dt.year}  •  $age tahun';
+      return '${dt.day} ${m[dt.month]} ${dt.year} • $age tahun';
     } catch (_) {
       return raw;
     }
@@ -328,7 +350,7 @@ class PlayerDetailScreen extends StatelessWidget {
   }
 }
 
-// ── Sub-widgets ──────────────────────────────────────────────────────────────────
+// ── Sub-widgets ──────────────────────────────────────────────────────────
 
 class _HeroFallback extends StatelessWidget {
   final String name;
@@ -422,7 +444,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.base, // 16px — konsisten
+        horizontal: AppSpacing.base,
         vertical: AppSpacing.md,
       ),
       child: Row(
@@ -459,5 +481,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
-
