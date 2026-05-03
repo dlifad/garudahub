@@ -27,10 +27,10 @@ class HeroSection extends StatelessWidget {
       return '➖';
     }).join();
 
+    // Container luar: HANYA shadow + borderRadius, TANPA clip
     return Container(
       height: 200,
       width: double.infinity,
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -46,69 +46,73 @@ class HeroSection extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Image.network(
-            heroImageUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (_, __, ___) =>
-                Container(color: cs.surfaceContainerHighest),
-          ),
-          Container(color: const Color(0x99000000)),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [cs.primary.withOpacity(0.85), Colors.transparent],
+      // Container dalam: clip + borderRadius, TANPA shadow
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            Image.network(
+              heroImageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) =>
+                  Container(color: cs.surfaceContainerHighest),
+            ),
+            Container(color: const Color(0x99000000)),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [cs.primary.withOpacity(0.85), Colors.transparent],
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm - 2,
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm - 2,
+                        ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: const Text(
+                      'Satu Jiwa, Satu Bangsa',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                       ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: Colors.white24),
-                  ),
-                  child: const Text(
-                    'Satu Jiwa, Satu Bangsa',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    _HeroStatCard(title: 'FIFA', value: 'Rank #$fifaRank'),
-                    const SizedBox(width: AppSpacing.sm),
-                    _HeroStatCard(title: 'Form', value: form.isEmpty ? '—' : form),
-                    const SizedBox(width: AppSpacing.sm),
-                    _HeroStatCard(title: 'Kickoff', value: countdownLabel),
-                  ],
-                ),
-              ],
+                  const Spacer(),
+                  Row(
+                    children: [
+                      _HeroStatCard(title: 'FIFA', value: 'Rank #$fifaRank'),
+                      const SizedBox(width: AppSpacing.sm),
+                      _HeroStatCard(title: 'Form', value: form.isEmpty ? '—' : form),
+                      const SizedBox(width: AppSpacing.sm),
+                      _HeroStatCard(title: 'Kickoff', value: countdownLabel),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
