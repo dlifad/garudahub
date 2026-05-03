@@ -159,10 +159,7 @@ class _TicketScreenState extends State<TicketScreen> {
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             controller: _scrollController,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.base,
-              vertical: AppSpacing.base,
-            ),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 100),
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final match = filtered[index];

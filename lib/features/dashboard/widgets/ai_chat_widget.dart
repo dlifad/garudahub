@@ -12,9 +12,14 @@ class AiChatWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFCC0001).withOpacity(0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: const Color(0xFFCC0001).withOpacity(0.30),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
