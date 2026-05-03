@@ -28,7 +28,6 @@ class AiChatWidget extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const AiChatScreen()),
           ),
           child: Ink(
-            padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFFCC0001), Color(0xFF8B0000)],
@@ -37,91 +36,90 @@ class AiChatWidget extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.18),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                  // Elang dekoratif di kanan bawah
+                  Positioned(
+                    right: -10,
+                    bottom: -10,
+                    child: Opacity(
+                      opacity: 0.18,
+                      child: Text(
+                        '\u{1F985}',
+                        style: const TextStyle(fontSize: 72),
+                      ),
+                    ),
                   ),
-                  alignment: Alignment.center,
-                  child: const Text('🦅', style: TextStyle(fontSize: 28)),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'GarudaBot',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
+                  // Konten utama
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.base),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Badge AI
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF81C784).withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFF81C784).withOpacity(0.5),
                             ),
                           ),
-                          SizedBox(width: AppSpacing.sm),
-                          _AiBadge(),
-                        ],
-                      ),
-                      SizedBox(height: AppSpacing.xs + 1),
-                      Text(
-                        'Tanya jadwal, prediksi skor, lineup,\npemain & futsal Timnas Indonesia',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          height: 1.35,
+                          child: const Text(
+                            'AI',
+                            style: TextStyle(
+                              color: Color(0xFF81C784),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.sm),
+                        const Text(
+                          'GarudaBot',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        const Text(
+                          'Tanya jadwal, prediksi & lineup',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        // Arrow button
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.18),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.18),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AiBadge extends StatelessWidget {
-  const _AiBadge();
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm - 1,
-        vertical: AppSpacing.xs - 2,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF81C784).withOpacity(0.25),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF81C784).withOpacity(0.5)),
-      ),
-      child: const Text(
-        'AI',
-        style: TextStyle(
-          color: Color(0xFF81C784),
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -255,8 +255,18 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 16),
 
-              // Quick Actions row: GarudaBot | Prediksi
-              // Pakai Row biasa (bukan IntrinsicHeight) agar tidak overflow
+              // Next Match (dipindah ke atas)
+              const SectionTitle('Pertandingan Berikutnya'),
+              const SizedBox(height: 12),
+              _animated(
+                ctrl: _matchAnim,
+                begin: const Offset(0.3, 0),
+                child: NextMatchCard(
+                    isLoading: _isLoading, match: _nextMatch),
+              ),
+              const SizedBox(height: 20),
+
+              // Quick Actions row: GarudaBot | Prediksi (dipindah ke bawah next match)
               _animated(
                 ctrl: _predAnim,
                 begin: const Offset(0, 0.2),
@@ -273,17 +283,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // Next Match
-              const SectionTitle('Pertandingan Berikutnya'),
-              const SizedBox(height: 12),
-              _animated(
-                ctrl: _matchAnim,
-                begin: const Offset(0.3, 0),
-                child: NextMatchCard(
-                    isLoading: _isLoading, match: _nextMatch),
               ),
               const SizedBox(height: 20),
 
