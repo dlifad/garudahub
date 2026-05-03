@@ -23,7 +23,7 @@ class PlayerDetailScreen extends StatelessWidget {
     final col = _posColor[player.position] ?? cs.primary;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       body: CustomScrollView(
         slivers: [
           // ── Hero foto ──────────────────────────────────────────
@@ -449,3 +449,5 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+
+

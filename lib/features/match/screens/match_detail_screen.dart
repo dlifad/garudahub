@@ -5,6 +5,7 @@ import 'package:garudahub/features/match/models/lineup_player.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:garudahub/features/match/models/tournament_coach.dart';
 import 'package:garudahub/features/match/services/match_service.dart';
+import 'package:garudahub/features/match/screens/match_chat_screen.dart';
 import 'package:garudahub/features/match/widgets/lineup_field_widget.dart';
 import 'package:garudahub/core/utils/flag_utils.dart';
 import 'package:garudahub/features/match/widgets/stadium_map_widget.dart';
@@ -190,7 +191,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     final m  = widget.match;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -227,10 +228,11 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
 
                 // ── Discussion CTA ─────────────────────────────────
                 FilledButton.icon(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Fitur diskusi segera hadir! \u{1F525}'),
-                        behavior: SnackBarBehavior.floating),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MatchChatScreen(match: m),
+                    ),
                   ),
                   icon: const Icon(Icons.forum_rounded, size: 18),
                   label: const Text('Gabung Diskusi Laga'),
@@ -1101,5 +1103,7 @@ class _InlineGoalScorers extends StatelessWidget {
     );
   }
 }
+
+
 
 

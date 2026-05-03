@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
@@ -190,9 +191,16 @@ class _DashboardScreenState extends State<DashboardScreen>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dashboardBg = isDark
+        ? cs.surface
+        : Color.alphaBlend(
+            AppColors.primary.withOpacity(0.035),
+            cs.surfaceContainerLow,
+          );
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: dashboardBg,
       body: RefreshIndicator(
         onRefresh: _fetchData,
         child: SingleChildScrollView(
@@ -276,11 +284,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                   countdownLabel: _countdownLabel(),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // ── Pertandingan Berikutnya ───────────────────────────────
-              const SectionTitle('Pertandingan Berikutnya'),
-              const SizedBox(height: 12),
               _animated(
                 ctrl: _matchAnim,
                 begin: const Offset(0.3, 0),
@@ -529,3 +535,4 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
     );
   }
 }
+

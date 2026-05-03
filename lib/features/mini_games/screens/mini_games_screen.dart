@@ -1,5 +1,6 @@
 // lib/features/mini_games/screens/mini_games_screen.dart
 import 'package:flutter/material.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../penalty/providers/penalty_provider.dart';
 import '../penalty/screens/penalty_game_screen.dart';
@@ -9,14 +10,16 @@ class MiniGamesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D0D),
+      backgroundColor: AppColors.softBackground(cs, isDark: isDark),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.softBackground(cs, isDark: isDark),
         elevation: 0,
-        title: const Text('Mini Games',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text('Mini Games',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: cs.onSurface)),
+        iconTheme: IconThemeData(color: cs.onSurface),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -24,7 +27,7 @@ class MiniGamesScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Pilih Game',
-                style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.45), letterSpacing: 2, fontWeight: FontWeight.w600)),
+                style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant.withOpacity(0.8), letterSpacing: 2, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             _GameCard(
               title: 'Adu Penalti',

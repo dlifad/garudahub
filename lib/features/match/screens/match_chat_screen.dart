@@ -230,7 +230,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     final vs = widget.match.opponentName;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.softBackground(cs, isDark: isDark),
       // ── AppBar ──
       appBar: AppBar(
         backgroundColor: const Color(0xFFCC0001),
@@ -765,4 +765,5 @@ class _EmptyChat extends StatelessWidget {
     );
   }
 }
+
 

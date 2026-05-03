@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import 'package:garudahub/core/constants/constants.dart';
+import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
@@ -227,7 +228,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
     final m = _nextMatch;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadData,
@@ -406,7 +407,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         ],
                       ),
                     ),
-
                     if (_statusMsg != null) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -420,7 +420,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         ),
                       ),
                     ],
-
                     const SizedBox(height: 14),
 
                     SizedBox(
@@ -839,3 +838,5 @@ class _PredictionScreenState extends State<PredictionScreen> {
     );
   }
 }
+
+

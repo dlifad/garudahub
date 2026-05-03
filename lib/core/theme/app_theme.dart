@@ -40,6 +40,14 @@ class AppColors {
   static const Color darkBg = Color(0xFF121212);
   static const Color darkSurface = Color(0xFF1E1E1E);
   static const Color darkBorder = Color(0xFF2C2C2C);
+
+  static Color softBackground(ColorScheme cs, {required bool isDark}) {
+    if (isDark) return cs.surface;
+    return Color.alphaBlend(
+      AppColors.primary.withOpacity(0.035),
+      cs.surfaceContainerLow,
+    );
+  }
 }
 
 /// Layout constants — gunakan ini di semua screen
@@ -125,7 +133,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: cs,
       textTheme: textTheme,
-      scaffoldBackgroundColor: isLight ? AppColors.bg : AppColors.darkBg,
+      scaffoldBackgroundColor: AppColors.softBackground(cs, isDark: !isLight),
 
       // ── AppBar ─────────────────────────────────────────────
       appBarTheme: AppBarTheme(

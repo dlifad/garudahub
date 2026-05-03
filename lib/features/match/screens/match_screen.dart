@@ -157,7 +157,7 @@ class _MatchScreenState extends State<MatchScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       body: RefreshIndicator(
         onRefresh: _refresh,
         color: cs.primary,
@@ -340,3 +340,5 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
+
+

@@ -51,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen>
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -147,3 +147,5 @@ class _DotLoader extends StatelessWidget {
     );
   }
 }
+
+

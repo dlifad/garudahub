@@ -64,7 +64,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       appBar: AppBar(
         titleSpacing: AppSpacing.base,
         centerTitle: false,
@@ -260,3 +260,5 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+
+

@@ -168,7 +168,7 @@ Era kebangkitan Garuda dimulai! 🦅🇮🇩""";
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
       appBar: AppBar(
         backgroundColor: const Color(0xFFCC0001),
         foregroundColor: Colors.white,
@@ -487,4 +487,6 @@ class _BotBubbleState extends State<_BotBubble>
     );
   }
 }
+
+
 
