@@ -72,7 +72,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
         actions: [
           if (!_isLoading && _error == null)
             Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.md),
+              padding: const EdgeInsets.only(right: AppSpacing.base),
               child: Chip(
                 label: Text('${_filtered.length} Pemain'),
                 visualDensity: VisualDensity.compact,
@@ -82,13 +82,13 @@ class _PlayerListScreenState extends State<PlayerListScreen>
       ),
       body: Column(
         children: [
-          // ── Filter posisi ──────────────────────────────────────
+          // ── Filter posisi ─────────────────────────────────
           SizedBox(
             height: 48,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
+                horizontal: AppSpacing.base, // 16px — sama dengan match screen
                 vertical: AppSpacing.sm,
               ),
               children: [
@@ -160,7 +160,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.base,
+                AppSpacing.base, // 16px — konsisten
                 AppSpacing.base,
                 AppSpacing.base,
                 AppSpacing.sm,
@@ -177,7 +177,9 @@ class _PlayerListScreenState extends State<PlayerListScreen>
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.base, // 16px — naik dari 12px
+            ),
             sliver: SliverGrid(
               delegate: SliverChildBuilderDelegate(
                 (_, i) => PlayerCard(
@@ -207,7 +209,7 @@ class _PlayerListScreenState extends State<PlayerListScreen>
   }
 }
 
-// ── Grid helper (untuk flat list per posisi) ──────────────────────────────────
+// ── Grid helper (untuk flat list per posisi) ─────────────────────────────────────────
 class _PlayerGrid extends StatelessWidget {
   final List<PlayerModel> players;
   final void Function(PlayerModel) onTap;
@@ -217,9 +219,9 @@ class _PlayerGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
+        AppSpacing.base, // 16px — naik dari 12px
         AppSpacing.sm,
-        AppSpacing.md,
+        AppSpacing.base, // 16px
         AppSpacing.base,
       ),
       itemCount: players.length,
@@ -235,7 +237,7 @@ class _PlayerGrid extends StatelessWidget {
   }
 }
 
-// ── Filter chip ───────────────────────────────────────────────────────────────
+// ── Filter chip ───────────────────────────────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
   final String label;
   final bool selected;

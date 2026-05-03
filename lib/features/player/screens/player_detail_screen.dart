@@ -26,7 +26,7 @@ class PlayerDetailScreen extends StatelessWidget {
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
-          // ── Hero foto ──────────────────────────────────────────
+          // ── Hero foto ────────────────────────────────────
           SliverAppBar(
             expandedHeight: 360,
             pinned: true,
@@ -48,7 +48,7 @@ class PlayerDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Foto — handle berbagai rasio dari storage
+                  // Foto
                   if (_resolvePhotoUrl(player.photoUrl) != null)
                     CachedNetworkImage(
                       imageUrl: _resolvePhotoUrl(player.photoUrl)!,
@@ -82,10 +82,10 @@ class PlayerDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Badge posisi + naturalisasi
+                  // Badge posisi + naturalisasi — sejajar dengan body (16px)
                   Positioned(
                     bottom: 20,
-                    left: 20,
+                    left: AppSpacing.base, // 16px — dari hardcode 20
                     child: Row(
                       children: [
                         Container(
@@ -138,13 +138,13 @@ class PlayerDetailScreen extends StatelessWidget {
             ),
           ),
 
-          // ── Body ────────────────────────────────────────────────
+          // ── Body ──────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.base + AppSpacing.xs,
+                AppSpacing.base, // 16px — dari base+xs (20px)
                 AppSpacing.xs,
-                AppSpacing.base + AppSpacing.xs,
+                AppSpacing.base, // 16px
                 AppSpacing.xxl + AppSpacing.sm,
               ),
               child: Column(
@@ -318,7 +318,7 @@ class PlayerDetailScreen extends StatelessWidget {
   }
 }
 
-// ── Sub-widgets ─────────────────────────────────────────────────────────
+// ── Sub-widgets ──────────────────────────────────────────────────────────────────
 
 class _HeroFallback extends StatelessWidget {
   final String name;
@@ -412,7 +412,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.base,
+        horizontal: AppSpacing.base, // 16px — konsisten
         vertical: AppSpacing.md,
       ),
       child: Row(
