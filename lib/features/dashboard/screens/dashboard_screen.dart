@@ -20,6 +20,9 @@ import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:garudahub/features/news/screen/news_screen.dart';
 import 'package:garudahub/features/news/screen/news_detail_screen.dart';
 
+// Mini Games
+import 'package:garudahub/features/mini_games/screens/mini_games_screen.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -39,6 +42,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   late final AnimationController _matchAnim;
   late final AnimationController _predAnim;
   late final AnimationController _newsAnim;
+  late final AnimationController _miniGameAnim;
 
   MatchData? _nextMatch;
   List<MatchData> _recentMatches = const [];
@@ -74,6 +78,10 @@ class _DashboardScreenState extends State<DashboardScreen>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+    _miniGameAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
     _playEntrance();
     _fetchData();
   }
@@ -85,6 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     _matchAnim.dispose();
     _predAnim.dispose();
     _newsAnim.dispose();
+    _miniGameAnim.dispose();
     super.dispose();
   }
 
@@ -97,6 +106,10 @@ class _DashboardScreenState extends State<DashboardScreen>
     Future.delayed(
       const Duration(milliseconds: 300),
       () => mounted ? _predAnim.forward() : null,
+    );
+    Future.delayed(
+      const Duration(milliseconds: 420),
+      () => mounted ? _miniGameAnim.forward() : null,
     );
     Future.delayed(
       const Duration(milliseconds: 400),
@@ -331,6 +344,21 @@ class _DashboardScreenState extends State<DashboardScreen>
                     predictionSummary: _predictionSummary(),
                   ),
                 ),
+
+                // ── ✨ MINI GAME BANNER ──────────────────────────────────
+                const SizedBox(height: 20),
+                _animated(
+                  ctrl: _miniGameAnim,
+                  begin: const Offset(0, 0.4),
+                  child: _MiniGameBanner(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MiniGamesScreen()),
+                    ),
+                  ),
+                ),
+                // ────────────────────────────────────────────────────────
+
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -366,6 +394,167 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Mini Game Banner Widget ───────────────────────────────────────────────────
+class _MiniGameBanner extends StatefulWidget {
+  final VoidCallback onTap;
+  const _MiniGameBanner({required this.onTap});
+
+  @override
+  State<_MiniGameBanner> createState() => _MiniGameBannerState();
+}
+
+class _MiniGameBannerState extends State<_MiniGameBanner>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _shimmerCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _shimmerCtrl,
+        builder: (_, __) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: const [
+                  Color(0xFF14532D),
+                  Color(0xFF166534),
+                  Color(0xFF15803D),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF22C55E).withOpacity(0.25),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Emoji + shimmer ring
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF4ADE80).withOpacity(
+                            0.3 + 0.4 * (0.5 + 0.5 * (_shimmerCtrl.value * 2 - 1).abs()),
+                          ),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text('⚽', style: TextStyle(fontSize: 24)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                // Teks
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'Mini Games',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4ADE80).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: const Color(0xFF4ADE80).withOpacity(0.5),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Text(
+                              'NEW',
+                              style: TextStyle(
+                                color: Color(0xFF4ADE80),
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Adu penalti pakai gyro HP kamu!',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.65),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Arrow
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
