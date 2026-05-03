@@ -100,7 +100,8 @@ class _TournamentSectionState extends State<TournamentSection>
           InkWell(
             onTap: _toggle,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+              // fix: dikurangi dari 14 → 8 (top & bottom)
+              padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
               child: Row(
                 children: [
                   // Logo
@@ -255,7 +256,8 @@ class _MatchRow extends StatelessWidget {
           MaterialPageRoute(
               builder: (_) => MatchDetailScreen(match: match))),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 11, 12, 11),
+        // fix: dikurangi dari 11 → 7 (top & bottom)
+        padding: const EdgeInsets.fromLTRB(16, 7, 12, 7),
         child: Row(
           children: [
             SizedBox(
