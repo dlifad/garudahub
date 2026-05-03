@@ -7,7 +7,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
-
 import 'features/splash/splash_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
@@ -21,6 +20,9 @@ import 'package:garudahub/features/shop/merchandise/providers/merchandise_provid
 import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
 import 'package:garudahub/features/shop/providers/currency_provider.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
+
+// Mini Games
+import 'features/mini_games/screens/mini_games_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +79,7 @@ class GarudaHubApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/register': (_) => const RegisterScreen(),
         '/home': (_) => const HomeScreen(),
+        '/mini-games': (_) => const MiniGamesScreen(),
       },
 
       // Buat menangani accelerometer
