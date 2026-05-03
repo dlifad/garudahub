@@ -40,10 +40,10 @@ class AiChatWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               child: Stack(
                 children: [
-                  // Elang dekoratif di kanan bawah
+                  // Elang dekoratif kanan bawah
                   Positioned(
-                    right: -10,
-                    bottom: -10,
+                    right: -8,
+                    bottom: -8,
                     child: Opacity(
                       opacity: 0.18,
                       child: Text(
@@ -52,54 +52,59 @@ class AiChatWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Konten utama
+                  // Konten
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.base),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Badge AI
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF81C784).withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xFF81C784).withOpacity(0.5),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Badge AI
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color:
+                                    const Color(0xFF81C784).withOpacity(0.25),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color:
+                                      const Color(0xFF81C784).withOpacity(0.5),
+                                ),
+                              ),
+                              child: const Text(
+                                'AI',
+                                style: TextStyle(
+                                  color: Color(0xFF81C784),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'AI',
-                            style: TextStyle(
-                              color: Color(0xFF81C784),
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(height: AppSpacing.sm),
+                            const Text(
+                              'GarudaBot',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: AppSpacing.xs),
+                            const Text(
+                              'Tanya jadwal, prediksi & lineup',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                        const Text(
-                          'GarudaBot',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        const Text(
-                          'Tanya jadwal, prediksi & lineup',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        // Arrow button
+                        // Arrow button di bawah
                         Container(
                           width: 34,
                           height: 34,

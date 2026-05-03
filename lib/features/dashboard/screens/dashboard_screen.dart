@@ -255,7 +255,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 16),
 
-              // Next Match (dipindah ke atas)
+              // Next Match
               const SectionTitle('Pertandingan Berikutnya'),
               const SizedBox(height: 12),
               _animated(
@@ -266,22 +266,25 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 20),
 
-              // Quick Actions row: GarudaBot | Prediksi (dipindah ke bawah next match)
+              // Quick Actions row: GarudaBot | Prediksi
+              // IntrinsicHeight agar kedua card sama tinggi
               _animated(
                 ctrl: _predAnim,
                 begin: const Offset(0, 0.2),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Expanded(child: AiChatWidget()),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: PredictionMiniCard(
-                        lastIndScore: 1,
-                        lastOppScore: 0,
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Expanded(child: AiChatWidget()),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: PredictionMiniCard(
+                          lastIndScore: 1,
+                          lastOppScore: 0,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
