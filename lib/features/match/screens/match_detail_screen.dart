@@ -140,7 +140,12 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
 
               // ── Header ───────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.base + AppSpacing.xs, AppSpacing.base, AppSpacing.base + AppSpacing.xs, AppSpacing.sm),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.base,
+                  AppSpacing.base,
+                  AppSpacing.base,
+                  AppSpacing.sm,
+                ),
                 child: Row(
                   children: [
                     Icon(Icons.stadium_rounded,
@@ -204,7 +209,11 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
               delegate: SliverChildListDelegate([
 
                 // ── Match Info ─────────────────────────────────────
-                _MatchInfoCard(match: m),
+                _MatchInfoCard(
+                  match: m,
+                  coach: _coach,
+                  coachLoading: _coachLoading,
+                ),
                 const SizedBox(height: AppSpacing.base + AppSpacing.xs),
 
                 // ── Lineup ─────────────────────────────────────────
@@ -608,14 +617,19 @@ class _HeroHeader extends StatelessWidget {
           colors: [Color(0xFFCC0001), Color(0xFF7B0000)],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft:  Radius.circular(32),
-          bottomRight: Radius.circular(32),
+          bottomLeft:  Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.base + AppSpacing.xs),
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.base,
+            AppSpacing.sm,
+            AppSpacing.base,
+            AppSpacing.base + AppSpacing.xs,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -725,7 +739,7 @@ class _HeroHeader extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.20),
+                  color: Colors.black.withOpacity(0.14),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -745,34 +759,6 @@ class _HeroHeader extends StatelessWidget {
               ),
 
               // ── Coach strip ───────────────────────────────────────
-              if (!coachLoading && coach != null) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.11),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.sports_rounded,
-                          color: Colors.white70, size: 14),
-                      const SizedBox(width: AppSpacing.sm),
-                      const Text('Pelatih Kepala: ',
-                          style: TextStyle(
-                              color: Colors.white60, fontSize: 12)),
-                      Flexible(child: Text(coach!.name,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12),
-                          overflow: TextOverflow.ellipsis)),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -819,10 +805,11 @@ class _StatusChip extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
+          color: Colors.white.withOpacity(0.24),
           borderRadius: BorderRadius.circular(6)),
-        child: const Text('SELESAI',
-            style: TextStyle(color: Colors.white70,
+        child: const Text(
+            'SELESAI',
+            style: TextStyle(color: Colors.white,
                 fontSize: 10, fontWeight: FontWeight.bold)));
     }
     return const SizedBox.shrink();
@@ -872,8 +859,14 @@ class _InfoRow extends StatelessWidget {
 
 // ══════════════════════════════════════════════════════════════════════════
 class _MatchInfoCard extends StatelessWidget {
-  const _MatchInfoCard({required this.match});
+  const _MatchInfoCard({
+    required this.match,
+    this.coach,
+    this.coachLoading = false,
+  });
   final MatchItem match;
+  final TournamentCoach? coach;
+  final bool coachLoading;
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -897,6 +890,12 @@ class _MatchInfoCard extends StatelessWidget {
         icon: Icons.grid_view_rounded,
         label: 'Formasi',
         value: match.formation!,
+      ));
+    if (!coachLoading && coach != null)
+      rows.add((
+        icon: Icons.person_rounded,
+        label: 'Pelatih Kepala',
+        value: coach!.name,
       ));
     if (rows.isEmpty) return const SizedBox.shrink();
     return Column(

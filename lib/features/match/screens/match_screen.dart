@@ -169,7 +169,10 @@ class _MatchScreenState extends State<MatchScreen>
           slivers: [
             SliverAppBar(
               pinned: true,
-              backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
+              backgroundColor: AppColors.softBackground(
+                cs,
+                isDark: Theme.of(context).brightness == Brightness.dark,
+              ),
               surfaceTintColor: cs.surfaceTint,
               title: const Text('Match'),
               bottom: (_isLoading || _years.isEmpty)
@@ -266,7 +269,9 @@ class _MatchScreenState extends State<MatchScreen>
                     );
                   }, childCount: _tournamentsForYear.length),
                 ),
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.xxl + 44),
+              ),
             ],
           ],
         ),

@@ -64,8 +64,15 @@ class _PlayerListScreenState extends State<PlayerListScreen>
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
+      backgroundColor: AppColors.softBackground(
+        cs,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+      ),
       appBar: AppBar(
+        backgroundColor: AppColors.softBackground(
+          cs,
+          isDark: Theme.of(context).brightness == Brightness.dark,
+        ),
         titleSpacing: AppSpacing.base,
         centerTitle: false,
         title: const Text('Garuda Squad'),
@@ -252,13 +259,15 @@ class _FilterChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: AppSpacing.sm),
       child: FilterChip(
-        label: Text(label),
+        label: Text(
+          label,
+          style: TextStyle(color: selected ? Colors.white : null),
+        ),
         selected: selected,
         onSelected: (_) => onTap(),
         visualDensity: VisualDensity.compact,
+        checkmarkColor: Colors.white,
       ),
     );
   }
 }
-
-

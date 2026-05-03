@@ -21,16 +21,18 @@ class PlayerDetailScreen extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     final col = _posColor[player.position] ?? cs.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pageBg = AppColors.softBackground(cs, isDark: isDark);
 
     return Scaffold(
-      backgroundColor: AppColors.softBackground(cs, isDark: Theme.of(context).brightness == Brightness.dark),
+      backgroundColor: pageBg,
       body: CustomScrollView(
         slivers: [
           // ── Hero foto ──────────────────────────────────────────
           SliverAppBar(
             expandedHeight: 360,
             pinned: true,
-            backgroundColor: cs.surface,
+            backgroundColor: pageBg,
             surfaceTintColor: cs.surfaceTint,
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.parallax,
@@ -43,7 +45,7 @@ class PlayerDetailScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [col.withOpacity(0.12), cs.surface],
+                        colors: [col.withOpacity(0.12), pageBg],
                       ),
                     ),
                   ),
@@ -76,7 +78,7 @@ class PlayerDetailScreen extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
-                          colors: [cs.surface, Colors.transparent],
+                          colors: [pageBg, Colors.transparent],
                         ),
                       ),
                     ),
@@ -140,11 +142,18 @@ class PlayerDetailScreen extends StatelessWidget {
 
           // ── Body ────────────────────────────────────────────────
           SliverToBoxAdapter(
-            child: Padding(
+            child: Container(
+              decoration: BoxDecoration(
+                color: pageBg,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
+              ),
+              child: Padding(
               padding: const EdgeInsets.fromLTRB(
-                AppSpacing.base + AppSpacing.xs,
+                AppSpacing.base,
                 AppSpacing.xs,
-                AppSpacing.base + AppSpacing.xs,
+                AppSpacing.base,
                 AppSpacing.xxl + AppSpacing.sm,
               ),
               child: Column(
@@ -273,6 +282,7 @@ class PlayerDetailScreen extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],
