@@ -14,92 +14,72 @@ class MiniGamesScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mini Games'),
-        centerTitle: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.base),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.base,
+            vertical: AppSpacing.base,
+          ),
           children: [
-            // ── Header section ─────────────────────────────────
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                ),
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.28),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Ayo Bermain!',
-                          style: TextStyle(
-                            color: AppColors.textOnRed,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Uji kemampuan & prediksimu\nbersama Timnas Indonesia',
-                          style: TextStyle(
-                            color: AppColors.textOnRed.withOpacity(0.75),
-                            fontSize: 13,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
+            // ── Header (sama persis dengan PredictionScreen) ───
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 16,
                     ),
                   ),
-                  const Text('🏆', style: TextStyle(fontSize: 42)),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Mini Games',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
             ),
 
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: 20),
 
-            // ── Section label ──────────────────────────────────
+            // ── Section label ───────────────────────────────
             Text(
-              'PILIH GAME',
+              'Pilih Game',
               style: TextStyle(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.5,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
+                color: cs.onSurface,
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 4),
+            Text(
+              'Uji kemampuan & prediksimu bersama Timnas',
+              style: TextStyle(
+                fontSize: 12,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
 
-            // ── Adu Penalti card ───────────────────────────────
+            const SizedBox(height: 16),
+
+            // ── Adu Penalti ────────────────────────────────
             _GameCard(
               title: 'Adu Penalti',
               subtitle: 'Tendang bola pakai gyro HP!\n5 tendangan, siapa yang menang?',
+              icon: '⚽',
               tag: 'MAIN SEKARANG',
               tagColor: AppColors.success,
-              icon: '⚽',
               accentColor: AppColors.primary,
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -111,15 +91,15 @@ class MiniGamesScreen extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 10),
 
-            // ── Coming Soon card ───────────────────────────────
+            // ── Coming Soon ────────────────────────────────
             _GameCard(
               title: 'Coming Soon',
               subtitle: 'Game seru lainnya\nsedang dalam pengembangan...',
+              icon: '🔒',
               tag: 'SEGERA HADIR',
               tagColor: cs.onSurfaceVariant,
-              icon: '🔒',
               accentColor: cs.onSurfaceVariant,
               onTap: null,
               disabled: true,
@@ -135,9 +115,9 @@ class MiniGamesScreen extends StatelessWidget {
 class _GameCard extends StatelessWidget {
   final String title;
   final String subtitle;
+  final String icon;
   final String tag;
   final Color tagColor;
-  final String icon;
   final Color accentColor;
   final VoidCallback? onTap;
   final bool disabled;
@@ -145,9 +125,9 @@ class _GameCard extends StatelessWidget {
   const _GameCard({
     required this.title,
     required this.subtitle,
+    required this.icon,
     required this.tag,
     required this.tagColor,
-    required this.icon,
     required this.accentColor,
     this.onTap,
     this.disabled = false,
@@ -156,155 +136,119 @@ class _GameCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? AppColors.darkSurface : AppColors.surface;
 
     return Opacity(
       opacity: disabled ? 0.5 : 1.0,
       child: GestureDetector(
         onTap: disabled ? null : onTap,
         child: Container(
+          padding: const EdgeInsets.all(AppSpacing.base),
           decoration: BoxDecoration(
-            color: surfaceColor,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.border,
-            ),
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: cs.outline.withOpacity(0.12)),
             boxShadow: disabled
                 ? []
                 : [
                     BoxShadow(
-                      color: accentColor.withOpacity(0.12),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
+                      color: cs.shadow.withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Accent top bar ────────────────────────────
-                Container(
-                  height: 3,
-                  color: disabled ? cs.outlineVariant : accentColor,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ── Icon ─────────────────────────────────
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: disabled
+                      ? cs.surfaceContainerHighest
+                      : accentColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: disabled
+                        ? cs.outlineVariant
+                        : accentColor.withOpacity(0.15),
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.base),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // ── Icon box ──────────────────────────
-                      Container(
-                        width: 58,
-                        height: 58,
-                        decoration: BoxDecoration(
-                          color: disabled
-                              ? cs.surfaceContainerHighest
-                              : accentColor.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          border: Border.all(
-                            color: disabled
-                                ? cs.outlineVariant
-                                : accentColor.withOpacity(0.18),
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            icon,
-                            style: const TextStyle(fontSize: 28),
-                          ),
+                child: Center(
+                  child: Text(icon, style: const TextStyle(fontSize: 26)),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+
+              // ── Text ─────────────────────────────────
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // ── Tag (mirip summary banner Prediction) ──
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: tagColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: tagColor.withOpacity(0.20),
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
-
-                      // ── Text content ──────────────────────
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    title,
-                                    style: TextStyle(
-                                      color: cs.onSurface,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.2,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              subtitle,
-                              style: TextStyle(
-                                color: cs.onSurfaceVariant,
-                                fontSize: 12,
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // ── Tag badge ─────────────────
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: tagColor.withOpacity(0.10),
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.pill),
-                                border: Border.all(
-                                  color: tagColor.withOpacity(0.25),
-                                ),
-                              ),
-                              child: Text(
-                                tag,
-                                style: TextStyle(
-                                  color: tagColor,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
-                                ),
-                              ),
-                            ),
-                          ],
+                      child: Text(
+                        tag,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: tagColor,
+                          letterSpacing: 0.6,
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
 
-                      // ── Arrow ────────────────────────────
-                      if (!disabled) ...[  
-                        const SizedBox(width: AppSpacing.sm),
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: accentColor.withOpacity(0.08),
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.pill),
-                          ),
-                          child: Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            color: accentColor,
-                            size: 14,
-                          ),
-                        ),
-                      ],
-                    ],
+              // ── Arrow ─────────────────────────────────
+              if (!disabled) ...[  
+                const SizedBox(width: AppSpacing.sm),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: accentColor,
+                    size: 14,
                   ),
                 ),
               ],
-            ),
+            ],
           ),
         ),
       ),
