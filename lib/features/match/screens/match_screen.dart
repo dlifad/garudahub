@@ -178,7 +178,7 @@ class _MatchScreenState extends State<MatchScreen>
               bottom: (_isLoading || _years.isEmpty)
                   ? null
                   : PreferredSize(
-                      preferredSize: const Size.fromHeight(40),
+                      preferredSize: const Size.fromHeight(48),
                       child: Column(
                         children: [
                           YearSelector(
@@ -201,7 +201,7 @@ class _MatchScreenState extends State<MatchScreen>
                 child: _ErrorState(message: _error!, onRetry: _init),
               )
             else ...[
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
               SliverToBoxAdapter(
                 child: RecordStatsCard(
                   year: _selectedYear,
@@ -269,8 +269,10 @@ class _MatchScreenState extends State<MatchScreen>
                     );
                   }, childCount: _tournamentsForYear.length),
                 ),
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppSpacing.xxl + 44),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom + AppSpacing.xl,
+                ),
               ),
             ],
           ],

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:garudahub/core/theme/app_theme.dart';
+import 'package:garudahub/core/models/user_model.dart';
+import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,12 +12,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Model pesan (dari Supabase)
 // ────────────────────────────────────────────────
 class MatchChatMessage {
-  final String  id;
-  final String  matchId;
-  final String  userId;
-  final String  username;
-  final String  avatarEmoji;
-  final String  body;
+  final String id;
+  final String matchId;
+  final String userId;
+  final String username;
+  final String avatarEmoji;
+  final String body;
   final String? type; // null=normal, 'predict','chant'
   final DateTime createdAt;
 
@@ -29,17 +32,16 @@ class MatchChatMessage {
     required this.createdAt,
   });
 
-  factory MatchChatMessage.fromMap(Map<String, dynamic> m) =>
-      MatchChatMessage(
-        id:          m['id']           as String,
-        matchId:     m['match_id']     as String,
-        userId:      m['user_id']      as String,
-        username:    m['username']     as String,
-        avatarEmoji: m['avatar_emoji'] as String? ?? '🦅',
-        body:        m['body']         as String,
-        type:        m['type']         as String?,
-        createdAt:   DateTime.parse(m['created_at'] as String),
-      );
+  factory MatchChatMessage.fromMap(Map<String, dynamic> m) => MatchChatMessage(
+    id: m['id'] as String,
+    matchId: m['match_id'] as String,
+    userId: m['user_id'] as String,
+    username: m['username'] as String,
+    avatarEmoji: m['avatar_emoji'] as String? ?? '🦅',
+    body: m['body'] as String,
+    type: m['type'] as String?,
+    createdAt: DateTime.parse(m['created_at'] as String),
+  );
 }
 
 // ────────────────────────────────────────────────
@@ -55,44 +57,42 @@ class MatchChatScreen extends StatefulWidget {
 
 class _MatchChatScreenState extends State<MatchChatScreen>
     with TickerProviderStateMixin {
-
-  static final _sb       = Supabase.instance.client;
-  static const _table    = 'match_chats';
-  static const _emojis   = ['🦅','🇮🇩','⚽','🔥','💪','🎯','🏆','😎'];
-  static const _chants   = [
+  static final _sb = Supabase.instance.client;
+  static const _table = 'match_chats';
+  static const _emojis = ['🦅', '🇮🇩', '⚽', '🔥', '💪', '🎯', '🏆', '😎'];
+  static const _chants = [
     'Ayo Garuda! 🦅🔥',
     'Indonesia Bisa! 💪',
     'Merah Putih Juara! 🇮🇩',
     'Garuda di Dadaku! ❤️',
   ];
 
-  final _ctrl    = TextEditingController();
-  final _scroll  = ScrollController();
+  final _ctrl = TextEditingController();
+  final _scroll = ScrollController();
   final _focusNode = FocusNode();
 
   List<MatchChatMessage> _messages = [];
-  bool   _loading     = true;
-  bool   _sending     = false;
-  String _msgType     = 'normal'; // normal | predict | chant
-  bool   _showChants  = false;
-  bool   _showScrollBtn = false;
+  bool _loading = true;
+  bool _sending = false;
+  String _msgType = 'normal'; // normal | predict | chant
+  bool _showChants = false;
+  bool _showScrollBtn = false;
 
   RealtimeChannel? _channel;
-
   late final AnimationController _fabAnim;
 
+  // ── helpers: ambil user dari AuthProvider, BUKAN dari Supabase.auth ──
   String get _matchId => '${widget.match.id}';
 
-  /// Kembalikan null jika user belum login
-  String? get _meOrNull => _sb.auth.currentUser?.id;
-  String get _me => _meOrNull ?? 'anon';
+  UserModel? get _appUser => context.read<AuthProvider>().user;
 
-  String get _myName {
-    final u = _sb.auth.currentUser;
-    return u?.userMetadata?['full_name'] as String?
-        ?? u?.email?.split('@').first
-        ?? 'Garuda Fan';
-  }
+  bool get _isLoggedIn =>
+      context.read<AuthProvider>().isAuthenticated && _appUser != null;
+
+  String get _me => _appUser?.id.toString() ?? 'anon';
+
+  String get _myName => _appUser?.name ?? 'Garuda Fan';
+
   String get _myEmoji {
     final code = _me.codeUnitAt(0) % _emojis.length;
     return _emojis[code];
@@ -102,7 +102,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   void initState() {
     super.initState();
     _fabAnim = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 250));
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
     _scroll.addListener(_onScroll);
     _load();
     _subscribe();
@@ -119,8 +121,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   }
 
   void _onScroll() {
-    final atBottom = _scroll.offset >=
-        (_scroll.position.maxScrollExtent - 80);
+    final atBottom = _scroll.offset >= (_scroll.position.maxScrollExtent - 80);
     if (!atBottom && !_showScrollBtn) {
       setState(() => _showScrollBtn = true);
       _fabAnim.forward();
@@ -138,17 +139,18 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           .from(_table)
           .select()
           .eq('match_id', _matchId)
-          .order('created_at')
+          .order('created_at', ascending: true) // ← tambah ini!
           .limit(200);
       if (mounted) {
         setState(() {
           _messages = (rows as List)
               .map((r) => MatchChatMessage.fromMap(r as Map<String, dynamic>))
               .toList();
-          _loading  = false;
+          _loading = false;
         });
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _scrollToBottom(animate: false));
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _scrollToBottom(animate: false),
+        );
       }
     } catch (e) {
       debugPrint('Chat load error: $e');
@@ -161,9 +163,9 @@ class _MatchChatScreenState extends State<MatchChatScreen>
     _channel = _sb
         .channel('match_chat_$_matchId')
         .onPostgresChanges(
-          event:  PostgresChangeEvent.insert,
+          event: PostgresChangeEvent.insert,
           schema: 'public',
-          table:  _table,
+          table: _table,
           filter: PostgresChangeFilter(
             type: PostgresChangeFilterType.eq,
             column: 'match_id',
@@ -171,12 +173,13 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           ),
           callback: (payload) {
             final msg = MatchChatMessage.fromMap(
-                payload.newRecord as Map<String, dynamic>);
+              payload.newRecord as Map<String, dynamic>,
+            );
             if (mounted) {
               setState(() => _messages.add(msg));
-              final atBottom = _scroll.hasClients &&
-                  _scroll.offset >=
-                      (_scroll.position.maxScrollExtent - 120);
+              final atBottom =
+                  _scroll.hasClients &&
+                  _scroll.offset >= (_scroll.position.maxScrollExtent - 120);
               if (atBottom) _scrollToBottom();
             }
           },
@@ -186,8 +189,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
   // ── Send ───────────────────────────────────────
   Future<void> _send({String? overrideText, String? overrideType}) async {
-    // Guard: harus login dulu
-    if (_meOrNull == null) {
+    // Guard: cek login via AuthProvider (bukan Supabase.auth)
+    if (!_isLoggedIn) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -201,26 +204,32 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
     final text = (overrideText ?? _ctrl.text).trim();
     if (text.isEmpty || _sending) return;
+
     setState(() => _sending = true);
     _ctrl.clear();
+
     try {
       await _sb.from(_table).insert({
-        'match_id':    _matchId,
-        'user_id':     _me,
-        'username':    _myName,
-        'avatar_emoji':_myEmoji,
-        'body':        text,
-        'type':        overrideType ?? (_msgType == 'normal' ? null : _msgType),
+        'match_id': _matchId,
+        'user_id': _me,
+        'username': _myName,
+        'avatar_emoji': _myEmoji,
+        'body': text,
+        'type': overrideType ?? (_msgType == 'normal' ? null : _msgType),
       });
     } catch (e) {
       debugPrint('Chat send error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal kirim pesan: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal kirim pesan: $e')));
       }
     } finally {
-      if (mounted) setState(() { _sending = false; _msgType = 'normal'; });
+      if (mounted)
+        setState(() {
+          _sending = false;
+          _msgType = 'normal';
+        });
     }
   }
 
@@ -242,8 +251,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   // ────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final cs  = Theme.of(context).colorScheme;
-    final tt  = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final isUpcoming = widget.match.result == null;
@@ -251,6 +260,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
     return Scaffold(
       backgroundColor: AppColors.softBackground(cs, isDark: isDark),
+
       // ── AppBar ──
       appBar: AppBar(
         backgroundColor: const Color(0xFFCC0001),
@@ -258,7 +268,11 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         elevation: 0,
         titleSpacing: AppSpacing.xs - 4,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.white,),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 18,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -267,42 +281,49 @@ class _MatchChatScreenState extends State<MatchChatScreen>
             Text(
               'Diskusi Laga',
               style: tt.titleSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14),
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
             ),
             Text(
               'Indonesia vs $vs',
-              style: const TextStyle(
-                  color: Colors.white70, fontSize: 11),
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
             ),
           ],
         ),
         actions: [
-          // mini scoreboard / status
           Container(
             margin: const EdgeInsets.only(right: AppSpacing.md),
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md - 2, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md - 2,
+              vertical: AppSpacing.xs,
+            ),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Row(children: [
-              const Text('🇮🇩', style: TextStyle(fontSize: 13)),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                isUpcoming
-                    ? 'vs'
-                    : '${widget.match.indonesiaScore ?? 0} - ${widget.match.opponentScore ?? 0}',
-                style: const TextStyle(
+            child: Row(
+              children: [
+                const Text('🇮🇩', style: TextStyle(fontSize: 13)),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  isUpcoming
+                      ? 'vs'
+                      : '${widget.match.indonesiaScore ?? 0} - ${widget.match.opponentScore ?? 0}',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 13),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(widget.match.opponentFlag ?? '🏳️',
-                  style: const TextStyle(fontSize: 13)),
-            ]),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  widget.match.opponentFlag ?? '🏳️',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ],
+            ),
           ),
         ],
         bottom: PreferredSize(
@@ -310,107 +331,96 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           child: Container(
             height: 1,
             decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [
-                Color(0xFFCC0001), Color(0xFF8B0000)
-              ]),
+              gradient: LinearGradient(
+                colors: [Color(0xFFCC0001), Color(0xFF8B0000)],
+              ),
             ),
           ),
         ),
       ),
 
-      body: Column(children: [
-        // ── Banner login warning jika belum login ──
-        if (_meOrNull == null)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            color: const Color(0xFFCC0001).withOpacity(0.1),
-            child: Row(children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 14, color: Color(0xFFCC0001)),
-              const SizedBox(width: AppSpacing.xs),
-              const Expanded(
-                child: Text(
-                  'Login untuk ikut berdiskusi',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFCC0001),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ]),
-          ),
-
-        // ── Messages list ──
-        Expanded(
-          child: _loading
-              ? const Center(child: CircularProgressIndicator())
-              : _messages.isEmpty
-                  ? _EmptyChat(vs: vs)
-                  : Stack(children: [
+      body: Column(
+        children: [
+          // ── Messages list ──
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _messages.isEmpty
+                ? _EmptyChat(vs: vs)
+                : Stack(
+                    children: [
                       ListView.builder(
-                        controller:   _scroll,
-                        padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.sm),
-                        itemCount:    _messages.length,
-                        itemBuilder:  (ctx, i) {
-                          final msg    = _messages[i];
+                        controller: _scroll,
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.md,
+                          AppSpacing.md,
+                          AppSpacing.md,
+                          AppSpacing.sm,
+                        ),
+                        itemCount: _messages.length,
+                        itemBuilder: (ctx, i) {
+                          final msg = _messages[i];
+                          // isMine: bandingkan pakai user_id dari AuthProvider
                           final isMine = msg.userId == _me;
-                          final prev   = i > 0 ? _messages[i - 1] : null;
-                          final showName = !isMine &&
+                          final prev = i > 0 ? _messages[i - 1] : null;
+                          final showName =
+                              !isMine &&
                               (prev == null || prev.userId != msg.userId);
                           return _ChatBubble(
-                            msg:       msg,
-                            isMine:    isMine,
-                            showName:  showName,
-                            isDark:    isDark,
+                            msg: msg,
+                            isMine: isMine,
+                            showName: showName,
+                            isDark: isDark,
                           );
                         },
                       ),
-                      // FAB scroll-to-bottom
                       if (_showScrollBtn)
                         Positioned(
-                          right: 12, bottom: 8,
+                          right: 12,
+                          bottom: 8,
                           child: ScaleTransition(
                             scale: CurvedAnimation(
-                                parent: _fabAnim,
-                                curve: Curves.elasticOut),
+                              parent: _fabAnim,
+                              curve: Curves.elasticOut,
+                            ),
                             child: FloatingActionButton.small(
                               onPressed: _scrollToBottom,
                               backgroundColor: const Color(0xFFCC0001),
                               foregroundColor: Colors.white,
                               elevation: 2,
                               child: const Icon(
-                                  Icons.keyboard_arrow_down_rounded),
+                                Icons.keyboard_arrow_down_rounded,
+                              ),
                             ),
                           ),
                         ),
-                    ]),
-        ),
+                    ],
+                  ),
+          ),
 
-        // ── Chant shortcut row ──
-        if (_showChants) _ChantRow(
-          chants: _chants,
-          onTap: (c) {
-            setState(() => _showChants = false);
-            _send(overrideText: c, overrideType: 'chant');
-          },
-        ),
+          // ── Chant shortcut row ──
+          if (_showChants)
+            _ChantRow(
+              chants: _chants,
+              onTap: (c) {
+                setState(() => _showChants = false);
+                _send(overrideText: c, overrideType: 'chant');
+              },
+            ),
 
-        // ── Input bar ──
-        _InputBar(
-          ctrl:         _ctrl,
-          focusNode:    _focusNode,
-          msgType:      _msgType,
-          sending:      _sending,
-          showChants:   _showChants,
-          isLoggedIn:   _meOrNull != null,
-          onTypeChanged: (t) => setState(() => _msgType = t),
-          onToggleChants: () => setState(() => _showChants = !_showChants),
-          onSend:       _send,
-        ),
-      ]),
+          // ── Input bar ──
+          _InputBar(
+            ctrl: _ctrl,
+            focusNode: _focusNode,
+            msgType: _msgType,
+            sending: _sending,
+            showChants: _showChants,
+            onTypeChanged: (t) => setState(() => _msgType = t),
+            onToggleChants: () => setState(() => _showChants = !_showChants),
+            onSend: _send,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -430,74 +440,80 @@ class _ChatBubble extends StatelessWidget {
 
   Color _userColor(String uid) {
     const colors = [
-      Color(0xFFE53935), Color(0xFF1E88E5), Color(0xFF43A047),
-      Color(0xFFFB8C00), Color(0xFF8E24AA), Color(0xFF00897B),
+      Color(0xFFE53935),
+      Color(0xFF1E88E5),
+      Color(0xFF43A047),
+      Color(0xFFFB8C00),
+      Color(0xFF8E24AA),
+      Color(0xFF00897B),
     ];
     return colors[uid.codeUnitAt(0) % colors.length];
   }
 
   @override
   Widget build(BuildContext context) {
-    final cs      = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final isPredict = msg.type == 'predict';
-    final isChant   = msg.type == 'chant';
+    final isChant = msg.type == 'chant';
 
     Color bubbleBg;
     if (isMine) {
       bubbleBg = const Color(0xFFCC0001);
     } else if (isPredict) {
-      bubbleBg = isDark
-          ? const Color(0xFF1B3A2A)
-          : const Color(0xFFE8F5E9);
+      bubbleBg = isDark ? const Color(0xFF1B3A2A) : const Color(0xFFE8F5E9);
     } else if (isChant) {
-      bubbleBg = isDark
-          ? const Color(0xFF3E2A00)
-          : const Color(0xFFFFF3E0);
+      bubbleBg = isDark ? const Color(0xFF3E2A00) : const Color(0xFFFFF3E0);
     } else {
-      bubbleBg = isDark
-          ? const Color(0xFF2A2A2A)
-          : Colors.white;
+      bubbleBg = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     }
 
     final radius = BorderRadius.only(
-      topLeft:     const Radius.circular(18),
-      topRight:    const Radius.circular(18),
-      bottomLeft:  Radius.circular(isMine ? 18 : 4),
+      topLeft: const Radius.circular(18),
+      topRight: const Radius.circular(18),
+      bottomLeft: Radius.circular(isMine ? 18 : 4),
       bottomRight: Radius.circular(isMine ? 4 : 18),
     );
 
     return Padding(
       padding: EdgeInsets.only(
-        top:    showName ? 12 : 3,
+        top: showName ? 12 : 3,
         bottom: 2,
-        left:   isMine ? 48 : 0,
-        right:  isMine ? 0  : 48,
+        left: isMine ? 48 : 0,
+        right: isMine ? 0 : 48,
       ),
       child: Column(
-        crossAxisAlignment:
-            isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isMine
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           if (showName && !isMine)
             Padding(
-              padding: const EdgeInsets.only(left: AppSpacing.sm, bottom: AppSpacing.xs - 1),
-              child: Row(children: [
-                Text(msg.avatarEmoji,
-                    style: const TextStyle(fontSize: 13)),
-                const SizedBox(width: AppSpacing.xs + 1),
-                Text(
-                  msg.username,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: _userColor(msg.userId),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.sm,
+                bottom: AppSpacing.xs - 1,
+              ),
+              child: Row(
+                children: [
+                  Text(msg.avatarEmoji, style: const TextStyle(fontSize: 13)),
+                  const SizedBox(width: AppSpacing.xs + 1),
+                  Text(
+                    msg.username,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: _userColor(msg.userId),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md + 1, vertical: AppSpacing.sm + 1),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md + 1,
+              vertical: AppSpacing.sm + 1,
+            ),
             decoration: BoxDecoration(
-              color:       bubbleBg,
+              color: bubbleBg,
               borderRadius: radius,
               boxShadow: [
                 BoxShadow(
@@ -513,30 +529,38 @@ class _ChatBubble extends StatelessWidget {
                 if (isPredict)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                    child: Row(children: [
-                      const Text('🔮', style: TextStyle(fontSize: 11)),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text('Prediksi Skor',
+                    child: Row(
+                      children: [
+                        const Text('🔮', style: TextStyle(fontSize: 11)),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          'Prediksi Skor',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             color: Colors.green[700],
-                          )),
-                    ]),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 if (isChant)
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-                    child: Row(children: [
-                      const Text('📣', style: TextStyle(fontSize: 11)),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text('Yel-Yel',
+                    child: Row(
+                      children: [
+                        const Text('📣', style: TextStyle(fontSize: 11)),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          'Yel-Yel',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                             color: Colors.orange[700],
-                          )),
-                    ]),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 Text(
                   msg.body,
@@ -582,34 +606,38 @@ class _InputBar extends StatelessWidget {
     required this.msgType,
     required this.sending,
     required this.showChants,
-    required this.isLoggedIn,
     required this.onTypeChanged,
     required this.onToggleChants,
     required this.onSend,
   });
   final TextEditingController ctrl;
   final FocusNode focusNode;
-  final String  msgType;
-  final bool    sending, showChants, isLoggedIn;
+  final String msgType;
+  final bool sending, showChants;
   final ValueChanged<String> onTypeChanged;
   final VoidCallback onToggleChants;
-  final Future<void> Function({String? overrideText, String? overrideType}) onSend;
+  final Future<void> Function({String? overrideText, String? overrideType})
+  onSend;
 
   @override
   Widget build(BuildContext context) {
-    final cs    = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.only(left: AppSpacing.sm, right: AppSpacing.sm, top: AppSpacing.sm,
+      padding: EdgeInsets.only(
+        left: AppSpacing.sm,
+        right: AppSpacing.sm,
+        top: AppSpacing.sm,
         bottom: MediaQuery.of(context).viewInsets.bottom > 0
-            ? AppSpacing.sm : MediaQuery.of(context).padding.bottom + AppSpacing.sm,
+            ? AppSpacing.sm
+            : MediaQuery.of(context).padding.bottom + AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
         border: Border(
-          top: BorderSide(
-              color: cs.outline.withOpacity(0.12), width: 1)),
+          top: BorderSide(color: cs.outline.withOpacity(0.12), width: 1),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
@@ -618,84 +646,87 @@ class _InputBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(children: [
-        // Predict button
-        _TypeBtn(
-          icon: '🔮',
-          active:  msgType == 'predict',
-          tooltip: 'Prediksi Skor',
-          enabled: isLoggedIn,
-          onTap:   () => onTypeChanged(
-              msgType == 'predict' ? 'normal' : 'predict'),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        // Chant button
-        _TypeBtn(
-          icon:    '📣',
-          active:  showChants,
-          tooltip: 'Yel-Yel',
-          enabled: isLoggedIn,
-          onTap:   onToggleChants,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        // Text field
-        Expanded(
-          child: Container(
-            constraints: const BoxConstraints(maxHeight: 120),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF2A2A2A)
-                  : const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: TextField(
-              controller:  ctrl,
-              focusNode:   focusNode,
-              maxLines:    null,
-              enabled:     isLoggedIn,
-              textCapitalization: TextCapitalization.sentences,
-              style: const TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                hintText: !isLoggedIn
-                    ? 'Login untuk ikut berdiskusi...'
-                    : msgType == 'predict'
-                        ? 'Prediksi skor... mis: 2-1'
-                        : 'Tulis komentar...',
-                hintStyle: TextStyle(
-                    color: cs.onSurfaceVariant.withOpacity(0.5),
-                    fontSize: 13),
-                border:      InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.md - 2),
+      child: Row(
+        children: [
+          _TypeBtn(
+            icon: '🔮',
+            active: msgType == 'predict',
+            tooltip: 'Prediksi Skor',
+            onTap: () =>
+                onTypeChanged(msgType == 'predict' ? 'normal' : 'predict'),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          _TypeBtn(
+            icon: '📣',
+            active: showChants,
+            tooltip: 'Yel-Yel',
+            onTap: onToggleChants,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 120),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF2A2A2A)
+                    : const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(22),
               ),
-              onSubmitted: (_) => onSend(),
+              child: TextField(
+                controller: ctrl,
+                focusNode: focusNode,
+                maxLines: null,
+                textCapitalization: TextCapitalization.sentences,
+                style: const TextStyle(fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: msgType == 'predict'
+                      ? 'Prediksi skor... mis: 2-1'
+                      : 'Tulis komentar...',
+                  hintStyle: TextStyle(
+                    color: cs.onSurfaceVariant.withOpacity(0.5),
+                    fontSize: 13,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.base,
+                    vertical: AppSpacing.md - 2,
+                  ),
+                ),
+                onSubmitted: (_) => onSend(),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        // Send button
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 42, height: 42,
-          decoration: BoxDecoration(
-            color: (sending || !isLoggedIn)
-                ? cs.surfaceContainerHighest
-                : const Color(0xFFCC0001),
-            shape: BoxShape.circle,
+          const SizedBox(width: AppSpacing.sm),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: sending
+                  ? cs.surfaceContainerHighest
+                  : const Color(0xFFCC0001),
+              shape: BoxShape.circle,
+            ),
+            child: sending
+                ? const Padding(
+                    padding: EdgeInsets.all(AppSpacing.md - 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : IconButton(
+                    onPressed: onSend,
+                    icon: const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    padding: EdgeInsets.zero,
+                  ),
           ),
-          child: sending
-              ? const Padding(
-                  padding: EdgeInsets.all(AppSpacing.md - 2),
-                  child: CircularProgressIndicator(
-                      strokeWidth: 1.5, color: Colors.white))
-              : IconButton(
-                  onPressed: isLoggedIn ? onSend : null,
-                  icon: Icon(Icons.send_rounded,
-                      color: isLoggedIn ? Colors.white : cs.onSurfaceVariant,
-                      size: 18),
-                  padding: EdgeInsets.zero,
-                ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
@@ -705,13 +736,11 @@ class _TypeBtn extends StatelessWidget {
     required this.icon,
     required this.active,
     required this.tooltip,
-    required this.enabled,
     required this.onTap,
   });
   final String icon;
-  final bool   active;
+  final bool active;
   final String tooltip;
-  final bool   enabled;
   final VoidCallback onTap;
 
   @override
@@ -719,26 +748,23 @@ class _TypeBtn extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: InkWell(
-        onTap: enabled ? onTap : null,
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          width: 36, height: 36,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(
             color: active
                 ? const Color(0xFFCC0001).withOpacity(0.12)
                 : Colors.transparent,
             shape: BoxShape.circle,
             border: active
-                ? Border.all(
-                    color: const Color(0xFFCC0001).withOpacity(0.4))
+                ? Border.all(color: const Color(0xFFCC0001).withOpacity(0.4))
                 : null,
           ),
           alignment: Alignment.center,
-          child: Text(icon,
-              style: TextStyle(
-                  fontSize: 18,
-                  color: enabled ? null : Colors.grey)),
+          child: Text(icon, style: const TextStyle(fontSize: 18)),
         ),
       ),
     );
@@ -760,24 +786,32 @@ class _ChantRow extends StatelessWidget {
       height: 44,
       color: cs.surfaceContainerLow,
       child: ListView.separated(
-        scrollDirection:   Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm - 2),
-        itemCount:         chants.length,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm - 2,
+        ),
+        itemCount: chants.length,
         separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (_, i) => InkWell(
           onTap: () => onTap(chants[i]),
           borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md + 2, vertical: AppSpacing.xs + 1),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md + 2,
+              vertical: AppSpacing.xs + 1,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFFF8F00).withOpacity(0.15),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                  color: const Color(0xFFFF8F00).withOpacity(0.35)),
+                color: const Color(0xFFFF8F00).withOpacity(0.35),
+              ),
             ),
-            child: Text(chants[i],
-                style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600)),
+            child: Text(
+              chants[i],
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
           ),
         ),
       ),
@@ -815,7 +849,9 @@ class _EmptyChat extends StatelessWidget {
           Text(
             'Indonesia vs $vs',
             style: TextStyle(
-                fontSize: 12, color: cs.onSurfaceVariant.withOpacity(0.6)),
+              fontSize: 12,
+              color: cs.onSurfaceVariant.withOpacity(0.6),
+            ),
           ),
         ],
       ),

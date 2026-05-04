@@ -188,187 +188,213 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [cs.surface, cs.background],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
-            child: Form(
-              key: _formKey,
+      backgroundColor: AppColors.softBackground(
+        cs,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
+            ),
+            child: IntrinsicHeight(
               child: Column(
                 children: [
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Back + Title
-                  Row(
-                    children: [
-                      IconButton.filledTonal(
+                  // ── Back button ───────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.md),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton.filledTonal(
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                        icon: const Icon(Icons.arrow_back_ios_new, size: 16),
+                        style: IconButton.styleFrom(
+                          backgroundColor: cs.surfaceContainerHighest,
+                          foregroundColor: cs.onSurface,
+                          minimumSize: const Size(36, 36),
+                        ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
+                    ),
+                  ),
+
+                  const Spacer(), // ← dorong card ke tengah
+                  // ── Header text ───────────────────────────
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Buat Akun Baru',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Mau lihat perkembangan King Indonesia? Daftar sekarang.',
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.base),
+
+                  // ── Card ──────────────────────────────────
+                  Card(
+                    elevation: 6,
+                    shadowColor: cs.shadow.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: cs.outlineVariant.withOpacity(0.4),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Form(
+                        key: _formKey,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Buat Akun Baru',
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: cs.onSurface,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            GarudaTextField(
+                              label: 'Nama Lengkap',
+                              controller: _nameCtrl,
+                              prefixIcon: Icons.person_outline,
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Nama wajib diisi';
+                                if (v.length < 2) return 'Nama terlalu pendek';
+                                return null;
+                              },
                             ),
-                            Text(
-                              'Mau lihat perkembangan King Indonesia? Daftar sekarang.',
-                              style: TextStyle(
-                                color: cs.onSurfaceVariant,
-                                fontSize: 13,
-                              ),
+                            const SizedBox(height: AppSpacing.sm),
+                            GarudaTextField(
+                              label: 'Email',
+                              controller: _emailCtrl,
+                              prefixIcon: Icons.email_outlined,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Email wajib diisi';
+                                if (!v.contains('@'))
+                                  return 'Email tidak valid';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            GarudaTextField(
+                              label: 'Kata Sandi',
+                              controller: _passCtrl,
+                              prefixIcon: Icons.lock_outline,
+                              isPassword: true,
+                              validator: (v) {
+                                if (v == null || v.isEmpty)
+                                  return 'Kata sandi wajib diisi';
+                                if (v.length < 6) return 'Minimal 6 karakter';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            GarudaTextField(
+                              label: 'Konfirmasi Kata Sandi',
+                              controller: _confirmPassCtrl,
+                              prefixIcon: Icons.lock_outline,
+                              isPassword: true,
+                              validator: (v) {
+                                if (v != _passCtrl.text)
+                                  return 'Kata sandi tidak cocok';
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+
+                            // Terms
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Checkbox(
+                                  value: _agreeTerms,
+                                  onChanged: (v) =>
+                                      setState(() => _agreeTerms = v ?? false),
+                                  visualDensity: VisualDensity.compact,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        color: cs.onSurfaceVariant,
+                                        fontSize: 12,
+                                        height: 1.4,
+                                      ),
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Saya setuju dengan ',
+                                        ),
+                                        TextSpan(
+                                          text: 'Syarat & Ketentuan',
+                                          style: TextStyle(
+                                            color: cs.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = _showTerms,
+                                        ),
+                                        const TextSpan(text: ' GarudaHub'),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+
+                            GarudaButton(
+                              text: 'Daftar Sekarang',
+                              onPressed: _register,
+                              isLoading: _isLoading,
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        children: [
-                          GarudaTextField(
-                            label: 'Nama Lengkap',
-                            controller: _nameCtrl,
-                            prefixIcon: Icons.person_outline,
-                            validator: (v) {
-                              if (v == null || v.isEmpty)
-                                return 'Nama wajib diisi';
-                              if (v.length < 2) return 'Nama terlalu pendek';
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.base),
-                          GarudaTextField(
-                            label: 'Email',
-                            controller: _emailCtrl,
-                            prefixIcon: Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (v) {
-                              if (v == null || v.isEmpty)
-                                return 'Email wajib diisi';
-                              if (!v.contains('@')) return 'Email tidak valid';
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.base),
-                          GarudaTextField(
-                            label: 'Kata Sandi',
-                            controller: _passCtrl,
-                            prefixIcon: Icons.lock_outline,
-                            isPassword: true,
-                            validator: (v) {
-                              if (v == null || v.isEmpty)
-                                return 'Kata sandi wajib diisi';
-                              if (v.length < 6) return 'Minimal 6 karakter';
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.base),
-                          GarudaTextField(
-                            label: 'Konfirmasi Kata Sandi',
-                            controller: _confirmPassCtrl,
-                            prefixIcon: Icons.lock_outline,
-                            isPassword: true,
-                            validator: (v) {
-                              if (v != _passCtrl.text)
-                                return 'Kata sandi tidak cocok';
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-
-                          // Terms checkbox
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Checkbox(
-                                value: _agreeTerms,
-                                onChanged: (v) =>
-                                    setState(() => _agreeTerms = v ?? false),
-                              ),
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: TextStyle(
-                                      color: cs.onSurfaceVariant,
-                                      fontSize: 13,
-                                      height: 1.4,
-                                    ),
-                                    children: [
-                                      const TextSpan(
-                                        text: 'Saya setuju dengan ',
-                                      ),
-                                      TextSpan(
-                                        text: 'Syarat & Ketentuan',
-                                        style: TextStyle(
-                                          color: cs.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = _showTerms,
-                                      ),
-                                      const TextSpan(text: ' GarudaHub'),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-
-                          GarudaButton(
-                            text: 'Daftar Sekarang',
-                            onPressed: _register,
-                            isLoading: _isLoading,
-                          ),
-                        ],
-                      ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Sudah punya akun? ',
-                        style: TextStyle(
-                          color: cs.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Text(
-                          'Masuk',
+                  const Spacer(), // ← dorong card ke tengah
+                  // ── Login link ────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Sudah punya akun? ',
                           style: TextStyle(
-                            color: cs.primary,
+                            color: cs.onSurfaceVariant,
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    ],
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Text(
+                            'Masuk',
+                            style: TextStyle(
+                              color: cs.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),

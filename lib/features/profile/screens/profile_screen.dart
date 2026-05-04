@@ -191,8 +191,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.softBackground(
+        cs,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+      ),
       appBar: AppBar(
-        titleSpacing: 16,
+        backgroundColor: AppColors.softBackground(
+          cs,
+          isDark: Theme.of(context).brightness == Brightness.dark,
+        ),
+        surfaceTintColor: cs.surfaceTint,
+        titleSpacing: AppSpacing.base,
         centerTitle: false,
         title: const Text('Profil'),
       ),
@@ -745,4 +754,3 @@ class _MenuTile extends StatelessWidget {
     );
   }
 }
-

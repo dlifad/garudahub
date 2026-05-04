@@ -128,7 +128,12 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
           child: GridView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 100),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.base,
+              AppSpacing.sm,
+              AppSpacing.base,
+              MediaQuery.of(context).padding.bottom + AppSpacing.xl,
+            ),
             itemCount: filteredItems.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -232,7 +237,7 @@ class _MerchandiseScreenState extends State<MerchandiseScreen> {
 
         if (_showScrollToTop)
           Positioned(
-            bottom: 90,
+            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.xl,
             right: AppSpacing.base,
             child: FloatingActionButton.small(
               onPressed: _scrollToTop,

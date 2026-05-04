@@ -159,7 +159,12 @@ class _TicketScreenState extends State<TicketScreen> {
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 100),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.base,
+              AppSpacing.md,
+              AppSpacing.base,
+              MediaQuery.of(context).padding.bottom + AppSpacing.xl,
+            ),
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final match = filtered[index];
@@ -396,7 +401,7 @@ class _TicketScreenState extends State<TicketScreen> {
 
         if (_showScrollToTop)
           Positioned(
-            bottom: 90,
+            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.xl,
             right: AppSpacing.base,
             child: FloatingActionButton.small(
               onPressed: _scrollToTop,

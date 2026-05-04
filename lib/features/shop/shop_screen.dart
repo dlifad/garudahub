@@ -201,26 +201,27 @@ class _ShopScreenState extends State<ShopScreen> {
 
                   Row(
                     children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              _minPriceController.clear();
-                              _maxPriceController.clear();
-                              setSheetState(() => tempSort = 'default');
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: cs.outline),
-                              foregroundColor: cs.onSurface,
-                              minimumSize: const Size(double.infinity, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                            ),
-                            child: const Text('Reset',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            _minPriceController.clear();
+                            _maxPriceController.clear();
+                            setSheetState(() => tempSort = 'default');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: cs.outline),
+                            foregroundColor: cs.onSurface,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
                             ),
                           ),
+                          child: const Text(
+                            'Reset',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: GarudaButton(
@@ -263,128 +264,117 @@ class _ShopScreenState extends State<ShopScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        body: Column(
-          children: [
-            Material(
-              color: cs.surface,
-              child: SafeArea(
-                bottom: false,
-                child: Column(
-                  children: [
-                    const SizedBox(height: AppSpacing.sm),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.base,
-                        AppSpacing.sm,
-                        AppSpacing.base,
-                        AppSpacing.md,
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Shop',
-                            style: Theme.of(context).appBarTheme.titleTextStyle,
-                          ),
-                          const Spacer(),
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              IconButton(
-                                onPressed: () => _showFilterSortSheet(context),
-                                icon: const Icon(Icons.tune_rounded),
-                              ),
-                              if (_isFilterActive)
-                                Positioned(
-                                  top: AppSpacing.sm,
-                                  right: AppSpacing.sm,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: cs.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.base,
-                        AppSpacing.sm,
-                        AppSpacing.base,
-                        AppSpacing.sm,
-                      ),
-                      child: Row(
-                        children: [Expanded(child: _buildSearchField(context))],
-                      ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.base,
-                        AppSpacing.sm,
-                        AppSpacing.base,
-                        AppSpacing.base,
-                      ),
+        appBar: AppBar(
+          backgroundColor: AppColors.softBackground(
+            cs,
+            isDark: Theme.of(context).brightness == Brightness.dark,
+          ),
+          surfaceTintColor: cs.surfaceTint,
+          titleSpacing: AppSpacing.base,
+          centerTitle: false,
+          title: const Text('Shop'),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.base),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    onPressed: () => _showFilterSortSheet(context),
+                    icon: const Icon(Icons.tune_rounded),
+                  ),
+                  if (_isFilterActive)
+                    Positioned(
+                      top: AppSpacing.sm,
+                      right: AppSpacing.sm,
                       child: Container(
-                        height: 45,
+                        width: 8,
+                        height: 8,
                         decoration: BoxDecoration(
-                          color: cs.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: TabBar(
-                          indicator: BoxDecoration(
-                            color: cs.primary,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          labelColor: cs.onPrimary,
-                          unselectedLabelColor: cs.onSurfaceVariant,
-                          dividerColor: Colors.transparent,
-                          tabs: const [
-                            Tab(text: 'Merchandise'),
-                            Tab(text: 'Tiket'),
-                          ],
+                          color: cs.primary,
+                          shape: BoxShape.circle,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  await Future.wait([
-                    context.read<MerchandiseProvider>().fetch(),
-                    context.read<TicketProvider>().fetch(),
-                  ]);
-                },
-                child: TabBarView(
-                  children: [
-                    MerchandiseScreen(
-                      query: _query,
-                      minPrice: _minPrice,
-                      maxPrice: _maxPrice,
-                      sortOption: _sortOption,
-                    ),
-                    TicketScreen(
-                      query: _query,
-                      minPrice: _minPrice,
-                      maxPrice: _maxPrice,
-                      sortOption: _sortOption,
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(
+              45 + AppSpacing.sm + 40 + AppSpacing.sm,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base,
+                0,
+                AppSpacing.base,
+                AppSpacing.sm,
+              ),
+              child: Column(
+                children: [
+                  _buildSearchField(context),
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TabBar(
+                      indicator: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelColor: cs.onPrimary,
+                      unselectedLabelColor: cs.onSurfaceVariant,
+                      labelStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      labelPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
+                      dividerColor: Colors.transparent,
+                      tabs: const [
+                        Tab(text: 'Merchandise'),
+                        Tab(text: 'Tiket'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await Future.wait([
+              context.read<MerchandiseProvider>().fetch(),
+              context.read<TicketProvider>().fetch(),
+            ]);
+          },
+          child: TabBarView(
+            children: [
+              MerchandiseScreen(
+                query: _query,
+                minPrice: _minPrice,
+                maxPrice: _maxPrice,
+                sortOption: _sortOption,
+              ),
+              TicketScreen(
+                query: _query,
+                minPrice: _minPrice,
+                maxPrice: _maxPrice,
+                sortOption: _sortOption,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -422,5 +412,3 @@ class _SortChip extends StatelessWidget {
     );
   }
 }
-
-

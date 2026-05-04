@@ -5,8 +5,7 @@ import 'package:garudahub/core/constants/constants.dart';
 class TicketService {
   static Future<List<Map<String, dynamic>>> getTickets() async {
     final response = await http.get(
-      // Uri.parse('${AppConstants.baseUrl}/matches?has_ticket=true'),
-      Uri.parse('${AppConstants.baseUrl}/matches?has_ticket=true&upcoming=true'),
+      Uri.parse('${AppConstants.baseUrl}/matches?has_ticket=true'),
     );
 
     if (response.statusCode == 200) {
