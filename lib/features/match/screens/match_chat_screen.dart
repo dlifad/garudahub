@@ -82,8 +82,12 @@ class _MatchChatScreenState extends State<MatchChatScreen>
   late final AnimationController _fabAnim;
 
   String get _matchId => '${widget.match.id}';
-  String get _me      => _sb.auth.currentUser?.id ?? 'anon';
-  String get _myName  {
+
+  /// Kembalikan null jika user belum login
+  String? get _meOrNull => _sb.auth.currentUser?.id;
+  String get _me => _meOrNull ?? 'anon';
+
+  String get _myName {
     final u = _sb.auth.currentUser;
     return u?.userMetadata?['full_name'] as String?
         ?? u?.email?.split('@').first
@@ -146,7 +150,8 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _scrollToBottom(animate: false));
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Chat load error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -181,6 +186,19 @@ class _MatchChatScreenState extends State<MatchChatScreen>
 
   // ── Send ───────────────────────────────────────
   Future<void> _send({String? overrideText, String? overrideType}) async {
+    // Guard: harus login dulu
+    if (_meOrNull == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kamu harus login dulu untuk bisa chat.'),
+            backgroundColor: Color(0xFFCC0001),
+          ),
+        );
+      }
+      return;
+    }
+
     final text = (overrideText ?? _ctrl.text).trim();
     if (text.isEmpty || _sending) return;
     setState(() => _sending = true);
@@ -194,10 +212,12 @@ class _MatchChatScreenState extends State<MatchChatScreen>
         'body':        text,
         'type':        overrideType ?? (_msgType == 'normal' ? null : _msgType),
       });
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Chat send error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal kirim pesan, coba lagi.')));
+          SnackBar(content: Text('Gagal kirim pesan: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() { _sending = false; _msgType = 'normal'; });
@@ -299,6 +319,30 @@ class _MatchChatScreenState extends State<MatchChatScreen>
       ),
 
       body: Column(children: [
+        // ── Banner login warning jika belum login ──
+        if (_meOrNull == null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            color: const Color(0xFFCC0001).withOpacity(0.1),
+            child: Row(children: [
+              const Icon(Icons.info_outline_rounded,
+                  size: 14, color: Color(0xFFCC0001)),
+              const SizedBox(width: AppSpacing.xs),
+              const Expanded(
+                child: Text(
+                  'Login untuk ikut berdiskusi',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFFCC0001),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ]),
+          ),
+
         // ── Messages list ──
         Expanded(
           child: _loading
@@ -361,6 +405,7 @@ class _MatchChatScreenState extends State<MatchChatScreen>
           msgType:      _msgType,
           sending:      _sending,
           showChants:   _showChants,
+          isLoggedIn:   _meOrNull != null,
           onTypeChanged: (t) => setState(() => _msgType = t),
           onToggleChants: () => setState(() => _showChants = !_showChants),
           onSend:       _send,
@@ -537,6 +582,7 @@ class _InputBar extends StatelessWidget {
     required this.msgType,
     required this.sending,
     required this.showChants,
+    required this.isLoggedIn,
     required this.onTypeChanged,
     required this.onToggleChants,
     required this.onSend,
@@ -544,7 +590,7 @@ class _InputBar extends StatelessWidget {
   final TextEditingController ctrl;
   final FocusNode focusNode;
   final String  msgType;
-  final bool    sending, showChants;
+  final bool    sending, showChants, isLoggedIn;
   final ValueChanged<String> onTypeChanged;
   final VoidCallback onToggleChants;
   final Future<void> Function({String? overrideText, String? overrideType}) onSend;
@@ -578,6 +624,7 @@ class _InputBar extends StatelessWidget {
           icon: '🔮',
           active:  msgType == 'predict',
           tooltip: 'Prediksi Skor',
+          enabled: isLoggedIn,
           onTap:   () => onTypeChanged(
               msgType == 'predict' ? 'normal' : 'predict'),
         ),
@@ -587,6 +634,7 @@ class _InputBar extends StatelessWidget {
           icon:    '📣',
           active:  showChants,
           tooltip: 'Yel-Yel',
+          enabled: isLoggedIn,
           onTap:   onToggleChants,
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -604,12 +652,15 @@ class _InputBar extends StatelessWidget {
               controller:  ctrl,
               focusNode:   focusNode,
               maxLines:    null,
+              enabled:     isLoggedIn,
               textCapitalization: TextCapitalization.sentences,
               style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
-                hintText: msgType == 'predict'
-                    ? 'Prediksi skor... mis: 2-1'
-                    : 'Tulis komentar...',
+                hintText: !isLoggedIn
+                    ? 'Login untuk ikut berdiskusi...'
+                    : msgType == 'predict'
+                        ? 'Prediksi skor... mis: 2-1'
+                        : 'Tulis komentar...',
                 hintStyle: TextStyle(
                     color: cs.onSurfaceVariant.withOpacity(0.5),
                     fontSize: 13),
@@ -626,7 +677,7 @@ class _InputBar extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           width: 42, height: 42,
           decoration: BoxDecoration(
-            color: sending
+            color: (sending || !isLoggedIn)
                 ? cs.surfaceContainerHighest
                 : const Color(0xFFCC0001),
             shape: BoxShape.circle,
@@ -637,9 +688,10 @@ class _InputBar extends StatelessWidget {
                   child: CircularProgressIndicator(
                       strokeWidth: 1.5, color: Colors.white))
               : IconButton(
-                  onPressed: onSend,
-                  icon: const Icon(Icons.send_rounded,
-                      color: Colors.white, size: 18),
+                  onPressed: isLoggedIn ? onSend : null,
+                  icon: Icon(Icons.send_rounded,
+                      color: isLoggedIn ? Colors.white : cs.onSurfaceVariant,
+                      size: 18),
                   padding: EdgeInsets.zero,
                 ),
         ),
@@ -653,11 +705,13 @@ class _TypeBtn extends StatelessWidget {
     required this.icon,
     required this.active,
     required this.tooltip,
+    required this.enabled,
     required this.onTap,
   });
   final String icon;
   final bool   active;
   final String tooltip;
+  final bool   enabled;
   final VoidCallback onTap;
 
   @override
@@ -665,7 +719,7 @@ class _TypeBtn extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(20),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -681,7 +735,10 @@ class _TypeBtn extends StatelessWidget {
                 : null,
           ),
           alignment: Alignment.center,
-          child: Text(icon, style: const TextStyle(fontSize: 18)),
+          child: Text(icon,
+              style: TextStyle(
+                  fontSize: 18,
+                  color: enabled ? null : Colors.grey)),
         ),
       ),
     );
@@ -765,5 +822,3 @@ class _EmptyChat extends StatelessWidget {
     );
   }
 }
-
-
