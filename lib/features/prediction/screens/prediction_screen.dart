@@ -10,6 +10,8 @@ import 'package:garudahub/features/auth/services/auth_service.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
 
+import 'package:garudahub/core/utils/flag_utils.dart';
+
 class PredictionHistory {
   final int id;
   final String homeTeam;
@@ -103,6 +105,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
           if (token != null) 'Authorization': 'Bearer $token',
         },
       );
+      
       if (res.statusCode == 200) {
         final body = jsonDecode(res.body) as Map<String, dynamic>;
         final list = body['data'] as List? ?? [];
@@ -564,13 +567,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
     final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Text(
-          _countryCode(flag),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-            letterSpacing: 0.5,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.network(
+            FlagUtils.getFlagUrl(flag),
+            width: 32,
+            height: 22,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 22),
           ),
         ),
         const SizedBox(height: 4),
@@ -686,12 +690,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      Text(
-                        _countryCode(item.homeFlag),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurfaceVariant,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.network(
+                          FlagUtils.getFlagUrl(item.homeFlag),
+                          width: 20,
+                          height: 14,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 14),
                         ),
                       ),
                       const SizedBox(width: 5),
@@ -752,12 +758,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         ),
                       ),
                       const SizedBox(width: 5),
-                      Text(
-                        _countryCode(item.awayFlag),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurfaceVariant,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.network(
+                          FlagUtils.getFlagUrl(item.awayFlag),
+                          width: 20,
+                          height: 14,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.flag, size: 14),
                         ),
                       ),
                     ],

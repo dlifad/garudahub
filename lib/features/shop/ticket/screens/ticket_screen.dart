@@ -54,6 +54,16 @@ class _TicketScreenState extends State<TicketScreen> {
     );
   }
 
+  bool _isMatchPassed(String? date) {
+    if (date == null) return true;
+    try {
+      final matchTime = DateTime.parse(date).toUtc();
+      return matchTime.isBefore(DateTime.now().toUtc());
+    } catch (_) {
+      return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final prov = context.watch<TicketProvider>();
@@ -150,6 +160,12 @@ class _TicketScreenState extends State<TicketScreen> {
       );
     }
 
+  filtered.sort((a, b) {
+    final dateA = DateTime.tryParse(a['match_date_local'] ?? '') ?? DateTime(2000);
+    final dateB = DateTime.tryParse(b['match_date_local'] ?? '') ?? DateTime(2000);
+    return dateB.compareTo(dateA);
+  });
+
     return Stack(
       children: [
         RefreshIndicator(
@@ -168,6 +184,7 @@ class _TicketScreenState extends State<TicketScreen> {
             itemCount: filtered.length,
             itemBuilder: (context, index) {
               final match = filtered[index];
+              final isPassed = _isMatchPassed(match['match_date_local']);
               final logo = match['tournament_logo'];
               final stadium = match['stadium']?['name'];
 
@@ -360,27 +377,24 @@ class _TicketScreenState extends State<TicketScreen> {
                               ],
                             ),
                             GestureDetector(
-                              onTap: () async {
-                                final url = Uri.parse(
-                                  'https://kitagaruda.id/id/ticket',
-                                );
-                                await launchUrl(
-                                  url,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              },
+                              onTap: isPassed
+                                  ? null
+                                  : () async {
+                                      final url = Uri.parse('https://kitagaruda.id/id/ticket');
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: AppSpacing.base,
                                   vertical: AppSpacing.sm,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: cs.primary,
+                                  color: isPassed ? Colors.grey : cs.primary,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
-                                  'Beli Tiket',
-                                  style: TextStyle(
+                                child: Text(
+                                  isPassed ? 'Pertandingan Selesai' : 'Beli Tiket',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,

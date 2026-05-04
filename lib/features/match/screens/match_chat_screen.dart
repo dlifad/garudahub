@@ -7,6 +7,7 @@ import 'package:garudahub/core/models/user_model.dart';
 import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/match/models/match_item.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:garudahub/core/utils/flag_utils.dart';
 
 // ────────────────────────────────────────────────
 // Model pesan (dari Supabase)
@@ -305,7 +306,17 @@ class _MatchChatScreenState extends State<MatchChatScreen>
             ),
             child: Row(
               children: [
-                const Text('🇮🇩', style: TextStyle(fontSize: 13)),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Image.network(
+                    FlagUtils.getFlagUrl('id'), // Indonesia
+                    width: 18,
+                    height: 12,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.flag, size: 12, color: Colors.white),
+                  ),
+                ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   isUpcoming
@@ -318,12 +329,19 @@ class _MatchChatScreenState extends State<MatchChatScreen>
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                Text(
-                  widget.match.opponentFlag ?? '🏳️',
-                  style: const TextStyle(fontSize: 13),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: Image.network(
+                    FlagUtils.getFlagUrl(widget.match.opponentFlag),
+                    width: 18,
+                    height: 12,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.flag, size: 12, color: Colors.white),
+                  ),
                 ),
               ],
-            ),
+            )
           ),
         ],
         bottom: PreferredSize(

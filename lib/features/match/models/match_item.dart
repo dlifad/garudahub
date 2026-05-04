@@ -37,7 +37,6 @@ class Stadium {
   });
 
   factory Stadium.fromJson(Map<String, dynamic>? json) {
-    print('STADIUM JSON: $json'); // 👈 TAMBAH INI
     if (json == null) {
       return const Stadium(
         name: '-',
