@@ -15,7 +15,7 @@ class AccelerometerService {
   double _lastAcceleration = 0;
 
   AccelerometerService({
-    this.threshold = 5,
+    this.threshold = 8,
     this.cooldown = const Duration(seconds: 2),
   });
 
