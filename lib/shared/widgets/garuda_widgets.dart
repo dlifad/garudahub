@@ -105,6 +105,7 @@ class GarudaButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final Color? color;
+  final Color? textColor;
 
   const GarudaButton({
     super.key,
@@ -112,6 +113,7 @@ class GarudaButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.color,
+    this.textColor,
   });
 
   @override
@@ -121,7 +123,7 @@ class GarudaButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: color ?? cs.primary,
-        foregroundColor: color != null ? Colors.white : cs.onPrimary,
+        foregroundColor: textColor ?? cs.onPrimary,
         minimumSize: const Size(double.infinity, 52),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

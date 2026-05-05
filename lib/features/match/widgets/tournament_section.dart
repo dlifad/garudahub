@@ -39,23 +39,6 @@ class _TournamentSectionState extends State<TournamentSection>
   late final Animation<double> _heightFactor;
   late final Animation<double> _rotate;
 
-  /// Resolve coach representatif untuk header section —
-  /// gunakan tanggal match pertama yang tersedia.
-  TournamentCoach? get _representativeCoach {
-    if (widget.coaches.isEmpty) return null;
-    final heads = widget.coaches.where((c) => c.role == 'head_coach').toList();
-    if (heads.isEmpty) return null;
-
-    if (widget.matches.isNotEmpty) {
-      final refDate = widget.matches.first.matchDateUtc;
-      final byDate = heads.where((c) => c.isActiveOn(refDate)).toList();
-      if (byDate.isNotEmpty) return byDate.first;
-    }
-
-    final active = heads.where((c) => c.isActive).toList();
-    return active.isNotEmpty ? active.first : heads.first;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -84,7 +67,6 @@ class _TournamentSectionState extends State<TournamentSection>
     final tt = Theme.of(context).textTheme;
     final finished = widget.matches.where((m) => m.isFinished).length;
     final total    = widget.matches.length;
-    final coach    = _representativeCoach;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(
@@ -149,16 +131,6 @@ class _TournamentSectionState extends State<TournamentSection>
                         const SizedBox(height: AppSpacing.xs - 2),
                         Row(
                           children: [
-                            if (coach != null) ...[
-                              Icon(Icons.sports_rounded, size: 11, color: cs.primary),
-                              const SizedBox(width: AppSpacing.xs - 1),
-                              Flexible(child: Text(coach.name,
-                                  style: tt.labelSmall?.copyWith(
-                                    color: cs.primary,
-                                    fontSize: 11, fontWeight: FontWeight.w600,
-                                  ), overflow: TextOverflow.ellipsis)),
-                              const SizedBox(width: AppSpacing.sm),
-                            ],
                             if (total > 0)
                               Text('$finished/$total laga',
                                   style: tt.labelSmall?.copyWith(

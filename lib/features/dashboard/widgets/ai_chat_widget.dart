@@ -69,24 +69,28 @@ class AiChatWidget extends StatelessWidget {
                           children: [
                             // Badge AI
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 3),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color:
-                                    const Color(0xFF81C784).withOpacity(0.25),
-                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color:
-                                      const Color(0xFF81C784).withOpacity(0.5),
+                                  color: Colors.white.withOpacity(0.25),
                                 ),
                               ),
-                              child: const Text(
-                                'AI',
-                                style: TextStyle(
-                                  color: Color(0xFF81C784),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.smart_toy, size: 12, color: Colors.white),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'AI',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: AppSpacing.sm),
@@ -111,18 +115,21 @@ class AiChatWidget extends StatelessWidget {
                         ),
                         // Arrow button di bawah
                         Container(
-                          width: 34,
-                          height: 34,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.18),
+                            color: Colors.white.withValues(alpha: 0.18),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.25),
+                            ),
                           ),
                           child: const Icon(
-                            Icons.arrow_forward_ios_rounded,
+                            Icons.arrow_forward_rounded,
                             color: Colors.white,
-                            size: 14,
+                            size: 18,
                           ),
-                        ),
+                        )
                       ],
                     ),
                   ),

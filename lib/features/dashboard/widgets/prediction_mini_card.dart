@@ -77,23 +77,23 @@ class PredictionMiniCard extends StatelessWidget {
                         children: [
                           // Badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color:
-                                  const Color(0xFFCC0001).withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(6),
+                              color: const Color(0xFFCC0001).withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: const Color(0xFFCC0001).withOpacity(0.2),
+                              ),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('\u26bd',
-                                    style: TextStyle(fontSize: 9)),
+                              children: const [
+                                Icon(Icons.sports_soccer, size: 12, color: Color(0xFFCC0001)),
                                 SizedBox(width: 4),
                                 Text(
                                   'Prediksi',
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFFCC0001),
                                   ),
@@ -134,14 +134,24 @@ class PredictionMiniCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Masuk & prediksi \u2192',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFCC0001),
-                        ),
-                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Masuk & prediksi',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFCC0001),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 14,
+                            color: Color(0xFFCC0001),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),

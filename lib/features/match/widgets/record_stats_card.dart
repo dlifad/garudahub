@@ -85,37 +85,37 @@ class RecordStatsCard extends StatelessWidget {
             Row(
               children: [
                 _StatItem(
-                  label: 'Main',
+                  label: 'M',
                   value: '${record.total}',
                   color: Colors.white,
                 ),
                 _StatDivider(),
                 _StatItem(
-                  label: 'Menang',
+                  label: 'W',
                   value: '${record.wins}',
                   color: const Color(0xFF81C784),
                 ),
                 _StatDivider(),
                 _StatItem(
-                  label: 'Seri',
+                  label: 'D',
                   value: '${record.draws}',
                   color: const Color(0xFFFFD54F),
                 ),
                 _StatDivider(),
                 _StatItem(
-                  label: 'Kalah',
+                  label: 'L',
                   value: '${record.losses}',
                   color: const Color(0xFFEF9A9A),
                 ),
                 _StatDivider(),
                 _StatItem(
-                  label: 'Gol',
+                  label: 'GF',
                   value: '${record.goalsFor}',
                   color: Colors.white,
                 ),
                 _StatDivider(),
                 _StatItem(
-                  label: 'Kebobolan',
+                  label: 'GA',
                   value: '${record.goalsAgainst}',
                   color: Colors.white,
                 ),
