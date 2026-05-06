@@ -88,8 +88,6 @@ class PredictionMiniCard extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: const [
-                                Icon(Icons.sports_soccer, size: 12, color: Color(0xFFCC0001)),
-                                SizedBox(width: 4),
                                 Text(
                                   'Prediksi',
                                   style: TextStyle(

@@ -71,24 +71,23 @@ class AiChatWidget extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
+                                color: const Color(0xFF81C784).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.25),
+                                  color: const Color(0xFF81C784).withOpacity(0.5),
                                 ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
-                                  Icon(Icons.smart_toy, size: 12, color: Colors.white),
-                                  SizedBox(width: 4),
                                   Text(
                                     'AI',
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: Color(0xFF81C784),
                                     ),
+
                                   ),
                                 ],
                               ),
@@ -104,7 +103,7 @@ class AiChatWidget extends StatelessWidget {
                             ),
                             const SizedBox(height: AppSpacing.xs),
                             const Text(
-                              'Tanya jadwal, prediksi & lineup',
+                              'Timnas Expert',
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 12,
