@@ -51,6 +51,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _refreshProfile() async {
+    final auth = context.read<AuthProvider>();
+
+    await Future.wait([
+      context.read<ProfileProvider>().fetchProfile(auth),
+      _loadNotificationSettings(),
+    ]);
+  }
+
   Future<void> _loadNotificationSettings() async {
     await NotificationService.instance.init();
 
@@ -205,43 +214,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: false,
         title: const Text('Profil'),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                AppSpacing.base,
-                AppSpacing.sm,
-                AppSpacing.base,
-                AppSpacing.base + MediaQuery.of(context).padding.bottom,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildProfileCard(context, cs, user),
-                  const SizedBox(height: AppSpacing.lg),
+      body: RefreshIndicator(
+        onRefresh: _refreshProfile,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.base,
+                  AppSpacing.sm,
+                  AppSpacing.base,
+                  AppSpacing.base +
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildProfileCard(context, cs, user),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  _SectionLabel('Akun'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildAccountSection(context, cs, auth),
-                  const SizedBox(height: AppSpacing.base),
+                    _SectionLabel('Akun'),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildAccountSection(context, cs, auth),
+                    const SizedBox(height: AppSpacing.base),
 
-                  _SectionLabel('Notifikasi'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildNotificationSection(context, cs),
-                  const SizedBox(height: AppSpacing.base),
+                    _SectionLabel('Notifikasi'),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildNotificationSection(context, cs),
+                    const SizedBox(height: AppSpacing.base),
 
-                  _SectionLabel('Lainnya'),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildOtherSection(context, cs),
-                  const SizedBox(height: AppSpacing.base),
+                    _SectionLabel('Lainnya'),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildOtherSection(context, cs),
+                    const SizedBox(height: AppSpacing.base),
 
-                  _buildLogoutButton(context, cs, auth),
-                ],
+                    _buildLogoutButton(context, cs, auth),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
