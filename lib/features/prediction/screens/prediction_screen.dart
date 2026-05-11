@@ -22,6 +22,7 @@ class PredictionHistory {
   final int predictedHome;
   final int predictedAway;
   final String status;
+  final int? pointsEarned;
 
   const PredictionHistory({
     required this.id,
@@ -33,6 +34,7 @@ class PredictionHistory {
     required this.predictedHome,
     required this.predictedAway,
     required this.status,
+    this.pointsEarned,
   });
 
   factory PredictionHistory.fromJson(Map<String, dynamic> j) {
@@ -47,6 +49,7 @@ class PredictionHistory {
       predictedHome: j['predicted_indonesia_score'] as int? ?? 0,
       predictedAway: j['predicted_opponent_score'] as int? ?? 0,
       status: j['status'] as String? ?? 'pending',
+      pointsEarned: j['points_earned'] as int?,
     );
   }
 }
@@ -605,11 +608,20 @@ class _PredictionScreenState extends State<PredictionScreen> {
     Color chipFg;
     String chipLabel;
     switch (item.status) {
-      case 'correct':
-      case 'draw_correct':
+      case 'exact_score':
+        chipBg = Colors.green.shade100;
+        chipFg = Colors.green.shade800;
+        chipLabel = '\u{1F3AF} Skor Tepat!';
+        break;
+      case 'correct_winner':
         chipBg = Colors.green.shade50;
         chipFg = Colors.green.shade700;
-        chipLabel = '\u{1F3AF} Tepat!';
+        chipLabel = '\u2705 Hasil Benar';
+        break;
+      case 'draw_correct':
+        chipBg = Colors.blue.shade50;
+        chipFg = Colors.blue.shade700;
+        chipLabel = '\u{1F91D} Seri Tepat';
         break;
       case 'wrong':
         chipBg = Colors.red.shade50;
@@ -666,21 +678,37 @@ class _PredictionScreenState extends State<PredictionScreen> {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: chipBg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    chipLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: chipFg,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: chipBg,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        chipLabel,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: chipFg,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (!isPending && item.pointsEarned != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '+${item.pointsEarned} poin',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.green.shade600,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -846,5 +874,3 @@ class _PredictionScreenState extends State<PredictionScreen> {
     );
   }
 }
-
-
