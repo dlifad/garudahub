@@ -11,6 +11,8 @@ class MatchData {
     required this.round,
     this.indonesiaScore,
     this.opponentScore,
+    this.matchAi,
+    required this.isHome,
   });
 
   final int id;
@@ -24,6 +26,8 @@ class MatchData {
   final String round;
   final int? indonesiaScore;
   final int? opponentScore;
+  final Map<String, dynamic>? matchAi;
+  final bool isHome;
 
   factory MatchData.fromJson(Map<String, dynamic> json) {
     int? parseInt(dynamic value) =>
@@ -49,6 +53,8 @@ class MatchData {
       round: json['round']?.toString() ?? 'Stage',
       indonesiaScore: parseInt(json['indonesia_score']),
       opponentScore: parseInt(json['opponent_score']),
+      matchAi: json["match_ai"],
+      isHome: json['is_home'] == true || json['is_home'] == 1,
     );
   }
 }

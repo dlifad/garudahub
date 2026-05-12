@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:garudahub/core/utils/flag_utils.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
+import 'package:garudahub/features/match_ai/widgets/match_ai_row.dart';
 
 class NextMatchCard extends StatelessWidget {
   const NextMatchCard({
@@ -236,6 +237,14 @@ class NextMatchCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          if (m.matchAi != null)
+            MatchAiRow(
+              homeWin: m.matchAi!["home_win"],
+              draw: m.matchAi!["draw"],
+              awayWin: m.matchAi!["away_win"],
+              isHome: m.isHome,
+            ),
         ],
       ),
     );
