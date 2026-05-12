@@ -9,12 +9,12 @@ import 'package:http/http.dart' as http;
 class DashboardService {
   Future<DashboardData> loadDashboardData() async {
     final results = await Future.wait([
-      getMatches(status: 'scheduled'),
+      getNextMatchAi(),
       getMatches(status: 'finished'),
       getNews(),
     ]);
 
-    final scheduled = results[0] as List<MatchData>;
+    final nextMatch = results[0] as MatchData?;
     final finished = results[1] as List<MatchData>;
     final news = results[2] as List<NewsData>;
 
@@ -22,7 +22,7 @@ class DashboardService {
       ..sort((a, b) => b.matchDateUtc.compareTo(a.matchDateUtc));
 
     return DashboardData(
-      nextMatch: scheduled.isEmpty ? null : scheduled.first,
+      nextMatch: nextMatch,
       recentMatches: recentMatches.take(5).toList(),
       news: news.take(4).toList(),
     );
@@ -41,6 +41,21 @@ class DashboardService {
         .map(MatchData.fromJson)
         .toList()
       ..sort((a, b) => a.matchDateUtc.compareTo(b.matchDateUtc));
+  }
+
+  Future<MatchData?> getNextMatchAi() async {
+    final uri = Uri.parse('${AppConstants.baseUrl}/matches/next-ai',);
+    final res = await http.get(uri);
+    if (res.statusCode != 200) {
+      return null;
+    }
+    final decoded = jsonDecode(res.body) as Map<String, dynamic>;
+    final data = decoded['data'];
+
+    if (data == null) {
+      return null;
+    }
+    return MatchData.fromJson(data);
   }
 
   Future<List<NewsData>> getNews() async {
