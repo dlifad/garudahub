@@ -20,9 +20,9 @@ class SaranKesanScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.base),
                 child: Text(
-                  'Mata kuliah TPM sangat bermanfaat dalam pengembangan aplikasi mobile. '
-                  'Materi yang diajarkan relevan dan aplikatif. Semoga ke depannya '
-                  'semakin banyak praktik langsung dan studi kasus nyata.',
+                  'Mata kuliah TPM sangat menantang karena tugas dan proyek akhirnya ini sangat kompleks. '
+                  'Materi yang diajarkan dalam teori ini kurang di pakai di saat pengerjakan proyek akhir yang gilaa ini, Semoga ke depannya '
+                  'untuk keputusan individu atau berkelompok bisa lebih di kasih tau di minggu minggu awal saja, karena untuk seperti kasus kita ini yang bikin backend sendiri menguras waktu banyak jadi bisa lebih awal menententukan tema dan dicicil proyek akhirnya.',
                   style: TextStyle(
                     color: cs.onSurfaceVariant,
                     fontSize: 14,
