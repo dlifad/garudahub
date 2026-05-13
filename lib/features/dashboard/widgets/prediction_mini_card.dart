@@ -19,7 +19,7 @@ class PredictionMiniCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.surface, //warna card
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFCC0001).withOpacity(0.10)),
         boxShadow: [

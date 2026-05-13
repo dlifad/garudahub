@@ -227,8 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   AppSpacing.base,
                   AppSpacing.sm,
                   AppSpacing.base,
-                  AppSpacing.base +
-                      MediaQuery.of(context).padding.bottom,
+                  AppSpacing.base + MediaQuery.of(context).padding.bottom,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -361,6 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
               MaterialPageRoute(builder: (_) => const EditProfileScreen()),
             ),
+            backgroundColor: Colors.white,
           ),
           const Divider(height: 1, indent: 56),
           _MenuTile(
@@ -370,6 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context,
               MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
             ),
+            backgroundColor: Colors.white,
           ),
           const Divider(height: 1, indent: 56),
           _MenuTile(
@@ -749,12 +750,14 @@ class _MenuTile extends StatelessWidget {
   final String label;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final Color backgroundColor;
 
   const _MenuTile({
     required this.icon,
     required this.label,
     this.trailing,
     this.onTap,
+    this.backgroundColor = Colors.white,
   });
 
   @override
@@ -767,6 +770,7 @@ class _MenuTile extends StatelessWidget {
           trailing ?? Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      tileColor: backgroundColor,
     );
   }
 }

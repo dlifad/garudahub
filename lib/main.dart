@@ -23,7 +23,6 @@ import 'package:garudahub/features/shop/ticket/providers/ticket_provider.dart';
 import 'package:garudahub/features/shop/providers/currency_provider.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
 
-// Mini Games
 import 'features/mini_games/screens/mini_games_screen.dart';
 
 void main() async {
@@ -38,7 +37,7 @@ void main() async {
     anonKey: AppConstants.supabaseAnonKey,
   );
 
-  // Kunci orientasi portrait
+  
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -82,7 +81,7 @@ class GarudaHubApp extends StatelessWidget {
       },
 
       builder: (context, child) {
-        // Status bar & nav bar adaptive sesuai tema
+        
         final isDark = Theme.of(context).brightness == Brightness.dark;
         SystemChrome.setSystemUIOverlayStyle(
           SystemUiOverlayStyle(

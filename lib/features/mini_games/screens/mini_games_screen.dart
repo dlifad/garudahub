@@ -1,4 +1,3 @@
-// lib/features/mini_games/screens/mini_games_screen.dart
 import 'package:flutter/material.dart';
 import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +20,6 @@ class MiniGamesScreen extends StatelessWidget {
             vertical: AppSpacing.base,
           ),
           children: [
-            // ── Header (sama persis dengan PredictionScreen) ───
             Row(
               children: [
                 GestureDetector(
@@ -53,47 +51,28 @@ class MiniGamesScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // // ── Section label ───────────────────────────────
-            // Text(
-            //   'Pilih Game',
-            //   style: TextStyle(
-            //     fontSize: 15,
-            //     fontWeight: FontWeight.w700,
-            //     color: cs.onSurface,
-            //   ),
-            // ),
-            // const SizedBox(height: 4),
-            // Text(
-            //   'Uji kemampuan & prediksimu bersama Timnas',
-            //   style: TextStyle(
-            //     fontSize: 12,
-            //     color: cs.onSurfaceVariant,
-            //   ),
-            // ),
-
-            //const SizedBox(height: 8),
-
-            // ── Adu Penalti ────────────────────────────────
             _GameCard(
               title: 'Adu Penalti',
-              subtitle: 'Tendang bola pakai gyro HP!\n5 tendangan, siapa yang menang?',
+              subtitle:
+                  'Tendang bola pakai gyro HP!\n5 tendangan, siapa yang menang?',
               icon: '⚽',
               tag: 'MAIN SEKARANG',
               tagColor: AppColors.success,
               accentColor: AppColors.primary,
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => ChangeNotifierProvider(
-                    create: (_) => PenaltyProvider(),
-                    child: const PenaltyGameScreen(),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ChangeNotifierProvider(
+                      create: (_) => PenaltyProvider(),
+                      child: const PenaltyGameScreen(),
+                    ),
                   ),
-                ));
+                );
               },
             ),
 
             const SizedBox(height: 10),
 
-            // ── Coming Soon ────────────────────────────────
             _GameCard(
               title: 'Coming Soon',
               subtitle: 'Game seru lainnya\nsedang dalam pengembangan...',
@@ -111,7 +90,6 @@ class MiniGamesScreen extends StatelessWidget {
   }
 }
 
-// ── _GameCard ──────────────────────────────────────────────────────────────────
 class _GameCard extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -160,7 +138,6 @@ class _GameCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── Icon ─────────────────────────────────
               Container(
                 width: 54,
                 height: 54,
@@ -181,7 +158,6 @@ class _GameCard extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.md),
 
-              // ── Text ─────────────────────────────────
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +180,7 @@ class _GameCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // ── Tag (mirip summary banner Prediction) ──
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 9,
@@ -213,9 +189,7 @@ class _GameCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: tagColor.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: tagColor.withOpacity(0.20),
-                        ),
+                        border: Border.all(color: tagColor.withOpacity(0.20)),
                       ),
                       child: Text(
                         tag,
@@ -231,8 +205,7 @@ class _GameCard extends StatelessWidget {
                 ),
               ),
 
-              // ── Arrow ─────────────────────────────────
-              if (!disabled) ...[  
+              if (!disabled) ...[
                 const SizedBox(width: AppSpacing.sm),
                 Container(
                   width: 32,

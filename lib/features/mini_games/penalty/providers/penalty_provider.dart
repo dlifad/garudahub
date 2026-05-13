@@ -1,4 +1,3 @@
-// lib/features/mini_games/penalty/providers/penalty_provider.dart
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';

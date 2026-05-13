@@ -19,15 +19,29 @@ class SaranKesanScreen extends StatelessWidget {
               color: cs.surfaceVariant,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.base),
-                child: Text(
-                  'Mata kuliah TPM sangat menantang karena tugas dan proyek akhirnya ini sangat kompleks. '
-                  'Materi yang diajarkan dalam teori ini kurang di pakai di saat pengerjakan proyek akhir yang gilaa ini, Semoga ke depannya '
-                  'untuk keputusan individu atau berkelompok bisa lebih di kasih tau di minggu minggu awal saja, karena untuk seperti kasus kita ini yang bikin backend sendiri menguras waktu banyak jadi bisa lebih awal menententukan tema dan dicicil proyek akhirnya.',
-                  style: TextStyle(
-                    color: cs.onSurfaceVariant,
-                    fontSize: 14,
-                    height: 1.6,
-                  ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Kesan: Mata kuliah TPM sangat menantang karena tugas dan proyek akhirnya ini sangat kompleks. '
+                      'Materi yang diajarkan dalam teori juga kurang di pakai di saat pengerjakan proyek akhir yang gilaa ini.',
+                      style: TextStyle(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 14,
+                        height: 1.6,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.base),
+                    Text(
+                      'Saran: Untuk keputusan individu atau berkelompok dalam proyek akhir bisa lebih di kasih tau di minggu minggu awal saja, karena untuk seperti kasus kita ini yang bikin backend sendiri menguras waktu banyak jadi bisa lebih awal menententukan tema dan dicicil proyek akhirnya.',
+                      style: TextStyle(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 14,
+                        height: 1.6,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

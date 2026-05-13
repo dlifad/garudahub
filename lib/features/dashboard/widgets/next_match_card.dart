@@ -67,7 +67,7 @@ class NextMatchCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFDC0000), Color(0xFFB00000)],
+          colors: [Color(0xFFDC0000), Color(0xFFB00000)], //warna card
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
@@ -200,10 +200,15 @@ class NextMatchCard extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 14, color: Colors.white),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
-                      child: Text(dateLabel,
+                      child: Text(
+                        dateLabel,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -223,7 +228,8 @@ class NextMatchCard extends StatelessWidget {
                     const Icon(Icons.stadium, size: 14, color: Colors.white),
                     const SizedBox(width: AppSpacing.xs),
                     Flexible(
-                      child: Text(m.venueName,
+                      child: Text(
+                        m.venueName,
                         textAlign: TextAlign.right,
                         style: const TextStyle(
                           color: Colors.white,
@@ -257,7 +263,10 @@ class NextMatchCard extends StatelessWidget {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

@@ -27,7 +27,7 @@ class HeroSection extends StatelessWidget {
       return '➖';
     }).join();
 
-    // Container luar: HANYA shadow + borderRadius, TANPA clip
+    
     return Container(
       height: 200,
       width: double.infinity,
@@ -54,7 +54,7 @@ class HeroSection extends StatelessWidget {
           ),
         ],
       ),
-      // Container dalam: clip + borderRadius, TANPA shadow
+      
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Stack(

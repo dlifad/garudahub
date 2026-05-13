@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:garudahub/core/theme/app_theme.dart';
 import 'package:garudahub/core/providers/timezone_provider.dart';
-import 'package:garudahub/features/auth/providers/auth_provider.dart';
 import 'package:garudahub/features/dashboard/models/match_data.dart';
 import 'package:garudahub/features/dashboard/services/dashboard_service.dart';
 import 'package:garudahub/features/dashboard/widgets/ai_chat_widget.dart';
@@ -20,7 +19,6 @@ import 'package:garudahub/features/news/models/news_data.dart';
 import 'package:garudahub/features/news/screen/news_screen.dart';
 import 'package:garudahub/features/news/screen/news_detail_screen.dart';
 
-// Mini Games
 import 'package:garudahub/features/mini_games/screens/mini_games_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -33,8 +31,6 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   static const int _fifaRank = 130;
-  // static const String _heroImageUrl =
-  //     'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&w=1200&q=80';
 
   final _service = DashboardService();
 
@@ -214,7 +210,6 @@ class _DashboardScreenState extends State<DashboardScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Top Bar ──────────────────────────────────────────────
               Row(
                 children: [
                   Container(
@@ -273,7 +268,6 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 16),
 
-              // ── Hero ─────────────────────────────────────────────────
               _animated(
                 ctrl: _heroAnim,
                 begin: const Offset(0, -0.3),
@@ -286,7 +280,6 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 20),
 
-              // ── Pertandingan Berikutnya ───────────────────────────────
               _animated(
                 ctrl: _matchAnim,
                 begin: const Offset(0.3, 0),
@@ -294,7 +287,6 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 20),
 
-              // ── Quick Actions: GarudaBot | Prediksi ──────────────────
               _animated(
                 ctrl: _predAnim,
                 begin: const Offset(0, 0.2),
@@ -316,7 +308,6 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 20),
 
-              // ── ✨ Mini Game Banner ───────────────────────────────────
               _animated(
                 ctrl: _miniGameAnim,
                 begin: const Offset(0, 0.4),
@@ -329,7 +320,6 @@ class _DashboardScreenState extends State<DashboardScreen>
               ),
               const SizedBox(height: 20),
 
-              // ── Berita Terbaru ────────────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -343,7 +333,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ],
               ),
-              // const SizedBox(height: 8),
+
               NewsList(
                 isLoading: _isLoading,
                 news: _news,
@@ -368,7 +358,6 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 }
 
-// ── Mini Game Banner ──────────────────────────────────────────────────────────
 class _MiniGameBanner extends StatefulWidget {
   final VoidCallback onTap;
   const _MiniGameBanner({required this.onTap});
@@ -427,7 +416,6 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
         ),
         child: Row(
           children: [
-            // Ikon bola + shimmer ring merah
             Stack(
               alignment: Alignment.center,
               children: [
@@ -443,8 +431,7 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
                           0.2 +
                               0.3 *
                                   (0.5 +
-                                      0.5 *
-                                          (_shimmerCtrl.value * 2 - 1).abs()),
+                                      0.5 * (_shimmerCtrl.value * 2 - 1).abs()),
                         ),
                         width: 2,
                       ),
@@ -465,7 +452,7 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
               ],
             ),
             const SizedBox(width: 14),
-            // Teks
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,7 +504,7 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
                 ],
               ),
             ),
-            // Arrow — merah
+
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -536,4 +523,3 @@ class _MiniGameBannerState extends State<_MiniGameBanner>
     );
   }
 }
-

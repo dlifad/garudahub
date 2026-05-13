@@ -35,7 +35,7 @@ class AiChatWidget extends StatelessWidget {
           child: Ink(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFFCC0001), Color(0xFF8B0000)],
+                colors: [Color(0xFFCC0001), Color(0xFF8B0000)], //warna card
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

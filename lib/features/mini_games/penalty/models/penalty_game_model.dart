@@ -1,5 +1,3 @@
-// lib/features/mini_games/penalty/models/penalty_game_model.dart
-
 enum AimZone { left, center, right }
 
 enum ShotResult { goal, saved, miss }
@@ -20,7 +18,7 @@ class PenaltyShotRecord {
 
 class PenaltyGameState {
   final int totalShots;
-  final int currentShot;     // 1-based
+  final int currentShot;
   final int goals;
   final List<PenaltyShotRecord> shots;
   final GamePhase phase;
